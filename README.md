@@ -18,7 +18,7 @@ An online application to be developed in Java 11=>**17** for the purpose of...  
 
 ##Prerequisites
 
-- Java 8=>**11**
+- Java **17**
 
 - IntelliJ - as developer platform
 
