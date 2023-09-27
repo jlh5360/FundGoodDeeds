@@ -1,6 +1,6 @@
 # TERM-PROJECT: >_replace-with-name_<
 
-An online application to be developed in Java 8=>**11** for the purpose of...  >**_replace-with-description_**<
+An online application to be developed in Java 11=>**17** for the purpose of...  >**_replace-with-description_**<
 
 ##  >_replace-with-team's-CoolName_< Team & Roles
 
