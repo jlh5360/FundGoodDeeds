@@ -20,7 +20,7 @@ An online application to be developed in Java 11=>**17** for the purpose of...  
 
 - Java **17**
 
-- IntelliJ - as developer platform
+- VSCode IDE - as developer platform
 
 #
 
