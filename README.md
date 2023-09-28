@@ -34,7 +34,7 @@ An online application to be developed in Java 11=>**17** for the purpose of...  
 
 4. Your team will need to coordinate with **all** other teams to agree on a standard **directory structure** and **.gitignore** both of which you will reproduce and adhere to for the project. 
 
-
+##More detail instructions on how to run your project shall be provided by the team in the **doc/SETUP.md** file prior to each major release
 
 ##License
 MIT License
