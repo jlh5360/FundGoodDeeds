@@ -18,7 +18,7 @@ An online application to be developed in Java 11=>**17** for the purpose of...  
 
 ##Prerequisites
 
-- Java **17**
+- Java **17=>21**
 
 - VSCode IDE - as developer platform
 
