@@ -8,6 +8,10 @@ An online application to be developed in Java 11=>**17** for the purpose of...  
 
 - Oliver Gomes, Configuration Manager
 
+- Jonathan Ho
+
+- Patrick Lebeau
+
 ## Team Additional Information
 
 - Meeting times: https://www.when2meet.com/?32438348-t5TOZ
