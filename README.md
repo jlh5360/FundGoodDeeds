@@ -2,41 +2,31 @@
 
 An online application to be developed in Java 11=>**17** for the purpose of...  >**_replace-with-description_**<
 
-##  Team 1, Team & Roles
+##  >_replace-with-team's-CoolName_< Team & Roles
 
-- Connor Bashaw, Team Coordinator
+- Jane Doe, Team Coordinator
 
-- Oliver Gomes, Configuration Manager
-
-- Jonathan Ho
-
-- Patrick Lebeau
+- John Doe, Configuration Manager
 
 ## Team Additional Information
 
-- Meeting times: https://www.when2meet.com/?32438348-t5TOZ
+- Meeting times
 
 - Google Drive link -> 
 
-- Trello link -> https://trello.com/b/AhtPZ1dh/
+- Trello link -> 
 
 ##Prerequisites
 
 - Java **17=>21**
-
 - VSCode IDE - as developer platform
-
-#
 
 ##How to begin
 
 1. Clone the repository and go to the root directory on your local machine.
-
 2. Edit this README.md file
-
 3. Follow instructions provided to "push" and, if need be, "merge" your results so that the final version exists on the server.
-
-4. Your team will need to coordinate with **all** other teams to agree on a standard **directory structure** and **.gitignore** both of which you will reproduce and adhere to for the project. 
+4. Your team will need to coordinate with **all** other teams to agree on a standard **directory structure** and **.gitignore** both of which you will reproduce and adhere to for the project.
 
 ##More detail instructions on how to run your project shall be provided by the team in the **doc/SETUP.md** file prior to each major release
 
