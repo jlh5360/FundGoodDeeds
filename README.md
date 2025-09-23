@@ -1,20 +1,20 @@
-# TERM-PROJECT: >_replace-with-name_<
+# TERM-PROJECT: Team 1
 
 An online application to be developed in Java 11=>**17** for the purpose of...  >**_replace-with-description_**<
 
-##  >_replace-with-team's-CoolName_< Team & Roles
+##  Team 1, Team & Roles
 
-- Jane Doe, Team Coordinator
+- Connor Bashaw, Team Coordinator
 
-- John Doe, Configuration Manager
+- Oliver Gomes, Configuration Manager
 
 ## Team Additional Information
 
-- Meeting times
+- Meeting times: https://www.when2meet.com/?32438348-t5TOZ
 
 - Google Drive link -> 
 
-- Trello link -> 
+- Trello link -> https://trello.com/b/AhtPZ1dh/
 
 ##Prerequisites
 
