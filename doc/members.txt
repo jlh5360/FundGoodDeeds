@@ -3,3 +3,9 @@ Account: jlh5360
 Have you been on co-op? yes
 List 1 to 3 programming languages you know: Python, Java, JavaScript/TypeScript
 List 1 to 3 hobbies or interests: anime, manga, drawing
+
+Name: Connor Bashaw
+Account: Cdb9772
+Have you been on coop? Yes double block at mindex 
+List 1-3 programming languages you know: Python, Java, C#
+List 1 to 3 hobbies or interests: Physical Activity, Buffalo Bills, Motor Sports Racing
