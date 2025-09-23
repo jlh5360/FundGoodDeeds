@@ -1,0 +1,25 @@
+To compile and run the WeatherStation program for the Swing UI and Text UI:
+    1.  Make sure you have Java installed on your system.
+    
+    2.  Open a terminal or command prompt.
+    
+    3.  Navigate to the directory containing the source files.
+    
+    4.  Compile the source files using the following command:
+            javac Barometer.java KelvinTempSensor.java SwingUI.java TextUI.java WeatherStation.java
+    
+    5.  Run the WeatherStation program for the Swing UI using the following command:
+            java SwingUI
+    
+        This will then run the Weather Station application, showing/displaying the current
+        Celsius and Kelvin temperatures.
+    
+    6.  This application will continue to run in a loop unless you manually close/end it.
+        To close/end the application, you can use the keys "Ctrl" + "C" in the terminal or
+        click on the close ("X") window button.
+
+    7.  To run the WeatherStation program for the Text UI, use the following command:
+            java TextUI
+            
+    8.  This application will continue to run in a loop unless you manually close/end it.
+        To close/end the application, you can use the keys "Ctrl" + "C" in the terminal.
