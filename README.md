@@ -2,23 +2,18 @@
 
 An online application to be developed in Java 11=>**17** for the purpose of...  >**_replace-with-description_**<
 
-##  Team 1 Team & Roles
+## Team 1 Team & Roles
 
 - Connor Bashaw, Team Coordinator
-
 - Oliver Gomes Jr, Configuration Coordinator
-
 - Jonathan Ho
-
 - Patrick Labeau
 
 ## Team Additional Information
 
-- Meeting times - https://www.when2meet.com/?32438348-t5TOZ
-
+- Meeting times -> https://www.when2meet.com/?32438348-t5TOZ
 - Google Drive link -> https://drive.google.com/drive/u/1/folders/0ALWbc479021SUk9PVA
-
-- Trello link -> https://trello.com/b/AhtPZ1dh/
+- Trello Workspace link -> https://trello.com/w/userworkspace76225060
 
 ##Prerequisites
 
