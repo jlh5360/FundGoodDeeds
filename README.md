@@ -11,9 +11,13 @@ An online application to be developed in Java 11=>**17** for the purpose of...  
 
 ## Team Additional Information
 
-- Meeting times -> https://www.when2meet.com/?32438348-t5TOZ
-- Google Drive link -> https://drive.google.com/drive/u/1/folders/0ALWbc479021SUk9PVA
-- Trello Workspace link -> https://trello.com/w/userworkspace76225060
+- **Meeting times** -> https://www.when2meet.com/?32438348-t5TOZ
+- **Google Drive link** -> https://drive.google.com/drive/u/1/folders/0ALWbc479021SUk9PVA
+- **Trello Workspace link** -> https://trello.com/w/userworkspace76225060
+- **Slack:**
+  - **General channel** -> https://rit.enterprise.slack.com/archives/C09GCM0J5MF
+  - **Team Contract channel** -> https://rit.enterprise.slack.com/archives/C09G3DPDZ9A
+  - **Virtual Standups channel** -> https://rit.enterprise.slack.com/archives/C09FJ33L9C7
 
 ##Prerequisites
 
