@@ -7,7 +7,7 @@ An online application to be developed in Java 11=>**17** for the purpose of...  
 - Connor Bashaw, Team Coordinator
 - Oliver Gomes Jr, Configuration Coordinator
 - Jonathan Ho
-- Patrick Labeau
+- Patrick LaBeau
 
 ## Team Additional Information
 
