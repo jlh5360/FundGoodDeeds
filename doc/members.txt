@@ -15,3 +15,9 @@ Account: odg1896
 Have you been on coop? Yes, double block at Clarity Innovations
 List 1-3 programming languages you know: TypeScript/JavaScript, Bash, Java
 List 1 to 3 hobbies or interests: Stock Market / Day Trading, Solo Leveling Anime, Sim Racing / Karting
+
+Name: Patrick LeBeau
+Account: pml4324
+Have you been on coop? No
+List 1-3 programming languages you know: C#, Java, SQL
+List 1 to 3 hobbies or interests: Pickleball, Marvel, Gaming 
