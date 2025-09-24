@@ -6,7 +6,7 @@ An online application to be developed in Java 11=>**17** for the purpose of...  
 
 - Connor Bashaw, Team Coordinator
 
-- Oliver Gomes, Configuration Manager
+- Oliver Gomes, Configuration Coordinator
 
 - Jonathan Ho
 
@@ -16,7 +16,7 @@ An online application to be developed in Java 11=>**17** for the purpose of...  
 
 - Meeting times - https://www.when2meet.com/?32438348-t5TOZ
 
-- Google Drive link -> Team shared drive, link is not shareable, is in personal drive -> shared drive -> Swen 383 team 1
+- Google Drive link -> https://drive.google.com/drive/u/1/folders/0ALWbc479021SUk9PVA
 
 - Trello link -> https://trello.com/b/AhtPZ1dh/
 
