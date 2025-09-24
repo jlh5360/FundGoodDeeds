@@ -1,8 +1,10 @@
-# TERM-PROJECT: Team 1
+# TERM-PROJECT:  JSCOPE
+
+We are **JSCOPE** "Creating **J**ava **S**olutions **C**oded and **O**ptimized for **P**rogress and **E**fficiency."
 
 An online application to be developed in Java 11=>**17** for the purpose of...  >**_replace-with-description_**<
 
-## Team 1 Team & Roles
+## JSCOPE Team & Roles
 
 - Connor Bashaw, Team Coordinator
 - Oliver Gomes Jr, Configuration Coordinator
