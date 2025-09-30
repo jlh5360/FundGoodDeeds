@@ -32,7 +32,7 @@ public class KelvinTempSensorAdapter implements ITempSensor{
     @Override
     public double getCelsius() {
         // ( kelvin + KTOC) / 100
-        return (adaptee.reading() + KTOC) / HUNDRED;
+        return getKelvin() - 273.15;
     }
 
     @Override
