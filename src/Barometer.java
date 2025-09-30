@@ -19,7 +19,7 @@
  
 import java.util.Random ;   // to simulate random fluctuations.
 
-public class Barometer {
+public class Barometer implements IBarometer {
     private final double MIN = 27.0 ;       // minimum reading
     private final double MAX = 32.0 ;       // maximum reading
     private final double DEFAULT = 29.92 ;  // default reading.
@@ -42,6 +42,7 @@ public class Barometer {
      * its current trend.
      * We also constrain the value to a reasonable range.
      */
+    @Override
     public double pressure() {
         final double CUTOFF = 0.75 ;    // 75% chance to continue trend
         final double MAXDELTA = 0.2 ;   // maximum pressure change
