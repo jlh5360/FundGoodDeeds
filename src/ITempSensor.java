@@ -18,8 +18,4 @@ public interface ITempSensor {
     //get temp in kelvin
     double getKelvin();
 
-
-    default String getName(){
-        return this.getClass().getSimpleName();
-    }
 }
