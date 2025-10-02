@@ -30,7 +30,7 @@ public class WeatherStation extends Observable implements Runnable {
     private final long PERIOD = 1000 ;      // 1 sec = 1000 ms
     private final int KTOC = -27315 ;       // Kelvin to Celsius conversion.
 
-    private int currentReading ;
+    private double currentReading ;
     private double currentPressure ;
 
     /*

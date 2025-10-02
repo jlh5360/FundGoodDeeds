@@ -9,7 +9,7 @@
  *  - Fahrenheit = (Celsius * 1.8) + 32
  */
 
-public class KelvinTempSensorAdapter implements ITempSensor{
+public class KelvinTempSensorAdapter implements ITempSensor {
     private final KelvinTempSensor adaptee;
 
     //conversion constants
@@ -39,5 +39,10 @@ public class KelvinTempSensorAdapter implements ITempSensor{
     public double getFarenheit() {
         // (celsius *1.8)  + 32
         return (getCelsius() *1.8) + 32;
+    }
+
+    @Override
+    public int reading() {
+        return adaptee.reading();
     }
 }
