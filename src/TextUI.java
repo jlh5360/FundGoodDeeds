@@ -62,7 +62,7 @@ public class TextUI implements Observer {
     public static void main(String[] args) {
         Barometer barometer = new Barometer();
         KelvinTempSensor kelvinTempSensor = new KelvinTempSensor();
-        KelvinTempSensorAdapter kelvinTempSensorAdapter = new KelvinTempSensorAdapter(kelvinTempSensor);
+        ITempSensor sensor = new KelvinTempSensorAdapter(new KelvinTempSensor());
         
         WeatherStation ws = new WeatherStation(barometer, kelvinTempSensorAdapter) ;
         Thread thread = new Thread(ws) ;
