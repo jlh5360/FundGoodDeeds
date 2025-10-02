@@ -24,24 +24,28 @@ import java.util.Observable ;
 
 public class WeatherStation extends Observable implements Runnable {
 
-    private final KelvinTempSensor sensor ; // Temperature sensor.
-    private final Barometer barometer ;     // Atmospheric pressure.
+    private final ITempSensor sensor ; // Temperature sensor.
+    private final IBarometer barometer ;     // Atmospheric pressure.
 
     private final long PERIOD = 1000 ;      // 1 sec = 1000 ms
     private final int KTOC = -27315 ;       // Kelvin to Celsius conversion.
 
-    private int currentReading ;
+    private double currentCelsius ;
+    private double currentKelvin ;
+    private double currentFarenheit ;
     private double currentPressure ;
 
     /*
      * When a WeatherStation object is created, it in turn creates the sensor
      * object it will use.
      */
-    public WeatherStation() {
-        sensor = new KelvinTempSensor() ;
-        barometer = new Barometer() ;
-        currentReading = sensor.reading() ;
-        currentPressure = barometer.pressure();
+    public WeatherStation(IBarometer barometer, ITempSensor sensor) {
+        this.sensor = sensor;
+        this.barometer = barometer ;
+        currentCelsius = sensor.getCelsius() ;
+        currentKelvin = sensor.getKelvin() ;
+        currentFarenheit = sensor.getFarenheit() ;
+        currentPressure = barometer.pressure() ;
     }
 
     /*
@@ -59,7 +63,9 @@ public class WeatherStation extends Observable implements Runnable {
              * Get next reading and notify any Observers.
              */
             synchronized(this) {
-                currentReading = sensor.reading() ;
+                currentCelsius = sensor.getCelsius() ;
+                currentKelvin = sensor.getKelvin() ;
+                currentFarenheit = sensor.getFarenheit() ;
                 currentPressure = barometer.pressure();
             }
             setChanged() ;
@@ -72,7 +78,7 @@ public class WeatherStation extends Observable implements Runnable {
      * double precision number.
      */
     public synchronized double getCelsius() {
-        return (currentReading + KTOC) / 100.0 ;
+        return currentCelsius ;
     }
 
     /*
@@ -80,7 +86,7 @@ public class WeatherStation extends Observable implements Runnable {
      * double precision number.
      */
     public synchronized double getKelvin() {
-        return currentReading / 100.0 ;
+        return currentKelvin ;
     }
 
     /*
@@ -90,7 +96,7 @@ public class WeatherStation extends Observable implements Runnable {
     public synchronized double getFahrenheit() {
         //Kelvin to Fahrenheit conversion formula
         //°F = (K - 273.15) * 1.8 + 32
-        return ((getCelsius() * 1.8) + 32) ;
+        return currentFarenheit ;
     }
 
     /*

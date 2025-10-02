@@ -3,5 +3,5 @@
  * promises to provide an implementation for all of its methods. 
  */
 public interface IBarometer {
-    double pressure() ;
+    public double pressure() ;
 }
