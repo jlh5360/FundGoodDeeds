@@ -10,12 +10,12 @@
 public interface ITempSensor {
 
     // get current temp in degrees celsius
-    double getCelsius();
+    public double getCelsius();
     
     //get temp in farenheit
-    double getFarenheit();
+    public double getFarenheit();
     
     //get temp in kelvin
-    double getKelvin();
+    public double getKelvin();
 
 }
