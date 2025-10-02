@@ -37,7 +37,7 @@ public class WeatherStation extends Observable implements Runnable {
      * When a WeatherStation object is created, it in turn creates the sensor
      * object it will use.
      */
-    public WeatherStation(IBarometer barometer,ITempSensor sensor) {
+    public WeatherStation(IBarometer barometer, ITempSensor sensor) {
         this.sensor = sensor;
         this.barometer = barometer ;
         currentReading = sensor.reading() ;
