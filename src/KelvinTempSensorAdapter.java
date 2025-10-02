@@ -24,25 +24,20 @@ public class KelvinTempSensorAdapter implements ITempSensor {
     }
 
     @Override
+    public double getCelsius() {
+        // ( kelvin + KTOC) / 100
+        return ((adaptee.reading() + KTOC) / HUNDRED);
+    }
+
+    @Override
     public double getKelvin(){
         // reading returns kelvin as int
         return adaptee.reading() / HUNDRED;
     }
 
     @Override
-    public double getCelsius() {
-        // ( kelvin + KTOC) / 100
-        return getKelvin() - 273.15;
-    }
-
-    @Override
     public double getFarenheit() {
-        // (celsius *1.8)  + 32
-        return (getCelsius() *1.8) + 32;
-    }
-
-    @Override
-    public int reading() {
-        return adaptee.reading();
+        // (celsius * 1.8)  + 32
+        return (getCelsius() * 1.8) + 32;
     }
 }

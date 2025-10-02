@@ -17,6 +17,4 @@ public interface ITempSensor {
     
     //get temp in kelvin
     public double getKelvin();
-    
-    public int reading();
 }
