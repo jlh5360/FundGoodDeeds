@@ -194,8 +194,8 @@ public class SwingUI extends JFrame implements Observer {
         ITempSensor sensor = new KelvinTempSensorAdapter(new KelvinTempSensor());
         // following line will not work without changing the WeatherStation constructor
         WeatherStation ws = new WeatherStation(barometer, sensor);
-        Thread thread = new Thread(ws) ;
-        SwingUI swing_UI = new SwingUI(ws) ;
+        Thread thread = new Thread(ws);
+        SwingUI swing_UI = new SwingUI(ws);
 
         thread.start() ;
     }
