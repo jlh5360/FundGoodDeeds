@@ -4,19 +4,12 @@
 
 /**
  * general temp sensor, that any concree temperature sensor, can implement or be adapted to
- * values are returned in doubles, in the requested temp scale.
+ * values and returned in Celsuis which is a double, like in the requested weatherstation.
  */
 
 public interface ITempSensor {
 
     // get current temp in degrees celsius
     public double getCelsius();
-    
-    //get temp in farenheit
-    public double getFarenheit();
-    
-    //get temp in kelvin
-    public double getKelvin();
-    
-    public int reading();
+
 }

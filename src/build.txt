@@ -6,7 +6,7 @@ To compile and run the WeatherStation program for the Swing UI and Text UI:
     3.  Navigate to the directory containing the source files.
     
     4.  Compile the source files using the following command:
-            javac Barometer.java KelvinTempSensor.java SwingUI.java TextUI.java WeatherStation.java
+            javac Barometer.java IBarometer.java ITempSensor.java KelvinTempSensor.java KelvinTempSensorAdapter.java SwingUI.java TextUI.java WeatherStation.java
     
     5.  Run the WeatherStation program for the Swing UI using the following command:
             java SwingUI

@@ -28,9 +28,8 @@ public class WeatherStation extends Observable implements Runnable {
     private final IBarometer barometer ;     // Atmospheric pressure.
 
     private final long PERIOD = 1000 ;      // 1 sec = 1000 ms
-    private final int KTOC = -27315 ;       // Kelvin to Celsius conversion.
 
-    private int currentReading ;
+    private double currentCelsius ;
     private double currentPressure ;
 
     /*
@@ -40,8 +39,6 @@ public class WeatherStation extends Observable implements Runnable {
     public WeatherStation(IBarometer barometer, ITempSensor sensor) {
         this.sensor = sensor;
         this.barometer = barometer ;
-        currentReading = sensor.reading() ;
-        currentPressure = barometer.pressure() ;
     }
 
     /*
@@ -59,7 +56,7 @@ public class WeatherStation extends Observable implements Runnable {
              * Get next reading and notify any Observers.
              */
             synchronized(this) {
-                currentReading = sensor.reading() ;
+                currentCelsius = sensor.getCelsius();
                 currentPressure = barometer.pressure();
             }
             setChanged() ;
@@ -72,7 +69,7 @@ public class WeatherStation extends Observable implements Runnable {
      * double precision number.
      */
     public synchronized double getCelsius() {
-        return (currentReading + KTOC) / 100.0 ;
+        return currentCelsius;
     }
 
     /*
@@ -80,7 +77,7 @@ public class WeatherStation extends Observable implements Runnable {
      * double precision number.
      */
     public synchronized double getKelvin() {
-        return currentReading / 100.0 ;
+        return getCelsius() + 273.15;
     }
 
     /*
@@ -88,9 +85,8 @@ public class WeatherStation extends Observable implements Runnable {
      * double precision number.
      */
     public synchronized double getFahrenheit() {
-        //Kelvin to Fahrenheit conversion formula
-        //°F = (K - 273.15) * 1.8 + 32
-        return ((getCelsius() * 1.8) + 32) ;
+        //Celsius to Fahrenheit conversion formula        
+        return (getCelsius() * 9/5 ) + 32;
     }
 
     /*

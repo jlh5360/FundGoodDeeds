@@ -190,10 +190,11 @@ public class SwingUI extends JFrame implements Observer {
      * Start the application.
      */
     public static void main(String[] args) {
-        WeatherStation ws = new WeatherStation() ;
-        Thread thread = new Thread(ws) ;
-        SwingUI swing_UI = new SwingUI(ws) ;
-
+        IBarometer barometer = new Barometer();
+        ITempSensor sensor = new KelvinTempSensorAdapter(new KelvinTempSensor());
+        WeatherStation ws = new WeatherStation(barometer, sensor);
+        Thread thread = new Thread(ws);
+        SwingUI swing_UI = new SwingUI(ws);
         thread.start() ;
     }
 }
