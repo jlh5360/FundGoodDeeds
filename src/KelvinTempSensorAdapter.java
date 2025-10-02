@@ -6,7 +6,6 @@
  * Assumptions (based on the WeatherStation code):
  *  - KelvinTempSensor.reading() returns an integer: Kelvin * 100 (i.e., centi-Kelvin).
  *  - Celsius = Kelvin - 273.15
- *  - Fahrenheit = (Celsius * 1.8) + 32
  */
 
 public class KelvinTempSensorAdapter implements ITempSensor {
@@ -29,15 +28,5 @@ public class KelvinTempSensorAdapter implements ITempSensor {
         return ((adaptee.reading() + KTOC) / HUNDRED);
     }
 
-    @Override
-    public double getKelvin(){
-        // reading returns kelvin as int
-        return adaptee.reading() / HUNDRED;
-    }
 
-    @Override
-    public double getFarenheit() {
-        // (celsius * 1.8)  + 32
-        return (getCelsius() * 1.8) + 32;
-    }
 }

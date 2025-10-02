@@ -28,11 +28,8 @@ public class WeatherStation extends Observable implements Runnable {
     private final IBarometer barometer ;     // Atmospheric pressure.
 
     private final long PERIOD = 1000 ;      // 1 sec = 1000 ms
-    private final int KTOC = -27315 ;       // Kelvin to Celsius conversion.
 
     private double currentCelsius ;
-    private double currentKelvin ;
-    private double currentFarenheit ;
     private double currentPressure ;
 
     /*
@@ -42,10 +39,6 @@ public class WeatherStation extends Observable implements Runnable {
     public WeatherStation(IBarometer barometer, ITempSensor sensor) {
         this.sensor = sensor;
         this.barometer = barometer ;
-        currentCelsius = sensor.getCelsius() ;
-        currentKelvin = sensor.getKelvin() ;
-        currentFarenheit = sensor.getFarenheit() ;
-        currentPressure = barometer.pressure() ;
     }
 
     /*
@@ -63,9 +56,7 @@ public class WeatherStation extends Observable implements Runnable {
              * Get next reading and notify any Observers.
              */
             synchronized(this) {
-                currentCelsius = sensor.getCelsius() ;
-                currentKelvin = sensor.getKelvin() ;
-                currentFarenheit = sensor.getFarenheit() ;
+                currentCelsius = sensor.getCelsius();
                 currentPressure = barometer.pressure();
             }
             setChanged() ;
@@ -78,7 +69,7 @@ public class WeatherStation extends Observable implements Runnable {
      * double precision number.
      */
     public synchronized double getCelsius() {
-        return currentCelsius ;
+        return currentCelsius;
     }
 
     /*
@@ -86,7 +77,7 @@ public class WeatherStation extends Observable implements Runnable {
      * double precision number.
      */
     public synchronized double getKelvin() {
-        return currentKelvin ;
+        return getCelsius() + 273.15;
     }
 
     /*
@@ -94,9 +85,8 @@ public class WeatherStation extends Observable implements Runnable {
      * double precision number.
      */
     public synchronized double getFahrenheit() {
-        //Kelvin to Fahrenheit conversion formula
-        //°F = (K - 273.15) * 1.8 + 32
-        return currentFarenheit ;
+        //Celsius to Fahrenheit conversion formula        
+        return (getCelsius() * 9/5 ) + 32;
     }
 
     /*
