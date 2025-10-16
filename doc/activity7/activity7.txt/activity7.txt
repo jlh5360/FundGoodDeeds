@@ -1,0 +1,61 @@
+Names:
+Jonathan Ho
+Oliver Gomes Jr.
+Connor Bradshaw
+Patrick Lebeau
+
+Activity 7
+
+Question 1:
+
+Component (interface): uniform interface with (open(), rename(), delete(), maybe size()).
+- File
+
+Composite (concrete class): manages children (add/remove/getChild) and implements the same File API by delegating to its children
+- Folder
+
+Leaf (concrete object): atomic with no children
+- Text File
+- Sound File
+
+Explanation:
+This structure reflects the Composite Design Pattern, where File is the common interface, and Folder and individual file types like Text File and Sound File are Composite and Leaf elements, respectively. It makes sense because Folder can contain other Files (both Folders and individual files), enabling a hierarchical tree structure where clients can treat all Files uniformly.
+
+
+Question 2:
+
+Component (interface):  defines the shared operations (draw, move, resize, bounds)
+Drawable
+
+Composite (concrete class): holds many Drawables and forwards operations to them 
+Group
+
+Leaf (concrete object): are indivisible shapes
+Ellipse
+Rectangle
+
+Explanation:
+The Drawable is the interface that defines drawing behavior, and both Group and shapes like Ellipse and Rectangle implement it. It makes sense because a Group can contain other Drawable objects, either groups or individual shapes, allowing uniform treatment of simple and complex graphics.
+
+
+
+Question 3: RIT FMA Club
+
+Component (interface)
+Member
+
+Composite (concrete class)
+E-board
+Portfolio Analysts
+
+Leaf (concrete object)
+Regular Member
+President
+Secretary
+Treasurer
+Elite Member
+Cool Member
+Club Advisor
+Alumni 
+
+The Member is the interface allowing uniform treatment of all club roles. E-board and Portfolio Analysts are Composites that group Members (like President, Secretary, Elite Member, etc.), whereas a regular member is just a simple instantiation of a member. A member is a generic interface that allows for further extensibility for concrete member objects, such as the Elite Member or Cool Member.They all share operations alongside their own respective operations for separation of concern.
