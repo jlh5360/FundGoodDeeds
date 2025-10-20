@@ -8,7 +8,7 @@ An online application to be developed in Java 11=>**17** for the purpose of...  
 
 - Connor Bashaw, Team Coordinator
 - Oliver Gomes Jr, Configuration Coordinator
-- Jonathan Ho
+- Jonathan Ho, Requirements Coordinator
 - Patrick LaBeau
 
 ## Team Additional Information
@@ -34,9 +34,11 @@ An online application to be developed in Java 11=>**17** for the purpose of...  
 4. Your team will need to coordinate with **all** other teams to agree on a standard **directory structure** and **.gitignore** both of which you will reproduce and adhere to for the project.
 
 ## Instructions
+
 Details on how to run our project shall be provided by the team in the **doc/SETUP.md** file prior to each major release
 
 ## License
+
 MIT License
 
 See LICENSE for details.
