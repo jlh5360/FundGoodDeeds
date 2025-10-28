@@ -1,6 +1,11 @@
 package Model;
 
-public class LedgerRepository {
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Observable;
+
+public class LedgerRepository extends Observable {
 	private final List<LedgerEntity> logEntries = new ArrayList<>();
 
 	public void save(LetgetEntity entity) {

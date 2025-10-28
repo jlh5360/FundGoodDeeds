@@ -8,7 +8,7 @@ public class Bundle extends NeedComponent {
 		super(name);
 	}
 
-	publid void addComponent(String needName, int count) {
+	public void addComponent(String needName, int count) {
 		this.componentNames.add(needName);
 		this.componentCounts.add(count);
 	}

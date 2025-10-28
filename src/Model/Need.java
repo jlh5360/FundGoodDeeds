@@ -1,6 +1,6 @@
 package Model;
 
-public class BasicNeed extends NeedComponent {
+public class Need extends NeedComponent {
 	private final double fixedCost;
 	private final double variableCost;
 	private final double fees;

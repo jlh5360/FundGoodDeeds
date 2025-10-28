@@ -1,6 +1,12 @@
 package Model;
 
-public class NeedsRepository {
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Observable;
+
+import View.ConsoleView;
+
+public class NeedsRepository extends Observable {
 	private final List<NeedComponent> needsCatalog = new ArrayList<>();
 
 	public void getNeeds(String csvSource) {

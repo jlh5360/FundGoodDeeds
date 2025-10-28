@@ -1,6 +1,12 @@
 package View;
 
-public class ConsoleView {
+import java.util.Observer;
+
+import Controller.LedgerController;
+import Controller.NeedsController;
+import Model.NeedsRepository;
+
+public class ConsoleView implements Observer {
 	private final NeedsController needsController;
 	private final LedgerController ledgerController;
 
