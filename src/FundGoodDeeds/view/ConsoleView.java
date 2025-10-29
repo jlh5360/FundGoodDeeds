@@ -1,4 +1,4 @@
-package View;
+package FundGoodDeeds.view;
 
 import java.util.Observer;
 

@@ -1,4 +1,4 @@
-package Model;
+package FundGoodDeeds.model;
 
 import java.util.ArrayList;
 import java.util.List;

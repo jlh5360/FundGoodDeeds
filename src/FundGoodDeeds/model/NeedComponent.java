@@ -1,4 +1,4 @@
-package Model;
+package FundGoodDeeds.model;
 
 public abstract class NeedComponent {
 	protected String name;
