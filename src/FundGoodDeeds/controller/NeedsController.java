@@ -1,4 +1,4 @@
-package Controller;
+package FundGoodDeeds.controller;
 
 public class NeedsController {
 	private final NeedsRepository needsRepository;

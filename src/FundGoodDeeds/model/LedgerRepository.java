@@ -1,4 +1,4 @@
-package Model;
+package FundGoodDeeds.model;
 
 import java.time.LocalDate;
 import java.util.ArrayList;

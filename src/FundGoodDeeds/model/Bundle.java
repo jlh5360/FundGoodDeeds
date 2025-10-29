@@ -1,4 +1,4 @@
-package Model;
+package FundGoodDeeds.model;
 
 public class Bundle extends NeedComponent {
 	private final List<String> componentNames = new ArrayList<>();

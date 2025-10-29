@@ -1,4 +1,4 @@
-package Model;
+package FundGoodDeeds.model;
 
 public class Need extends NeedComponent {
 	private final double fixedCost;

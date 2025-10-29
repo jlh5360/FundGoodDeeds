@@ -1,4 +1,4 @@
-package Controller;
+package FundGoodDeeds.controller;
 
 public class LedgerController {
 	private final Needsrepository needsRepository;
