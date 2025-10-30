@@ -1,5 +1,7 @@
 package Model;
 
+import java.time.LocalDate;
+
 public class LedgerEntity {
 	public enum EntryType {FUND, GOAL, NEED}
 

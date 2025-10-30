@@ -4,9 +4,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Observable;
 
-import View.ConsoleView;
 
 public class NeedsRepository extends Observable {
+
 	private final List<NeedComponent> needsCatalog = new ArrayList<>();
 
 	public void getNeeds(String csvSource) {
@@ -26,15 +26,11 @@ public class NeedsRepository extends Observable {
 	}
 
 	public void addNeedsToNeedsArray(List<NeedComponent> basicNeeds) {
-		this.needsCalalog.addAll(basicNeeds);
+		this.needsCatalog.addAll(basicNeeds);
 	}
 
 	public void addBundlesToBundlesArray(List<NeedComponent> bundles) {
-		this.needsCalalog.addAll(bundles);
-	}
-
-	public void finishedAlert(ConsoleView view) {
-		view.finishedAlert();
+		this.needsCatalog.addAll(bundles);
 	}
 
 public NeedComponent getNeedByName(String name) {

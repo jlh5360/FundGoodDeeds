@@ -8,8 +8,8 @@ import java.util.Observable;
 public class LedgerRepository extends Observable {
 	private final List<LedgerEntity> logEntries = new ArrayList<>();
 
-	public void save(LetgetEntity entity) {
-		this.name = name;
+	public void save(LedgerEntity entity) {
+		
 	}
 
 	public String getSummary() {
