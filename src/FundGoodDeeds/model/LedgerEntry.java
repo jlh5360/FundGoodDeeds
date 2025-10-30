@@ -1,6 +1,6 @@
 package FundGoodDeeds.model;
 
-public class LedgerEntity {
+public class LedgerEntry {
 	public enum EntryType {FUND, GOAL, NEED}
 
 	private final LocalDate date;
@@ -10,7 +10,7 @@ public class LedgerEntity {
 	private final int count;
 
 	//Constructor for FUND/DOAL entries
-	public LedgerEntity(LocalDate date, EntryType type, double amount) {
+	public LedgerEntry(LocalDate date, EntryType type, double amount) {
 		this.date = date;
 		this.type = type;
 		this.amount = amount;
@@ -19,7 +19,7 @@ public class LedgerEntity {
 	}
 
 	//Contructor for NEED fulfillment entries
-	public LedgerEntity(LocalDate date, EntryType type, String needName, int count) {
+	public LedgerEntry(LocalDate date, EntryType type, String needName, int count) {
 		this.date = date;
 		this.type = type;
 		this.needName = needName;

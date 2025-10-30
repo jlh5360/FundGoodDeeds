@@ -28,10 +28,15 @@ public class LedgerController {
     }
 
     //Triggers the model to load ledger data.
-    public void loadData() {
+    public void loadLog() {
 		//This loadLog() method should load all LedgerEntries from the CSV file.
 		//Need to sync up with Patrick on the logic
         ledgerRepository.loadLog();   //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+    }
+
+    //Triggers the model to save ledger data.
+    public void saveLog() {
+        ledgerRepository.saveLog();
     }
 
     //Retrieves the daily funding goal for the specified date.
@@ -65,5 +70,65 @@ public class LedgerController {
         LedgerEntry entry = new LedgerEntry(date, "NEED", quantity, needName);
         
         ledgerRepository.appendLog(entry);
+    }
+
+    //Record the available funds for a date (writes a "FUND" entry)
+    public void setFunds(java.time.LocalDate date, double amount) {
+        if (date == null) {
+            date = java.time.LocalDate.now();
+        }
+
+        if (amount < 0) {
+            throw new IllegalArgumentException("Funds amount cannot be negative.");
+        }
+
+        FundGoodDeeds.model.LedgerEntry entry = new FundGoodDeeds.model.LedgerEntry(date, "FUND", amount);
+        ledgerRepository.appendLog(entry);
+    }
+
+    //Record the fundraising goal for a date (writes a "GOAL" entry)
+    public void setGoal(java.time.LocalDate date, double goal) {
+        if (date == null) {
+            date = java.time.LocalDate.now();
+        }
+
+        if (goal < 0) {
+            throw new IllegalArgumentException("Goal cannot be negative.");
+        }
+
+        FundGoodDeeds.model.LedgerEntry entry = new FundGoodDeeds.model.LedgerEntry(date, "GOAL", goal);
+        ledgerRepository.appendLog(entry);
+    }
+
+    //Record fulfillment for a specific Need/Bundle by name (writes a "NEED" entry)
+    public void addEntry(java.time.LocalDate date, String needOrBundleName, double quantity) {
+        if (date == null) {
+            date = java.time.LocalDate.now();
+        }
+
+        if ((needOrBundleName == null) || (needOrBundleName.isBlank())) {
+            throw new IllegalArgumentException("Name must not be empty.");
+        }
+
+        if (quantity <= 0) {
+            throw new IllegalArgumentException("Quantity must be > 0.");
+        }
+
+        FundGoodDeeds.model.LedgerEntry entry = new FundGoodDeeds.model.LedgerEntry(date, "NEED", quantity, needOrBundleName);
+        ledgerRepository.appendLog(entry);
+    }
+
+    //Saves BOTH sides (needs + ledger). One-stop for the CLI.
+    public void saveAllData() {
+        try {
+            if (this.needsRepository != null) {
+                this.needsRepository.saveNeeds();
+            }
+
+            ledgerRepository.saveLog();
+
+        } catch (Exception e) {
+            throw new RuntimeException("Save failed: " + e.getMessage(), e);
+        }
     }
 }

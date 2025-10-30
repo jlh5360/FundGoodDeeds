@@ -19,9 +19,15 @@ public class NeedsController {
 	//Note to self:
 	//     -  This is for sequence diagram #1
 	//     -  NeedsController is implied between ConsoleUI and NeedsRepository
-    public void loadData() {
+    public void loadNeeds() {
         //Delegate data loading to the repository
         needsRepository.loadNeeds();
+    }
+
+    //Triggers the model to save all need and bundle data.
+    public void saveNeeds() {
+        //Delegate data loading to the repository
+        needsRepository.saveNeeds();
     }
     
     //Creates and adds a new Basic Need to the catalog.
