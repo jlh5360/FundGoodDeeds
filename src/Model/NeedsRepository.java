@@ -18,7 +18,7 @@ public class NeedsRepository extends Observable {
 	}
 
 
-	public List<String[]> getNeeds() 
+	public List<String[]> getNeedsFromCSV() 
 	{
 		//Reads BasicNeeds from CSV
 		List<String[]> needs = new ArrayList<>();
@@ -56,7 +56,7 @@ public class NeedsRepository extends Observable {
 
 	}
 
-	public List<String[]> getBundles() 
+	public List<String[]> getBundlesFromCSV() 
 	{
 		List<String[]> bundles = new ArrayList<>();
 
@@ -126,11 +126,13 @@ public class NeedsRepository extends Observable {
 	public void addNeedsToNeedsArray(List<NeedComponent> basicNeeds) 
 	{
 		this.needsCatalog.addAll(basicNeeds);
+		setChanged();
 	}
 
 	public void addBundlesToBundlesArray(List<NeedComponent> bundles) 
 	{
 		this.needsCatalog.addAll(bundles);
+		setChanged();
 	}
 
 	public NeedComponent getNeedByName(String name) 
@@ -140,4 +142,6 @@ public class NeedsRepository extends Observable {
 			.findFirst()
 			.orElse(null));
     }
+
+
 }

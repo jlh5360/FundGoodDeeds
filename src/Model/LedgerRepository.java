@@ -32,5 +32,6 @@ public class LedgerRepository extends Observable {
 
 		this.logEntries.add(new LedgerEntity(today, LedgerEntity.EntryType.FUND, donation1));
 		this.logEntries.add(new LedgerEntity(today, LedgerEntity.EntryType.FUND, donation2));
+		setChanged();
 	}
 }
