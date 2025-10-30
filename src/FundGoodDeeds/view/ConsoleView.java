@@ -1,3 +1,29 @@
+/**
+ * CLI "front-end" per R1 spec.
+ * - Thin and delegates all work to controllers
+ * - No direct file IO
+ *
+ * Assumed controller APIs (tweak names if needed):
+ *  NeedsController:
+ *    void loadData();                // load needs.csv
+ *    void loadData();                // save needs.csv
+ *    List<NeedComponent> getNeedsCatalog();
+ * 
+ *    void addNeed(String name, double total, double fixed, double variable, double fees);
+ *    void addBundle(String bundleName, Map<String, Double> partToQty);
+ *
+ *  LedgerController:
+ *    NEEDED void loadLog();                  // load log.csv
+ *    NEEDED void saveLog();                  // save log.csv
+ *    NEEDED void setFunds(LocalDate date, double amount); // "f" line
+ * 
+ *    void setGoal(LocalDate date, double goal);    // "g" line
+ *    void addEntry(LocalDate date, String name, double count); // "n" line (need or bundle)
+ * Connor Bashaw - ConsoleView.java
+ */
+
+
+
 package FundGoodDeeds.view;
 
 import FundGoodDeeds.controller.NeedsController;
@@ -9,26 +35,7 @@ import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.*;
 
-/**
- * CLI "front-end" per R1 spec.
- * - Thin; delegates all work to controllers
- * - No direct file IO or model mutation here
- *
- * Assumed controller APIs (tweak names if needed):
- *  NeedsController:
- *    void loadNeeds();                // load needs.csv
- *    void saveNeeds();                // save needs.csv
- *    List<NeedComponent> getCatalog();
- *    void addNeed(String name, double total, double fixed, double variable, double fees);
- *    void addBundle(String bundleName, Map<String, Double> partToQty);
- *
- *  LedgerController:
- *    void loadLog();                  // load log.csv
- *    void saveLog();                  // save log.csv
- *    void setFunds(LocalDate date, double amount); // "f" line
- *    void setGoal(LocalDate date, double goal);    // "g" line
- *    void addEntry(LocalDate date, String name, double count); // "n" line (need or bundle)
- */
+
 public class ConsoleView {
 
     private final NeedsController needs;
@@ -42,11 +49,11 @@ public class ConsoleView {
         this.ledger = ledger;
     }
 
-    /** Start the interactive loop. Safe to run with empty CSVs. */
+    /** Start the loop. Safe to run with empty CSVs. */
     public void startup() {
-        // Initial loads (idempotent recommended)
-        safe(() -> needs.loadNeeds(), "Loading needs");
-        safe(() -> ledger.loadLog(),  "Loading ledger");
+        // Initial loads (no dupes recomended)
+        safe(() -> needs.loadData(), "Loading needs");
+        safe(() -> ledger.loadData(),  "Loading ledger");
 
         System.out.println("=== FundGoodDeeds CLI (V1.0) ===");
         boolean run = true;
@@ -83,7 +90,7 @@ public class ConsoleView {
             }
         }
 
-        // polite save prompt (not mandatory)
+        // save prompt (not mandatory)
         if (askYesNo("Save before exit? (y/n): ")) saveAll();
         System.out.println("Goodbye.");
     }
@@ -91,7 +98,7 @@ public class ConsoleView {
     // ---------- Menu handlers ----------
 
     private void listCatalog() {
-        List<NeedComponent> items = needs.getCatalog();
+        List<NeedComponent> items = needs.getNeedsCatalog();
         if (items == null || items.isEmpty()) {
             System.out.println("(no needs/bundles)");
             return;
@@ -99,6 +106,7 @@ public class ConsoleView {
         System.out.println("-- Catalog --");
         for (NeedComponent nc : items) {
             try {
+                //get total cost comes from need component, will need implementation once code in model is created
                 System.out.printf("- %s [total=%.2f]%n", nc.getName(), nc.getTotalCost());
             } catch (Exception e) {
                 System.out.println("- " + String.valueOf(nc));
@@ -117,21 +125,33 @@ public class ConsoleView {
         System.out.println("Need added.");
     }
 
+    // PLEASE INVESTIGATE THIS METHOD and workings.
     private void addBundleFlow() {
         System.out.println("-- Add Bundle --");
         String bundleName = askString("Bundle name: ");
 
-        Map<String, Double> partToQty = new LinkedHashMap<>();
+        // need to make to list<bundlepart> to match controller api
+        //can be made to hash map in future parts 
+        // Map<String, Double> parts = new HashMap<>();
+        //using bundlepart for now!
+        List<BundlePart> parts = new ArrayList<>();
         boolean more = true;
         while (more) {
             String part = askString(" Component name (existing need or bundle): ");
             double qty  = askDouble(" Quantity: ");
-            partToQty.put(part, qty);
+            parts.add(part, qty);
             more = askYesNo(" Add another part? (y/n): ");
         }
 
-        needs.addBundle(bundleName, partToQty);
+        if (parts.isEmpty()) {
+            System.out.println("Issue: A bundle must contain at least one component.");
+            return;
+        }
+
+        needs.addBundle(bundleName, parts);
         System.out.println("Bundle added.");
+        System.out.printf("Success: Bundle '%s' created with %d components and added to catalog.%n", name, parts.size());
+
     }
 
     private void addLedgerEntryFlow() {
@@ -139,10 +159,11 @@ public class ConsoleView {
         LocalDate day = askDate("Date (YYYY-MM-DD, blank=today): ");
         String name   = askString("Need/Bundle name: ");
         double count  = askDouble("Units fulfilled: ");
-        ledger.addEntry(day, name, count);
+        ledger.registerDonations(count, name, day);
         System.out.println("Ledger entry added.");
     }
 
+    // PLEASE INVESTIGATE THIS METHOD.
     private void setFundsFlow() {
         System.out.println("-- Set Available Funds --");
         LocalDate day = askDate("Date (YYYY-MM-DD, blank=today): ");
@@ -155,21 +176,23 @@ public class ConsoleView {
         System.out.println("-- Set Funding Goal --");
         LocalDate day = askDate("Date (YYYY-MM-DD, blank=today): ");
         double goal   = askDouble("Goal amount: ");
-        ledger.setGoal(day, goal);
+        ledger.setDailyGoal(goal, day);
         System.out.println("Goal recorded.");
     }
 
     private void reloadAll() {
-        safe(() -> needs.loadNeeds(), "Reload needs");
-        safe(() -> ledger.loadLog(),  "Reload ledger");
+        safe(() -> needs.loadData(), "Reload needs");
+        safe(() -> ledger.loadData(),  "Reload ledger");
         System.out.println("Reloaded.");
     }
 
-    private void saveAll() {
-        safe(() -> needs.saveNeeds(), "Save needs");
-        safe(() -> ledger.saveLog(),  "Save ledger");
-        System.out.println("Saved.");
-    }
+    // PLEASE INVESTIGATE THIS METHOD.
+    // should live within repositories, but for simplicity placed here
+    // private void saveAll() {
+    //     safe(() -> needs.saveNeeds(), "Save needs");
+    //     safe(() -> ledger.saveLog(),  "Save ledger");
+    //     System.out.println("Saved.");
+    // }
 
     // ---------- Tiny helpers ----------
 
