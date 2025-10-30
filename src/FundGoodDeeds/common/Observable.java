@@ -1,10 +1,26 @@
-package FundGoodDeeds.model;
+package FundGoodDeeds.common;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 
-import FundGoodDeeds.view.Observer;
 public class Observable<T> {
-    private final List<Observer<T>> obs = new ArrayList<>();
-    public void addObserver(Observer<T> o){ if(o!=null) obs.add(o); }
-    public void notifyObservers(T arg){ for(var o: obs) o.update(arg); }
+    private final List<Observer<T>> observers = new ArrayList<>();
+
+    public void addObserver(Observer<T> o) {
+        if (o != null) observers.add(o);
+    }
+
+    public void removeObserver(Observer<T> o) {
+        observers.remove(o);
+    }
+
+    public void notifyObservers(T event) {
+        for (Observer<T> o : observers) {
+            try {
+                o.update(event);
+            } catch (Exception ignored) {
+                // keep notifications best-effort
+            }
+        }
+    }
 }

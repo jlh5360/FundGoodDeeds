@@ -1,6 +1,6 @@
-package FundGoodDeeds.view;
+package FundGoodDeeds.common;
 
 @FunctionalInterface
-public interface Observer<T> { 
-    void update(T arg); 
+public interface Observer<T> {
+    void update(T event);
 }
