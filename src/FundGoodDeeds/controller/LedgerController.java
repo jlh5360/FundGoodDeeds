@@ -52,6 +52,18 @@ public class LedgerController {
 
 	//Records the fulfillment of a Need or Bundle (NEED entry).
     public void recordFulfillment(String needName, double quantity, LocalDate date) {
-		//FUTURE IMPLEMENTATION
-	}
+        if (quantity <= 0.0) {
+            throw new IllegalArgumentException("Quantity must be positive.");
+        }
+
+        NeedComponent need = needsRepository.getNeedByName(needName);
+        if (need == null) {
+            throw new IllegalArgumentException("Need or Bundle not found in catalog: " + needName);
+        }
+        
+        double totalCost = need.calculateTotalCost() * quantity;
+        LedgerEntry entry = new LedgerEntry(date, "NEED", quantity, needName);
+        
+        ledgerRepository.appendLog(entry);
+    }
 }
