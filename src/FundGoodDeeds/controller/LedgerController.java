@@ -1,48 +1,57 @@
 package FundGoodDeeds.controller;
 
+import java.time.LocalDate;
+import java.util.List;
+
+import FundGoodDeeds.model.Donation;
+import FundGoodDeeds.model.LedgerEntry;
+import FundGoodDeeds.model.LedgerRepository;
+import FundGoodDeeds.model.NeedComponent;
+import FundGoodDeeds.model.NeedsRepository;
+import FundGoodDeeds.view.ConsoleView;
+
+/**
+ * Handles operations related to Ledger Entries and Donations.
+ */
 public class LedgerController {
-	private final Needsrepository needsRepository;
-	private final Ledgersrepository ledgerRepository;
+	private final LedgerRepository ledgerRepository;
 
-	public LedgerController(NeedsRepository needsRepository, ledgerRepository ledgerRepository) {
-		this.needsRepository = needsRepository;
-		this.ledgerRepository = ledgerRepository;
-	}
+	//Note to self: This needsRepository will somehow be used in the recordFulfillment()
+	//method which it will record the fulfillment of a Need or Bundle (NEED entry).
+    private final NeedsRepository needsRepository;   //Needed for 'get need'
+	//<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
-	public void recordsFullfillment(String needName, int count) {
-		LedgerEntity fulfillment = new LedgerEntity(LocalDate.now(), LedgerEntity.EntryType.NEED, needName, count);
-
-		ledgerRepository.save(fulfillment);
-
-		needsRepository.getNeedByName(needName);
-	}
-		
-	public void displaySummary(ConsoleView view) {
-		String summary = ledgerRepository.getSummary();
-
-		view.displaySummary(summary);
-    }
-        
-    public void processDailyGoal(ConsoleView view) {
-        LocalDate today = LocalDate.now();
-        int need_count = 5; // Placeholder for loop condition
-
-        while (need_count > 0) {
-            double goal = ledgerRepository.findGoal(today);
-            double donations = ledgerRepository.calculateDonations(today);
-            double remainingGoal = goal - donations;
-
-            view.displayGoal(remainingGoal);
-
-            need_count = (need_count - 1);
-        }
+    //Dependency Injection via constructor
+    public LedgerController(LedgerRepository ledgerRepository, NeedsRepository needsRepository) {
+        this.ledgerRepository = ledgerRepository;
+        this.needsRepository = needsRepository;
     }
 
-	public void registerDonations(double donation1, double donation2, ConsoleView view) {
-		ledgerRepository.addDonations(donation1, donation2);
+    //Triggers the model to load ledger data.
+    public void loadData() {
+		//This loadLog() method should load all LedgerEntries from the CSV file.
+		//Need to sync up with Patrick on the logic
+        ledgerRepository.loadLog();   //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+    }
 
-		//Logic to recalculate the goal status
+    //Retrieves the daily funding goal for the specified date.
+    //Note to self: This is for sequence diagram #3, step 1-5 loop
+    public double getDailyGoal(LocalDate date) {
+        //2. LedgerController -> findGoal(todaysDate) -> LedgerRepository
+        return ledgerRepository.findGoal(date);
+    }
+    
+    //Retrieves the total donations/fulfillment value for the specified date.
+    //Note to self: This is for sequence diagram #3, step 1-5 loop
+    public double getTodayDonations(LocalDate date) {
+		//Look back at our design doc on the sequence diagram #3 for clearer/visual understanding:
+        //    -  3. LedgerRepository -> calculateDonations(todaysDate) -> LedgerRepository
+        //    -  5. LedgerRepository -> return Donations -> LedgerController
+        return ledgerRepository.calculateDonations(date);
+    }
 
-		view.donationCompleted();
+	//Records the fulfillment of a Need or Bundle (NEED entry).
+    public void recordFulfillment(String needName, double quantity, LocalDate date) {
+		//FUTURE IMPLEMENTATION
 	}
 }
