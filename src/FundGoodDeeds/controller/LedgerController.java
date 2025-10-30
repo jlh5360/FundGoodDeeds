@@ -28,7 +28,7 @@ public class LedgerController {
     }
 
     //Triggers the model to load ledger data.
-    public void loadLog() {
+    public void loadData() {
 		//This loadLog() method should load all LedgerEntries from the CSV file.
 		//Need to sync up with Patrick on the logic
         ledgerRepository.loadLog();   //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<

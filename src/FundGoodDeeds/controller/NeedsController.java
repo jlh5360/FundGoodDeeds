@@ -19,7 +19,7 @@ public class NeedsController {
 	//Note to self:
 	//     -  This is for sequence diagram #1
 	//     -  NeedsController is implied between ConsoleUI and NeedsRepository
-    public void loadNeeds() {
+    public void loadData() {
         //Delegate data loading to the repository
         needsRepository.loadNeeds();
     }
