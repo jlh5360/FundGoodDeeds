@@ -74,7 +74,7 @@ public class LedgerController {
             throw new IllegalArgumentException("Need or Bundle not found in catalog: " + needName);
         }
         
-        double totalCost = (need.getTotalCost() * quantity);
+        double totalCost = (need.getTotal() * quantity);
         LedgerEntity entry = new LedgerEntity(date, "NEED", quantity, needName);
         
         ledgerRepository.appendLog(entry);
