@@ -44,7 +44,7 @@ public class NeedsController {
     }
 
     //Note: This assumes the BundleParts' names can be resolved later.
-    public void addBundle(String name, List<BundlePart> parts) {
+    public void addBundle(String name, List<Bundle.BundlePart> parts) {
         if (name == null || name.trim().isEmpty()) {
             throw new IllegalArgumentException("Bundle name cannot be empty.");
         }
