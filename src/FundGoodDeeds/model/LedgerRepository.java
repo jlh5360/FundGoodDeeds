@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.Observable;
 
 public class LedgerRepository extends Observable {
-	private final List<LedgerEntry> logEntries = new ArrayList<>();
+	private final List<LedgerEntity> logEntries = new ArrayList<>();
 
 	public void save(LetgetEntity entity) {
 		this.name = name;
@@ -30,7 +30,7 @@ public class LedgerRepository extends Observable {
 	public void addDonations(double donation1, double donation2) {
 		LocalDate today = LocalDate.now();
 
-		this.logEntries.add(new LedgerEntry(today, LedgerEntry.EntryType.FUND, donation1));
-		this.logEntries.add(new LedgerEntry(today, LedgerEntry.EntryType.FUND, donation2));
+		this.logEntries.add(new LedgerEntity(today, LedgerEntity.EntryType.FUND, donation1));
+		this.logEntries.add(new LedgerEntity(today, LedgerEntity.EntryType.FUND, donation2));
 	}
 }

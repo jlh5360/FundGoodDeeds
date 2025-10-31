@@ -5,7 +5,7 @@ import java.util.List;
 import java.util.Observer;
 
 import FundGoodDeeds.model.Donation;
-import FundGoodDeeds.model.LedgerEntry;
+import FundGoodDeeds.model.LedgerEntity;
 import FundGoodDeeds.model.LedgerRepository;
 import FundGoodDeeds.model.NeedComponent;
 import FundGoodDeeds.model.NeedsRepository;
@@ -75,7 +75,7 @@ public class LedgerController {
         }
         
         double totalCost = (need.getTotalCost() * quantity);
-        LedgerEntry entry = new LedgerEntry(date, "NEED", quantity, needName);
+        LedgerEntity entry = new LedgerEntity(date, "NEED", quantity, needName);
         
         ledgerRepository.appendLog(entry);
     }
@@ -90,7 +90,7 @@ public class LedgerController {
             throw new IllegalArgumentException("Funds amount cannot be negative.");
         }
 
-        FundGoodDeeds.model.LedgerEntry entry = new FundGoodDeeds.model.LedgerEntry(date, "FUND", amount);
+        FundGoodDeeds.model.LedgerEntity entry = new FundGoodDeeds.model.LedgerEntity(date, "FUND", amount);
         ledgerRepository.appendLog(entry);
     }
 
@@ -104,7 +104,7 @@ public class LedgerController {
             throw new IllegalArgumentException("Goal cannot be negative.");
         }
 
-        FundGoodDeeds.model.LedgerEntry entry = new FundGoodDeeds.model.LedgerEntry(date, "GOAL", goal);
+        FundGoodDeeds.model.LedgerEntity entry = new FundGoodDeeds.model.LedgerEntity(date, "GOAL", goal);
         ledgerRepository.appendLog(entry);
     }
 
@@ -122,7 +122,7 @@ public class LedgerController {
             throw new IllegalArgumentException("Quantity must be > 0.");
         }
 
-        FundGoodDeeds.model.LedgerEntry entry = new FundGoodDeeds.model.LedgerEntry(date, "NEED", quantity, needOrBundleName);
+        FundGoodDeeds.model.LedgerEntity entry = new FundGoodDeeds.model.LedgerEntity(date, "NEED", quantity, needOrBundleName);
         ledgerRepository.appendLog(entry);
     }
 
