@@ -13,41 +13,37 @@ public class LedgerRepository extends Observable {
 		
 	}
 
-	public String getSummary() {
+	public String getSummary() 
+	{
 		//Logic to calculate summary
-		double availableFunds = 0;
-		try{
-			
-			List<String> rawData = CSVManager.readData("Model/log.csv");
-			for(String rawString : rawData)
-			{
-				String[] splittedString = rawString.split(",");
-				if(splittedString[3].equals("f"))
-					availableFunds += Double.parseDouble(splittedString[4]);
+
+			double availableFunds = 0;
+			List<String> rawData;
+			try {
+				rawData = CSVManager.readData("model/log.csv");
+				for(String rawString : rawData)
+				{
+					String[] splittedString = rawString.split(",");
+					if(splittedString[3].equals("f"))
+						availableFunds += Double.parseDouble(splittedString[4]);
+				}
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
 			}
 			
-		}
-		catch(IOException e)
-		{
-			e.printStackTrace();
-		}
-
 		return "Daily Summary: " + availableFunds + "funding available.";
 	}
 
 	public double findGoal(LocalDate todaysDate) {
 		//Logic to find the current goal for the date
-
-		//I'll retrieve all the goals that have been entered and compare them to today's date to find today's goal
-		
+		// This will retrieve all the goals and compare their date to today's date
 		return 200.00;
 	}
 
 	public double calculateDonations(LocalDate todaysDate) {
 		//Logic to aggregate donations for the date
-
-		// Almost the same logic as findGoal
-
+		
 		return 50.00;
 	}
 

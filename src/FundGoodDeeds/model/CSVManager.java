@@ -59,8 +59,6 @@ public class CSVManager
         
         FileWriter writer = new FileWriter(csvPath,true);
 
-        // Buffered writer for increased performance
-
         try(BufferedWriter bufferedWriter = new BufferedWriter(writer))
         {
             for(String dataString : data)
@@ -78,4 +76,3 @@ public class CSVManager
         }
     }
 }
-
