@@ -160,5 +160,16 @@ public class NeedsRepository extends Observable {
 			.orElse(null));
     }
 
+	public void appendNeed(NeedComponent need) 
+	{
+		this.needsCatalog.add(need);
+		setChanged();
+	}
+
+	public List<NeedComponent> getNeedsCatalog() 
+	{
+		return this.needsCatalog;
+	}
+
 
 }

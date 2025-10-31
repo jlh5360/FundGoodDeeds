@@ -10,12 +10,13 @@ import FundGoodDeeds.model.LedgerRepository;
 import FundGoodDeeds.model.NeedComponent;
 import FundGoodDeeds.model.NeedsRepository;
 import FundGoodDeeds.view.ConsoleView;
-
+import FundGoodDeeds.model.LedgerEntity.EntryType;
 /**
  * Handles operations related to Ledger Entries and Donations.
  */
 public class LedgerController {
 	private final LedgerRepository ledgerRepository;
+    
 
 	//Note to self: This needsRepository will somehow be used in the recordFulfillment()
 	//method which it will record the fulfillment of a Need or Bundle (NEED entry).
@@ -26,6 +27,7 @@ public class LedgerController {
     public LedgerController(LedgerRepository ledgerRepository, NeedsRepository needsRepository) {
         this.ledgerRepository = ledgerRepository;
         this.needsRepository = needsRepository;
+        
     }
 
     //Allow the View to register as an Observer
@@ -36,15 +38,16 @@ public class LedgerController {
     }
 
     //Triggers the model to load ledger data.
-    public void loadData() {
-		//This loadLog() method should load all LedgerEntries from the CSV file.
-		//Need to sync up with Patrick on the logic
-        ledgerRepository.loadLog();   //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-    }
+    // ***FUTURE FEATURE MARKED FOR REFACTORING***
+    // public void loadData() {
+	// 	//This loadLog() method should load all LedgerEntries from the CSV file.
+	// 	//Need to sync up with Patrick on the logic
+    //     ledgerRepository.();   //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+    // }
 
     //Triggers the model to save ledger data.
-    public void saveLog() {
-        ledgerRepository.saveLog();
+    public void saveLog(LedgerEntity entry) {
+        ledgerRepository.save(entry);
     }
 
     //Retrieves the daily funding goal for the specified date.
@@ -75,7 +78,8 @@ public class LedgerController {
         }
         
         double totalCost = (need.getTotal() * quantity);
-        LedgerEntity entry = new LedgerEntity(date, "NEED", quantity, needName);
+        
+        LedgerEntity entry = new LedgerEntity(date, EntryType.NEED, needName, (int) quantity);
         
         ledgerRepository.appendLog(entry);
     }
