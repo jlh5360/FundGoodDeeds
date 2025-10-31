@@ -1,6 +1,7 @@
 package FundGoodDeeds.controller;
 
 import java.util.List;
+import java.util.Observer;
 
 import FundGoodDeeds.model.Bundle;
 import FundGoodDeeds.model.Need;
@@ -14,6 +15,13 @@ public class NeedsController {
 	public NeedsController(NeedsRepository needsRepository) {
 		this.needsRepository = needsRepository;
 	}
+
+    //Allow the View to register as an Observer
+    public void addObserver(Observer o) {
+        if (needsRepository != null) {
+            this.needsRepository.addObserver(o);
+        }
+    }
 
 	//Triggers the model to load all need and bundle data.
 	//Note to self:

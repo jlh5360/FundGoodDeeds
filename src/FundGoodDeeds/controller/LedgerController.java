@@ -2,6 +2,7 @@ package FundGoodDeeds.controller;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Observer;
 
 import FundGoodDeeds.model.Donation;
 import FundGoodDeeds.model.LedgerEntry;
@@ -25,6 +26,13 @@ public class LedgerController {
     public LedgerController(LedgerRepository ledgerRepository, NeedsRepository needsRepository) {
         this.ledgerRepository = ledgerRepository;
         this.needsRepository = needsRepository;
+    }
+
+    //Allow the View to register as an Observer
+    public void addObserver(Observer o) {
+        if (ledgerRepository != null) {
+            this.ledgerRepository.addObserver(o);
+        }
     }
 
     //Triggers the model to load ledger data.
