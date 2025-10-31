@@ -29,14 +29,15 @@ public class NeedsController {
 	//     -  NeedsController is implied between ConsoleUI and NeedsRepository
     public void loadData() {
         //Delegate data loading to the repository
-        needsRepository.loadNeeds();
+        needsRepository.getNeedsFromCSV();
     }
-
+    // ***Future feature marked for refactoring***
     //Triggers the model to save all need and bundle data.
-    public void saveNeeds() {
-        //Delegate data loading to the repository
-        needsRepository.saveNeeds();
-    }
+    // public void saveNeeds() {
+        
+    //     //Delegate data loading to the repository
+    //     needsRepository.saveNeeds();
+    // }
     
     //Creates and adds a new Basic Need to the catalog.
     public void addNeed(String name, double total, double fixed, double variable, double fees) {
@@ -52,7 +53,7 @@ public class NeedsController {
     }
 
     //Note: This assumes the BundleParts' names can be resolved later.
-    public void addBundle(String name, List<Bundle.BundlePart> parts) {
+    public void addBundle(String name, List<NeedComponent> parts) {
         if (name == null || name.trim().isEmpty()) {
             throw new IllegalArgumentException("Bundle name cannot be empty.");
         }
@@ -66,12 +67,12 @@ public class NeedsController {
         Bundle newBundle = new Bundle(name, parts);
         
         needsRepository.appendNeed(newBundle);
-        needsRepository.resolveAll();
+        newBundle.resolveAllNames();
     }
 
     //--- Display Methods for ConsoleView ---
     //Retrieves the entire catalog of Needs and Bundles.
     public List<NeedComponent> getNeedsCatalog() {
-        return needsRepository.getAllNeeds();
+        return needsRepository.getNeedsCatalog();
     }
 }

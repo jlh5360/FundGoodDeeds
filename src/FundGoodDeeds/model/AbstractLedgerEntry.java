@@ -1,5 +1,5 @@
 package FundGoodDeeds.model;
 
-public interface AbstractLedgerEntry {
+public class AbstractLedgerEntry {
     
 }
