@@ -2,17 +2,28 @@ package FundGoodDeeds.model;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
+import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Files;
-import java.nio.file.Paths;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 
 public class CSVManager 
 {
+    private final String absoluteDataPath = "term-project-rit-swen-383-01-1a/src/data/";
     
-    public static List<String> readData(String csvPath) throws IOException
+    public CSVManager() throws FileNotFoundException
+    {
+        Path path = Path.of(absoluteDataPath);
+        if(!Files.exists(path))
+        {   
+            throw new FileNotFoundException(absoluteDataPath + " does not exist!");
+        }
+    }
+
+    public List<String> readData(String csvPath)
     {
 
         // List to keep all the csv data
@@ -23,7 +34,9 @@ public class CSVManager
 
         String header;
 
-        try(BufferedReader reader = Files.newBufferedReader(Paths.get(csvPath)))
+
+
+        try(BufferedReader reader = Files.newBufferedReader(Path.of(this.absoluteDataPath + csvPath)))
         {
 
             // Skips the header
@@ -52,7 +65,7 @@ public class CSVManager
         
     }
 
-    public static void writeData(String csvPath, List<String> data) throws IOException
+    public void writeData(String csvPath, List<String> data) throws IOException
     {
 
         // Appends to a file using a encapsulating class

@@ -33,6 +33,10 @@ public class LedgerEntity {
 		return needName;
 	}
 
+	public EntryType getType(){
+		return type;
+	}
+
 	public double getAmount() {
 		return amount;
 	}

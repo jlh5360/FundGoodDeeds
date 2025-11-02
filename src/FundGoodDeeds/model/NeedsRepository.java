@@ -4,19 +4,25 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Observable;
-import FundGoodDeeds.*;
 
 public class NeedsRepository extends Observable {
 
 	private final List<NeedComponent> needsCatalog = new ArrayList<>();
 
-	// Stores the csv source path so that there's no need to specify it over and over again
+	private final CSVManager manager;
 
-	private final String csvSource;
-
-	public NeedsRepository(String csvSource)
+	public NeedsRepository(CSVManager manager)
 	{
-		this.csvSource = csvSource;
+		this.manager = manager;
+	}
+
+	public void loadNeeds()
+	{
+		List<String[]> rawNeeds = getNeedsFromCSV();
+		List<String[]> rawBundles = getBundlesFromCSV();
+
+		addNeedsToNeedsArray(convertNeedsToObject(rawNeeds));
+		addBundlesToBundlesArray((convertBundlesToBundlesObject(rawBundles)));
 	}
 
 
@@ -25,19 +31,12 @@ public class NeedsRepository extends Observable {
 		//Reads BasicNeeds from CSV
 		List<String[]> needs = new ArrayList<>();
 
-		try {
-			
-			List<String> needsAndBundles = CSVManager.readData(this.csvSource);
-			for(String dataString : needsAndBundles)
-			{
-				String[] splittedString = dataString.split(",");
-				if(splittedString[0].equals("n"))
-					needs.add(splittedString);
-			}
-			
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+		List<String> needsAndBundles = manager.readData("needs.csv");
+		for(String dataString : needsAndBundles)
+		{
+			String[] splittedString = dataString.split(",");
+			if(splittedString[0].equals("n"))
+				needs.add(splittedString);
 		}
 
 		return needs;
@@ -62,22 +61,13 @@ public class NeedsRepository extends Observable {
 	{
 		List<String[]> bundles = new ArrayList<>();
 
-		try 
+		// Filters out needs, focusing on the bundles
+		List<String> needsAndBundles = manager.readData("needs.csv");
+		for(String dataString : needsAndBundles)
 		{
-			// Filters out needs, focusing on the bundles
-			List<String> needsAndBundles = CSVManager.readData(this.csvSource);
-			for(String dataString : needsAndBundles)
-			{
-				String[] splittedString = dataString.split(",");
-				if(splittedString[0].equals("b"))
-					bundles.add(splittedString);
-			}
-			
-		} 
-		catch (IOException e) 
-		{
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			String[] splittedString = dataString.split(",");
+			if(splittedString[0].equals("b"))
+				bundles.add(splittedString);
 		}
 
 		return bundles;

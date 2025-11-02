@@ -7,32 +7,123 @@ import java.util.List;
 import java.util.Observable;
 
 public class LedgerRepository extends Observable {
-	private final List<LedgerEntity> logEntries = new ArrayList<>();
 
-	public void save(LedgerEntity entity) {
+	private final List<LedgerEntity> logEntries = new ArrayList<>();
+	public CSVManager manager;
+
+	public LedgerRepository(CSVManager manager)
+	{
+		this.manager = manager;
+	}
+
+	public void loadLog()
+	{
+		List<String[]> rawData = getDataFromCSV();
+		List<LedgerEntity> entries = new ArrayList<>();
+		for(String[] raw : rawData)
+		{
+			int year = Integer.parseInt(raw[0]);
+			int month = Integer.parseInt(raw[1]);
+			int day = Integer.parseInt(raw[2]);
+			LedgerEntity entity;
+
+			LocalDate entityDate = LocalDate.of(year,month,day);
+			switch(raw[3])
+			{
+				
+				case "n":
+					entity = new LedgerEntity(entityDate, LedgerEntity.EntryType.NEED,raw[4] ,Integer.parseInt(raw[5]));
+				break;
+
+				case "f":
+					entity = new LedgerEntity(entityDate, LedgerEntity.EntryType.FUND, Double.parseDouble(raw[4]));
+				break;
+					
+				case "g":
+					entity = new LedgerEntity(entityDate, LedgerEntity.EntryType.GOAL, Double.parseDouble(raw[4]));
+				default:
+
+				break;
+			}
+		}
+
+		logEntries.addAll(entries);
 		
+
+	}
+
+	public void save(LedgerEntity entry) {
+		logEntries.add(entry);
+	}
+
+	public List<String[]> getDataFromCSV()
+	{
+		List<String[]> rawData = new ArrayList<>();
+
+		List<String> csvData = manager.readData("log.csv");
+		for(String data : csvData)
+		{
+			rawData.add(data.split(","));
+		}
+
+		return rawData;
+
 	}
 
 	public String getSummary() {
 		//Logic to calculate summary
 		double availableFunds = 0;
-		try{
-			
-			List<String> rawData = CSVManager.readData("Model/log.csv");
-			for(String rawString : rawData)
-			{
-				String[] splittedString = rawString.split(",");
-				if(splittedString[3].equals("f"))
-					availableFunds += Double.parseDouble(splittedString[4]);
-			}
-			
-		}
-		catch(IOException e)
+		if(!logEntries.isEmpty())
 		{
-			e.printStackTrace();
+			for(LedgerEntity entity : logEntries)
+			{
+				if(entity.getType() == LedgerEntity.EntryType.FUND)
+				{
+					availableFunds = entity.getAmount();
+					break;
+				}
+			}
 		}
 
-		return "Daily Summary: " + availableFunds + "funding available.";
+		// In case there was no entry
+
+		if(!(availableFunds > 0))
+		{
+			List<String> rawData = manager.readData("log_test.csv");
+
+			// Placeholder to compare against
+
+			LocalDate previousDate = LocalDate.MIN;
+			double funds = 0;
+
+			// Gets the most recent funding entry
+
+			for(String dataString : rawData)
+			{
+				String[] splittedString = dataString.split(",");
+				if(splittedString[3].equals("f"))
+				{
+					// Converting the raw data
+
+					int year = Integer.parseInt(splittedString[0]);
+					int month = Integer.parseInt(splittedString[1]);
+					int day = Integer.parseInt(splittedString[2]);
+
+					LocalDate currentIndexDate = LocalDate.of(year,month,day);
+
+					if(currentIndexDate.isAfter(previousDate))
+					{
+						previousDate = currentIndexDate;
+						funds = Double.parseDouble(splittedString[3]);
+					}
+				}
+			}
+
+
+			availableFunds = funds;
+		}
+
+		return "Daily Summary: " + availableFunds + " funding available.";
 	}
 
 	public double findGoal(LocalDate todaysDate) {
