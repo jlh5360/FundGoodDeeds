@@ -1,61 +1,79 @@
 package FundGoodDeeds.model;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 
 public class Bundle implements NeedComponent {
-    private String name;
-	/**
+    public String name;	 
+    public List<NeedComponent> components;
+    public Map<NeedComponent, Integer> componentCounts;
+    /**
 	 * Theorietically, a Bundle can look like this:
 	 * 
 	 * [Bus Pass, Buss Pass, Monthly Rent, PB&J, PB&J]
 	 * 
-	 * FUTURE REFACTORING NOTE:
 	 * List needs to be converted to dictionary to hold NeedComponents and their counts.
 	 * [{Bus Pass: 2}, {Monthly Rent: 1}, {PB&J: 2}]
 	 * 
     */
-	 
-    private List<NeedComponent> components;
-	
     public Bundle(String name) {
         this.name = name;
 		// initialize with an empty list NeedComponents, then use add() for each Need in the bundle
         this.components = new ArrayList<>();
+        this.componentCounts = new HashMap<>();
     }
 
     // Constructor with predefined Needs for the bundle
     public Bundle(String name, List<NeedComponent> components) {
         this.name = name;
-		
         this.components = components;
+
+        // Count each component object using a for loop and store in the map
+        for (NeedComponent component : components) {
+            componentCounts.put(component, componentCounts.getOrDefault(component, 0) + 1);
+        }
+
     }
     
-    // List related methods
+    // Adds compnonent to the bundle and updates count
     public void add(NeedComponent component) {
         components.add(component);
+        componentCounts.put(component, componentCounts.getOrDefault(component, 0) + 1);
     }
     
+    // Removes component from the bundle and updates count
     public void remove(NeedComponent component) {
         components.remove(component);
+        
+        Integer currentCount = componentCounts.get(component);
+        if (currentCount != null) {
+            if (currentCount > 1) {
+                componentCounts.put(component, currentCount - 1);
+            } else {
+                componentCounts.remove(component);
+            }
+        }
     }
     
-    public List<NeedComponent> getComponents() {
-        return new ArrayList<>(components);
+    
+    public Map<NeedComponent, Integer> getComponentsAndCounts() {
+        return componentCounts;
     }
-     /**
-     * Returns a list of all need names in this bundle
-     * Example: ["Bus Pass", "Bus Pass", "Monthly Rent", "PB&J", "PB&J"]
+    public List<NeedComponent> getComponents() {
+        return components;
+    }
+    /**
+     * Returns a list of all need names in this bundle with their counts
+     * Example: ["Bus Pass (2)", "Monthly Rent (1)", "PB&J (2)"]
      */
     public List<String> resolveAllNames() {
-        return components.stream()
-                .map(NeedComponent::getName)
+        return componentCounts.entrySet().stream()
+                .map(entry -> entry.getKey().getName() + " (" + entry.getValue() + ")")
                 .collect(Collectors.toList());
     }
     
-    // Implement interface by aggregating child values
+    
     @Override
     public String getName() {
         return name;
