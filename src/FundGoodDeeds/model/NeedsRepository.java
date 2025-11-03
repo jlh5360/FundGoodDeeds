@@ -174,6 +174,7 @@ public class NeedsRepository extends Observable {
 		
 		for(NeedComponent component : needsCatalog)
 		{
+			//After testing, I think the need logic is fine (did not mess up the need data)
 			if(component instanceof Need)
 			{
 				// Format: n,name,total,fixed,variable,fees
@@ -187,6 +188,7 @@ public class NeedsRepository extends Observable {
 				);
 				csvLines.add(line);
 			}
+			//After testing, it messes up the order and even deletes some bundle data
 			else if(component instanceof Bundle)
 			{
 				// Format: b,name,n1name,n1count,n2name,n2count,...

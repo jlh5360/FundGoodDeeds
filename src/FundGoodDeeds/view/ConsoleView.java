@@ -238,6 +238,8 @@ public class ConsoleView implements Observer {
         return in.nextLine().trim();
     }
 
+    //INPUTTING n DOES NOT WORK -----> AT LEAST WHEN ADDING BUNDLES
+    //NEEDS UPDATING
     private boolean askYesNo(String prompt) {
         System.out.print(prompt);
         String s = in.nextLine().trim().toLowerCase(Locale.ROOT);
