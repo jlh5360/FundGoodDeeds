@@ -22,8 +22,12 @@ public class FundGoodDeedsApp {
     public static void main(String[] args) throws FileNotFoundException{
         //1. Model 
         //Instantiate csv manager
-        if (args.length < 2) {
-            System.out.println("Usage: RUN App.java <ledger-csv-file>");
+        if (args.length < 1) {
+            System.out.println("Usage: java FundGoodDeedsApp.java <ledger-csv-file>");
+            return;
+        }
+        else if (args.length < 1) {
+            System.out.println("Warning: Extra arguments will be ignored.");
             return;
         }
 
