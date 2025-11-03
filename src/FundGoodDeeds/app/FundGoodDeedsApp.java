@@ -7,6 +7,8 @@
 
 package FundGoodDeeds.app;
 
+import java.io.FileNotFoundException;
+
 import FundGoodDeeds.controller.LedgerController;
 import FundGoodDeeds.controller.NeedsController;
 import FundGoodDeeds.model.CSVManager;
@@ -17,10 +19,17 @@ import FundGoodDeeds.view.ConsoleView;
 
 
 public class FundGoodDeedsApp {
-    public static void main(String[] args){
+    public static void main(String[] args) throws FileNotFoundException{
         //1. Model 
         //Instantiate csv manager
-        CSVManager csvManager = new CSVManager();
+        if (args.length < 2) {
+            System.out.println("Usage: RUN App.java <ledger-csv-file>");
+            return;
+        }
+
+        // Read arguments
+        String ledgerCSV = args[0];
+        CSVManager csvManager = new CSVManager(ledgerCSV);
 
         //Instantiate Repositories and inject CSVManager
         NeedsRepository needsRepo = new NeedsRepository(csvManager);
@@ -44,6 +53,8 @@ public class FundGoodDeedsApp {
         //4.STARTUP
         //Initialize the application via the View/Controller
         //(Sequence Diagram #1: ConsoleView -> startup() initiates the load)
+        
+
         view.startup();
 
     }
