@@ -10,5 +10,9 @@ Removes previous build artifacts and compiles the source code:
 
 ```bash
 mvn clean compile
+```
+### 2️⃣ Run the Application
+
+```bash
 mvn exec:java -Dexec.args="ledger-new.csv"
 ```
