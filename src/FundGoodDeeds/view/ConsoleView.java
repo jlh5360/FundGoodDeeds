@@ -73,10 +73,14 @@ public class ConsoleView implements Observer {
             System.out.println(" 4) Add donation/fulfillment");
             System.out.println(" 5) Set funds for date");
             System.out.println(" 6) Set goal for date");
+            // System.out.println(" 7) Check current goal");
+            // System.out.println(" 8) Display goal status");
             System.out.println();
             System.out.println("Data");
             System.out.println(" 7) Reload CSVs (needs/log)");
             System.out.println(" 8) Save CSVs   (needs/log)");
+            // System.out.println(" 9) Reload CSVs (needs/log)");
+            // System.out.println(" 10) Save CSVs   (needs/log)");
             System.out.println();
             System.out.println(" 0) Exit");
             System.out.print("Select: ");
@@ -90,6 +94,10 @@ public class ConsoleView implements Observer {
                 case "6" -> setGoalFlow();
                 case "7" -> reloadAll();
                 case "8" -> saveAll();
+                // case "7" -> checkCurrentGoal();
+                // case "8" -> displayGoalStatus();
+                // case "9" -> reloadAll();
+                // case "10" -> saveAll();
                 case "0" -> run = false;
                 default  -> System.out.println("Invalid choice.");
             }
@@ -284,6 +292,10 @@ public class ConsoleView implements Observer {
     }
 
     private LocalDate askDate(String prompt) {
+        // LocalDate currentDate = LocalDate.now();
+        // DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+        // String formattedDate = currentDate.format(formatter);
+
         System.out.print(prompt);
         String s = in.nextLine().trim();
         if (s.isEmpty()) return LocalDate.now();
@@ -299,4 +311,18 @@ public class ConsoleView implements Observer {
         safe(() -> ledger.saveAllData(),  "Save All");
         System.out.println("Everything has been saved to csv files.");
     }
+
+    ////NEEDS WORK (ESPECIALLY WITH MEMORY)
+    // private void checkCurrentGoal() {
+    //     LocalDate day = askDate("Date to check goal for (YYYY-MM-DD, blank=today): ");
+    //     double goal = ledger.getGoal(day);
+
+    //     System.out.printf("The active funding goal for %s is $%.2f%n", day, goal);
+    // }
+
+    // public void displayGoalStatus() {
+    //     double activeGoal = ledger.getGoal(LocalDate.now());
+
+    //     System.out.printf("Today's funding goal is $%.2f%n", activeGoal);
+    // }
 }

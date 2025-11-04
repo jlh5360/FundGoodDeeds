@@ -13,7 +13,7 @@ import java.util.List;
 public class CSVManager 
 {
     // starting from "src/"
-    private final String absoluteDataPath = "FundGoodDeeds/data/";
+    private final String absoluteDataPath = "src/FundGoodDeeds/data/";
     public String ledgerCSV;
     
     public CSVManager(String ledgerCSVFile) throws FileNotFoundException

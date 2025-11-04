@@ -52,6 +52,11 @@ public class LedgerController {
         //2. LedgerController -> findGoal(todaysDate) -> LedgerRepository
         return ledgerRepository.findGoal(date);
     }
+
+    //Retrieves the active funding goal for a specific date, applying fallback logic.
+    public double getGoal(LocalDate date) {
+        return ledgerRepository.getGoalForDate(date);
+    }
     
     //Retrieves the total donations/fulfillment value for the specified date.
     //Note to self: This is for sequence diagram #3, step 1-5 loop

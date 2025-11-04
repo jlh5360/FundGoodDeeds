@@ -77,63 +77,6 @@ public class NeedsRepository extends Observable {
 	
 	}
 
-	////VERSION 1
-	// public List<NeedComponent> convertBundlesToBundlesObject(List<String[]> rawBundles) 
-	// {
-	// 	List<NeedComponent> bundles = new ArrayList<>();
-
-
-	// 	for(String[] bundle : rawBundles)
-	// 	{
-	// 		// Set the name, it is always the second index
-
-	// 		Bundle bundleObject = new Bundle(bundle[1]);
-
-	// 		// Variables to hold the data
-			
-	// 		for(int index = 2; index < bundle.length; index++)
-	// 		{
-	// 			double count = -1;
-	// 			String needName = "undefined";
-	// 			// In the csv files, need names are always even columns while need counts are always odd columns
-
-	// 			if(index % 2 == 0)
-	// 			{
-	// 				needName = bundle[index];
-	// 				// Skip to the next index
-	// 				index++;
-	// 			}
-	// 			if(index % 2 != 0)
-	// 			{
-	// 				count = Double.parseDouble(bundle[index]);
-	// 			}
-	// 			// Ensure we don't accidentally add the placeholder values
-	// 			if(count > -1 && !(needName.equals("undefined"))) {
-					
-	// 				// Look up the need from the catalog - prevents adding needs that don't exist
-    //             	NeedComponent need = getNeedByName(needName);
-                
-	// 				if(need != null) {
-	// 					// Add the need 'count' times to the bundle
-	// 					for(int i = 0; i < (int)count; i++)
-	// 					{
-	// 						bundleObject.add(need);
-	// 					}
-	// 				}
-
-	// 			}
-            		
-                
-            	
-	// 		}
-	// 		bundles.add(bundleObject);
-	// 	}
-	// 	return bundles;
-
-
-	// }
-
-	//VERSION 2
 	public List<NeedComponent> convertBundlesToBundlesObject(List<String[]> rawBundles) 
 	{
 		List<NeedComponent> bundles = new ArrayList<>();
@@ -141,18 +84,20 @@ public class NeedsRepository extends Observable {
 
 		for(String[] bundle : rawBundles)
 		{
-			// Set the name, it is always the second index
+			//Set the name, it is always the second index
 			Bundle bundleObject = new Bundle(bundle[1]);
 
-			// Start from index 2, iterate by 2 for needName and count pair
-			// This is more robust than relying on index % 2 and manual index increments.
+			//Start from index 2, iterate by 2 for needName and count pair
+			//This is more robust than relying on index % 2 and manual index increments.
 			for(int index = 2; index < bundle.length; index += 2)
 			{
 				String needName = bundle[index];
 				double count = 0.0;
 				
-				// Ensure the count index is within bounds (should be index + 1)
+				//Ensure the count index is within bounds (should be index + 1)
 				if(index + 1 < bundle.length) {
+					// DEBUGGING PURPOSE
+					// System.out.println("bundle object -----> " + bundleObject.getName());
 					try {
 						count = Double.parseDouble(bundle[index + 1]);
 					} catch (NumberFormatException e) {
@@ -163,17 +108,20 @@ public class NeedsRepository extends Observable {
 				
 				if(count > 0.0) {
 					
-					// Look up the need from the catalog - prevents adding needs that don't exist
+					//Look up the need from the catalog - prevents adding needs that don't exist
 					NeedComponent need = getNeedByName(needName);
+					
+					// DEBUGGING PURPOSE
+					// System.out.println("need --------> " + need);
 				
 					if(need != null) {
-						// Add the need 'count' times to the bundle
+						//Add the need 'count' times to the bundle
 						for(int i = 0; i < (int)count; i++)
 						{
 							bundleObject.add(need);
 						}
 					} else {
-						// ADDED WARNING: This alerts you to missing components like 'Monthly Rent'
+						//ADDED WARNING: This alerts you to missing components like 'Monthly Rent'
 						System.out.println("Warning: Component '" + needName + "' referenced in bundle '" + bundleObject.getName() + "' not found in catalog. Skipping component.");
 					}
 
@@ -198,27 +146,14 @@ public class NeedsRepository extends Observable {
 	}
 
 	public NeedComponent getNeedByName(String name) 
-	{
-		// if (name == null || name.isEmpty()) {
-		// 	return null;
-		// }
-		// // Case-insensitive search is vital here
-		// return (needsCatalog.stream()
-		// 	.filter(n -> n.getName().equalsIgnoreCase(name))
-		// 	.findFirst()
-		// 	.orElse(null));
-
-
-
-		if (name == null || name.isEmpty()) {
-			return null;
-		}
-		
+	{		
 		//Iterate over the needsCatalog which contains both Needs and Bundles
 		for (NeedComponent component : needsCatalog) {
 			//Compare the name (case-insensitive)
 			if (component.getName().equalsIgnoreCase(name)) {
 				//Found the actual existing object instance
+				// DEBUGGING PURPOSE
+				// System.out.println("component --------> " + component.getName());
 				return component;
 			}
 		}
@@ -276,6 +211,9 @@ public class NeedsRepository extends Observable {
 					String needName = entry.getKey().getName();
 					double count = entry.getValue();
 					line.append(",").append(needName).append(",").append(count);
+					// DEBUGGING PURPOSE
+					// System.out.println("entry ----------> " + entry);
+					// System.out.println("line ----------> " + line);
 				}
 				
 				csvLines.add(line.toString());
