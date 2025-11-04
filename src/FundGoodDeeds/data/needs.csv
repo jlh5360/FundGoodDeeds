@@ -8,15 +8,8 @@ n,Car Insurance,120.0,100.0,15.0,5.0
 n,Streaming Subscription,20.0,15.0,3.0,2.0
 n,Medical Insurance,250.0,200.0,40.0,10.0
 n,Pet Care,80.0,50.0,25.0,5.0
-n,Monthly Rent,10000.0,1000.0,20.0,0.0
-b,Fitness Package,Gym Membership,2.0,Water Bill,2.0
-b,Home Utilities,Electric Bill,2.0,Water Bill,2.0,Internet Service,2.0
-b,Communication Plan,Phone Plan,2.0,Internet Service,2.0
-b,Living Essentials,Monthly Rent,2.0,Grocery Budget,2.0,Water Bill,2.0,Electric Bill,2.0
-b,Complete Lifestyle Bundle,Living Essentials,1.0,Living Essentials,1.0,Grocery Budget,5.0,Fitness Package,1.0,Fitness Package,1.0,Communication Plan,1.0,Communication Plan,1.0,Streaming Subscription,2.0
-b,Fitness Package,Gym Membership,2.0,Water Bill,2.0
-b,Home Utilities,Electric Bill,2.0,Water Bill,2.0,Internet Service,2.0
-b,Communication Plan,Phone Plan,2.0,Internet Service,2.0
-b,Living Essentials,Monthly Rent,2.0,Grocery Budget,2.0,Water Bill,2.0,Electric Bill,2.0
-b,Complete Lifestyle Bundle,Living Essentials,1.0,Living Essentials,1.0,Grocery Budget,5.0,Fitness Package,1.0,Fitness Package,1.0,Communication Plan,1.0,Communication Plan,1.0,Streaming Subscription,2.0
-n,Coolbeans,54.0,50.0,2.0,2.0
+b,Fitness Package,Gym Membership,1.0,Water Bill,1.0
+b,Home Utilities,Electric Bill,1.0,Water Bill,1.0,Internet Service,1.0
+b,Communication Plan,Phone Plan,1.0,Internet Service,1.0
+b,Living Essentials,Monthly Rent,1.0,Grocery Budget,1.0,Water Bill,1.0,Electric Bill,1.0
+b,Complete Lifestyle Bundle,Living Essentials,1.0,Fitness Package,1.0,Communication Plan,1.0,Streaming Subscription,1.0
