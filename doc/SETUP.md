@@ -2,7 +2,7 @@
 
 ## Prerequisite
 
-Make sure Maven is installed on your PC and available in your system PATH. If you don't know how to set it up. Here is a youtube [video](https://www.youtube.com/watch?v=dQw4w9WgXcQ).
+Make sure Maven is installed on your PC and available in your system PATH. If you don't know how to set it up... here is a youtube [video](https://www.youtube.com/watch?v=dQw4w9WgXcQ).
 
 ## Commands to Run
 
@@ -15,7 +15,7 @@ Removes previous build artifacts and compiles the source code:
 ```bash
 mvn clean compile
 ```
-### 2️. Run the Application
+### 2. Run the Application
 
 ```bash
 mvn exec:java -Dexec.args="ledger-new.csv"
