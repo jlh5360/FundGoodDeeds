@@ -30,7 +30,7 @@ public class NeedsRepository extends Observable {
 			.collect(Collectors.joining(", "));
 		System.out.println("Needs catalog after loading needs only: " + names + "\n");
 		
-		addBundlesToBundlesArray((convertBundlesToBundlesObject(rawBundles)));
+		convertBundlesToBundlesObject(rawBundles);
 		String bundles = needsCatalog.stream()
 			.map(NeedComponent::getName)
 			.collect(Collectors.joining(", "));
@@ -87,7 +87,7 @@ public class NeedsRepository extends Observable {
 	
 	}
 
-	public List<NeedComponent> convertBundlesToBundlesObject(List<String[]> rawBundles) 
+	public void convertBundlesToBundlesObject(List<String[]> rawBundles) 
 	{
 		List<NeedComponent> bundles = new ArrayList<>();
 
@@ -118,35 +118,31 @@ public class NeedsRepository extends Observable {
 				}
 				
 				if(count > 0.0) {
+					
+					
 					Need currentNeed = new Need(needName, getNeedByName(needName).getTotal(), getNeedByName(needName).getFixed(), getNeedByName(needName).getVariable(), getNeedByName(needName).getFees());
-					bundleObject.add(currentNeed);
+					
 					//Look up the need from the catalog - prevents adding needs that don't exist
 					String names = needsCatalog.stream()
 						.map(NeedComponent::getName)
 						.collect(Collectors.joining(", "));
 					System.out.println("Needs catalog right before name query: " + names + "\n");
-					NeedComponent need = getNeedByName(needName);
+					
 					
 					// DEBUGGING PURPOSE
 					// System.out.println("need --------> " + need);
 				
-					if(need != null) {
-						//Add the need 'count' times to the bundle
-						for(int i = 0; i < (int)count; i++)
-						{
-							bundleObject.add(need);
-						}
-					} else {
-						//ADDED WARNING: This alerts you to missing components like 'Monthly Rent'
-						System.out.println("Need in question: " + need + "\n");
-						System.out.println("Warning: Component '" + needName + "' referenced in bundle '" + bundleObject.getName() + "' not found in catalog. Skipping component.");
+					//Add the need 'count' times to the bundle
+					for(int i = 0; i < (int)count; i++)
+					{
+						bundleObject.add(currentNeed);
 					}
 
 				}
 			}
 			bundles.add(bundleObject);
 		}
-		return bundles;
+		
 	}
 
 	public void addNeedsToNeedsArray(List<NeedComponent> basicNeeds) 
@@ -155,12 +151,7 @@ public class NeedsRepository extends Observable {
 		setChanged();
 	}
 
-	public void addBundlesToBundlesArray(List<NeedComponent> bundles) 
-	{
-		this.needsCatalog.addAll(bundles);
-		setChanged();
-		// notifyObservers("Catalog updated with " + bundles.size() + " bundles.");
-	}
+	
 
 	public NeedComponent getNeedByName(String name) 
 	{		
