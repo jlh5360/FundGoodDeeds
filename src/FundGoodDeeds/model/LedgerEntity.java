@@ -2,9 +2,7 @@ package FundGoodDeeds.model;
 
 import java.time.LocalDate;
 
-public class LedgerEntity {
-	public enum EntryType {FUND, GOAL, NEED}
-
+public class LedgerEntity implements AbstractLedgerEntry {
 	private final LocalDate date;
 	private final EntryType type;
 	private final String needName;
@@ -33,6 +31,7 @@ public class LedgerEntity {
 		return needName;
 	}
 
+	@Override
 	public EntryType getType(){
 		return type;
 	}
@@ -41,9 +40,11 @@ public class LedgerEntity {
 		return amount;
 	}
 
+	@Override
 	public LocalDate getDate() {
 		return date;
 	}
+	
 	public int getCount() {
 		return count;
 	}

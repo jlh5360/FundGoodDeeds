@@ -96,7 +96,13 @@ public class ConsoleView implements Observer {
         }
 
         // save prompt (not mandatory)
-        if (askYesNo("Save before exit? (y/n): ")) saveAll();
+        if (askYesNo("Save before exit? (y/n): ") == true) {
+            saveAll();
+        }
+        else {
+            System.out.println("Okay. Will not be saving.");
+        }
+
         System.out.println("Goodbye.");
     }
 
@@ -136,11 +142,17 @@ public class ConsoleView implements Observer {
     private void addNeedFlow() {
         System.out.println("-- Add Need --");
         String name   = askString("Name: ");
-        double total  = askDouble("Total cost: ");
+        //I don't think we should be asking the user the total
+        // double total  = askDouble("Total cost: ");
         double fixed  = askDouble("Fixed cost: ");
         double var    = askDouble("Variable cost: ");
         double fees   = askDouble("Fees: ");
-        needs.addNeed(name, total, fixed, var, fees);
+
+        //I think we should be the one calculating the total based
+        //on the user's input for tyhe fixed, var, and fees costs
+        double calculatedTotal = (fixed + var + fees);
+
+        needs.addNeed(name, calculatedTotal, fixed, var, fees);
         System.out.println("Need added.");
     }
 
@@ -238,12 +250,25 @@ public class ConsoleView implements Observer {
         return in.nextLine().trim();
     }
 
-    //INPUTTING n DOES NOT WORK -----> AT LEAST WHEN ADDING BUNDLES
-    //NEEDS UPDATING
     private boolean askYesNo(String prompt) {
-        System.out.print(prompt);
-        String s = in.nextLine().trim().toLowerCase(Locale.ROOT);
-        return s.startsWith("y") || s.equals("1") || s.equals("yes");
+        //Loops until the user enters a valid 'y' or 'n'
+        while (true) {
+            System.out.print(prompt);
+            String s = in.nextLine().trim().toLowerCase(Locale.ROOT);
+
+            //Check for "yes" input
+            if (s.equals("y") || s.equals("1") || s.equals("yes")) {
+                return true;
+            }
+
+            //Check for "no" input
+            if (s.equals("n") || s.equals("0") || s.equals("no")) {
+                return false;
+            }
+
+            //If neither, inform the user and loop again
+            System.out.println("Invalid input. Please enter 'y' for yes or 'n' for no.");
+        }
     }
 
     private double askDouble(String prompt) {

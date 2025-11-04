@@ -44,7 +44,7 @@ public class CSVManager
 
             // Skips the header
 
-            header = reader.readLine();
+            // header = reader.readLine();
 
             while(reader.ready())
             {
@@ -73,7 +73,7 @@ public class CSVManager
 
         // Appends to a file using a encapsulating class
         
-        FileWriter writer = new FileWriter(this.absoluteDataPath + csvPath,true);
+        FileWriter writer = new FileWriter(this.absoluteDataPath + csvPath,false);
 
         // Buffered writer for increased performance
 
