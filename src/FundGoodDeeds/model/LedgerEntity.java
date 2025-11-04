@@ -11,7 +11,7 @@ public class LedgerEntity {
 	private final double amount;
 	private final int count;
 
-	//Constructor for FUND/GOAL entries
+	//Constructor for FUND/DOAL entries
 	public LedgerEntity(LocalDate date, EntryType type, double amount) {
 		this.date = date;
 		this.type = type;
@@ -43,8 +43,5 @@ public class LedgerEntity {
 
 	public LocalDate getDate() {
 		return date;
-	}
-	public int getCount() {
-		return count;
 	}
 }

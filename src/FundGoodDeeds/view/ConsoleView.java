@@ -28,10 +28,8 @@ package FundGoodDeeds.view;
 
 import FundGoodDeeds.controller.NeedsController;
 import FundGoodDeeds.controller.LedgerController;
-import FundGoodDeeds.model.Bundle;
-import FundGoodDeeds.model.LedgerEntity;
 import FundGoodDeeds.model.NeedComponent;
-import FundGoodDeeds.model.*;
+
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
@@ -126,7 +124,7 @@ public class ConsoleView implements Observer {
         for (NeedComponent nc : items) {
             try {
                 //get total cost comes from need component, will need implementation once code in model is created
-                System.out.printf("- %s [total=%.2f]%n", nc.getName(), nc.getTotal());
+                System.out.printf("- %s [total=%.2f]%n", nc.getName(), nc.getTotalCost());
             } catch (Exception e) {
                 System.out.println("- " + String.valueOf(nc));
             }
@@ -149,40 +147,28 @@ public class ConsoleView implements Observer {
         System.out.println("-- Add Bundle --");
         String bundleName = askString("Bundle name: ");
 
-        // List to hold the NeedComponents that will be added to the bundle
-        List<NeedComponent> bundleParts = new ArrayList<>();
-        
+        // need to make to list<bundlepart> to match controller api
+        //can be made to hash map in future parts 
+        // Map<String, Double> parts = new HashMap<>();
+        //using bundlepart for now!
+        List<BundlePart> parts = new ArrayList<>();
         boolean more = true;
         while (more) {
-            String componentName = askString(" Component name (existing need or bundle): ");
-            int quantity = (int) askDouble(" Quantity: ");
-            
-            // Look up the component from the needs catalog
-            NeedComponent component = needs.getNeedByName(componentName);
-            
-            if (component == null) {
-                System.out.println("Warning: Component '" + componentName + "' not found in catalog. Skipping.");
-            } else {
-                // Add the component n times to the bundle
-                for (int i = 0; i < quantity; i++) {
-                    bundleParts.add(component);
-                }
-                System.out.println("Added " + quantity + "x " + componentName);
-            }
-            
+            String part = askString(" Component name (existing need or bundle): ");
+            double qty  = askDouble(" Quantity: ");
+            parts.add(part, qty);
             more = askYesNo(" Add another part? (y/n): ");
         }
 
-        if (bundleParts.isEmpty()) {
+        if (parts.isEmpty()) {
             System.out.println("Issue: A bundle must contain at least one component.");
             return;
         }
 
-        // Create the bundle with the list of components
-        needs.addBundle(bundleName, bundleParts);
+        needs.addBundle(bundleName, parts);
         System.out.println("Bundle added.");
-        System.out.printf("Success: Bundle '%s' created with %d components and added to catalog.%n", 
-            bundleName, bundleParts.size());
+        System.out.printf("Success: Bundle '%s' created with %d components and added to catalog.%n", name, parts.size());
+
     }
 
     private void addLedgerEntryFlow() {
@@ -190,7 +176,7 @@ public class ConsoleView implements Observer {
         LocalDate day = askDate("Date (YYYY-MM-DD, blank=today): ");
         String name   = askString("Need/Bundle name: ");
         double count  = askDouble("Units fulfilled: ");
-        ledger.addEntry(day, name, count);
+        ledger.registerDonations(count, name, day);
         System.out.println("Ledger entry added.");
     }
 
@@ -207,7 +193,7 @@ public class ConsoleView implements Observer {
         System.out.println("-- Set Funding Goal --");
         LocalDate day = askDate("Date (YYYY-MM-DD, blank=today): ");
         double goal   = askDouble("Goal amount: ");
-        ledger.setGoal(day, goal);
+        ledger.setDailyGoal(goal, day);
         System.out.println("Goal recorded.");
     }
 
@@ -238,8 +224,6 @@ public class ConsoleView implements Observer {
         return in.nextLine().trim();
     }
 
-    //INPUTTING n DOES NOT WORK -----> AT LEAST WHEN ADDING BUNDLES
-    //NEEDS UPDATING
     private boolean askYesNo(String prompt) {
         System.out.print(prompt);
         String s = in.nextLine().trim().toLowerCase(Locale.ROOT);
@@ -268,10 +252,5 @@ public class ConsoleView implements Observer {
             System.out.println("Invalid date, using today.");
             return LocalDate.now();
         }
-    }
-
-    private void saveAll() {    
-        safe(() -> ledger.saveAllData(),  "Save All");
-        System.out.println("Everything has been saved to csv files.");
     }
 }

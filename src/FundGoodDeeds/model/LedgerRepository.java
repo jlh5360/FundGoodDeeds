@@ -60,7 +60,7 @@ public class LedgerRepository extends Observable {
 	{
 		List<String[]> rawData = new ArrayList<>();
 
-		List<String> csvData = manager.readData(manager.ledgerCSV);
+		List<String> csvData = manager.readData("log.csv");
 		for(String data : csvData)
 		{
 			rawData.add(data.split(","));
@@ -148,54 +148,5 @@ public class LedgerRepository extends Observable {
 		this.logEntries.add(new LedgerEntity(today, LedgerEntity.EntryType.FUND, donation1));
 		this.logEntries.add(new LedgerEntity(today, LedgerEntity.EntryType.FUND, donation2));
 		setChanged();
-	}
-
-	// Writes all log entries back to the CSV file.
-	public void saveLogEntries() throws IOException
-	{
-		List<String> csvLines = new ArrayList<>();
-		
-		
-		
-		for(LedgerEntity entry : logEntries)
-		{
-			LocalDate date = entry.getDate();
-			int year = date.getYear();
-			int month = date.getMonthValue();
-			int day = date.getDayOfMonth();
-			
-			String line;
-			
-			switch(entry.getType())
-			{
-				case FUND:
-					
-					line = String.format("%d,%d,%d,f,%.1f",
-						year, month, day, entry.getAmount());
-					break;
-					
-				case GOAL:
-					
-					line = String.format("%d,%d,%d,g,%.1f",
-						year, month, day, entry.getAmount());
-					break;
-					
-				case NEED:
-					
-					line = String.format("%d,%d,%d,n,%s,%d",
-						year, month, day, entry.getNeedName(), entry.getCount());
-					break;
-					
-				default:
-					continue; 
-			}
-			
-			csvLines.add(line);
-		}
-		
-		// Write to file
-		manager.writeData("ledger-new.csv", csvLines);
-		setChanged();
-		notifyObservers();
 	}
 }

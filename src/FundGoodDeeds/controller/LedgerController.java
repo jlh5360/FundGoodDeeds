@@ -4,9 +4,13 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Observer;
 
-import FundGoodDeeds.model.*;
+import FundGoodDeeds.model.Donation;
+import FundGoodDeeds.model.LedgerEntity;
+import FundGoodDeeds.model.LedgerRepository;
+import FundGoodDeeds.model.NeedComponent;
+import FundGoodDeeds.model.NeedsRepository;
 import FundGoodDeeds.view.ConsoleView;
-
+import FundGoodDeeds.model.LedgerEntity.EntryType;
 /**
  * Handles operations related to Ledger Entries and Donations.
  */
@@ -75,9 +79,9 @@ public class LedgerController {
         
         double totalCost = (need.getTotal() * quantity);
         
-        LedgerEntity entry = new LedgerEntity(date, LedgerEntity.EntryType.NEED, needName, (int) quantity);
+        LedgerEntity entry = new LedgerEntity(date, EntryType.NEED, needName, (int) quantity);
         
-        ledgerRepository.save(entry);
+        ledgerRepository.appendLog(entry);
     }
 
     //Record the available funds for a date (writes a "FUND" entry)
@@ -90,8 +94,8 @@ public class LedgerController {
             throw new IllegalArgumentException("Funds amount cannot be negative.");
         }
 
-        LedgerEntity entry = new LedgerEntity(date, LedgerEntity.EntryType.FUND, amount);
-        ledgerRepository.save(entry);
+        FundGoodDeeds.model.LedgerEntity entry = new FundGoodDeeds.model.LedgerEntity(date, "FUND", amount);
+        ledgerRepository.appendLog(entry);
     }
 
     //Record the fundraising goal for a date (writes a "GOAL" entry)
@@ -104,8 +108,8 @@ public class LedgerController {
             throw new IllegalArgumentException("Goal cannot be negative.");
         }
 
-        LedgerEntity entry = new LedgerEntity(date, LedgerEntity.EntryType.GOAL, (int) goal);
-        ledgerRepository.save(entry);
+        FundGoodDeeds.model.LedgerEntity entry = new FundGoodDeeds.model.LedgerEntity(date, "GOAL", goal);
+        ledgerRepository.appendLog(entry);
     }
 
     //Record fulfillment for a specific Need/Bundle by name (writes a "NEED" entry)
@@ -122,25 +126,21 @@ public class LedgerController {
             throw new IllegalArgumentException("Quantity must be > 0.");
         }
 
-        LedgerEntity entry = new LedgerEntity(date, LedgerEntity.EntryType.NEED, needOrBundleName, (int) quantity);
-        ledgerRepository.save(entry);
+        FundGoodDeeds.model.LedgerEntity entry = new FundGoodDeeds.model.LedgerEntity(date, "NEED", quantity, needOrBundleName);
+        ledgerRepository.appendLog(entry);
     }
 
     //Saves BOTH sides (needs + ledger). One-stop for the CLI.
     public void saveAllData() {
         try {
             if (this.needsRepository != null) {
-                this.needsRepository.saveNeedsCatalog();
+                this.needsRepository.saveNeeds();
             }
 
-            ledgerRepository.saveLogEntries();
+            ledgerRepository.saveLog();
 
         } catch (Exception e) {
             throw new RuntimeException("Save failed: " + e.getMessage(), e);
         }
-    }
-
-    public void loadData() {
-        ledgerRepository.loadLog();
     }
 }
