@@ -8,9 +8,7 @@ import java.util.Observable;
 import java.util.stream.Collectors;
 
 public class NeedsRepository extends Observable {
-
 	private final List<NeedComponent> needsCatalog = new ArrayList<>();
-
 	private final CSVManager manager;
 	
 
@@ -25,16 +23,16 @@ public class NeedsRepository extends Observable {
 		List<String[]> rawBundles = getBundlesFromCSV();
 		
 		addNeedsToNeedsArray(convertNeedsToObject(rawNeeds));
-		String names = needsCatalog.stream()
-			.map(NeedComponent::getName)
-			.collect(Collectors.joining(", "));
-		System.out.println("Needs catalog after loading needs only: " + names + "\n");
+		// String names = needsCatalog.stream()
+		// 	.map(NeedComponent::getName)
+		// 	.collect(Collectors.joining(", "));
+		// System.out.println("Needs catalog after loading needs only: " + names + "\n");
 		
 		convertBundlesToBundlesObject(rawBundles);
-		String bundles = needsCatalog.stream()
-			.map(NeedComponent::getName)
-			.collect(Collectors.joining(", "));
-		System.out.println("Needs catalog after loading needs only: " + bundles + "\n");
+		// String bundles = needsCatalog.stream()
+		// 	.map(NeedComponent::getName)
+		// 	.collect(Collectors.joining(", "));
+		// System.out.println("Needs catalog after loading needs only: " + bundles + "\n");
 	}
 
 
@@ -42,13 +40,15 @@ public class NeedsRepository extends Observable {
 	{
 		//Reads BasicNeeds from CSV
 		List<String[]> needs = new ArrayList<>();
-
 		List<String> needsAndBundles = manager.readData("needs.csv");
+
 		for(String dataString : needsAndBundles)
 		{
 			String[] splittedString = dataString.split(",");
-			if(splittedString[0].equals("n"))
+
+			if(splittedString[0].equals("n")) {
 				needs.add(splittedString);
+			}
 		}
 
 		return needs;
@@ -60,11 +60,13 @@ public class NeedsRepository extends Observable {
 		//Parses data into BasicNeed objects
 
 		List<NeedComponent> needsList = new ArrayList<>();
+
 		for(String[] need : rawNeeds)
 		{
 			NeedComponent needComponent = new Need(need[1], Double.parseDouble(need[2]),Double.parseDouble(need[3]),Double.parseDouble(need[4]), Double.parseDouble(need[5]));
 			needsList.add(needComponent);
 		}
+
 		return needsList;
 
 	}
@@ -90,7 +92,6 @@ public class NeedsRepository extends Observable {
 	public void convertBundlesToBundlesObject(List<String[]> rawBundles) 
 	{
 		List<NeedComponent> bundles = new ArrayList<>();
-
 
 		for(String[] bundle : rawBundles)
 		{
@@ -118,16 +119,13 @@ public class NeedsRepository extends Observable {
 				}
 				
 				if(count > 0.0) {
-					
-					
 					Need currentNeed = new Need(needName, getNeedByName(needName).getTotal(), getNeedByName(needName).getFixed(), getNeedByName(needName).getVariable(), getNeedByName(needName).getFees());
 					
 					//Look up the need from the catalog - prevents adding needs that don't exist
-					String names = needsCatalog.stream()
-						.map(NeedComponent::getName)
-						.collect(Collectors.joining(", "));
-					System.out.println("Needs catalog right before name query: " + names + "\n");
-					
+					// String names = needsCatalog.stream()
+					// 	.map(NeedComponent::getName)
+					// 	.collect(Collectors.joining(", "));
+					// System.out.println("Needs catalog right before name query: " + names + "\n");
 					
 					// DEBUGGING PURPOSE
 					// System.out.println("need --------> " + need);
@@ -140,6 +138,7 @@ public class NeedsRepository extends Observable {
 
 				}
 			}
+
 			bundles.add(bundleObject);
 		}
 		
@@ -150,8 +149,6 @@ public class NeedsRepository extends Observable {
 		this.needsCatalog.addAll(basicNeeds);
 		setChanged();
 	}
-
-	
 
 	public NeedComponent getNeedByName(String name) 
 	{		
@@ -191,7 +188,6 @@ public class NeedsRepository extends Observable {
 		
 		for(NeedComponent component : needsCatalog)
 		{
-			//After testing, I think the need logic is fine (did not mess up the need data)
 			if(component instanceof Need)
 			{
 				// Format: n,name,total,fixed,variable,fees
@@ -205,7 +201,6 @@ public class NeedsRepository extends Observable {
 				);
 				csvLines.add(line);
 			}
-			//After testing, it messes up the order and even deletes some bundle data
 			else if(component instanceof Bundle)
 			{
 				// Format: b,name,n1name,n1count,n2name,n2count,...
