@@ -26,7 +26,7 @@ public class FundGoodDeedsApp {
             System.out.println("Usage: java FundGoodDeedsApp.java <ledger-csv-file>");
             return;
         }
-        else if (args.length < 1) {
+        else if (args.length > 1) {
             System.out.println("Warning: Extra arguments will be ignored.");
             return;
         }
@@ -36,6 +36,7 @@ public class FundGoodDeedsApp {
         CSVManager csvManager = new CSVManager(ledgerCSV);
 
         //Instantiate Repositories and inject CSVManager
+        
         NeedsRepository needsRepo = new NeedsRepository(csvManager);
         LedgerRepository ledgerRepo = new LedgerRepository(csvManager);
         
