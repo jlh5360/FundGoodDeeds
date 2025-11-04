@@ -1,5 +1,7 @@
 package FundGoodDeeds.model;
 
+import java.util.Locale;
+
 public class Need implements NeedComponent {
     private String name;
     private double total;
@@ -61,5 +63,29 @@ public class Need implements NeedComponent {
     
     public void setFees(double fees) {
         this.fees = fees;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+
+        //Need to ensure the class type is the same
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        
+        Need need = (Need) o;
+        
+        //Two needs are equal if they have the same name
+        return name.equalsIgnoreCase(need.name);
+    }
+
+    @Override
+    public int hashCode() {
+        //Hash code based on the unique name
+        //Use Locale.ROOT to ensure case-insensitive hashing is consistent across all systems
+        return name.toLowerCase(Locale.ROOT).hashCode();
     }
 }

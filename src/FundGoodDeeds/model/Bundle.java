@@ -21,13 +21,16 @@ public class Bundle implements NeedComponent {
         this.name = name;
 		// initialize with an empty list NeedComponents, then use add() for each Need in the bundle
         this.components = new ArrayList<>();
-        this.componentCounts = new HashMap<>();
+        // this.componentCounts = new HashMap<>();
+        this.componentCounts = new LinkedHashMap<>();
     }
 
     // Constructor with predefined Needs for the bundle
     public Bundle(String name, List<NeedComponent> components) {
         this.name = name;
         this.components = components;
+
+        this.componentCounts = new LinkedHashMap<>();
 
         // Count each component object using a for loop and store in the map
         for (NeedComponent component : components) {
@@ -120,4 +123,27 @@ public class Bundle implements NeedComponent {
     //     return ...
     // }
     
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+
+        //Must check for the exact class to distinguish Bundle from a Need with the same name
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+
+        Bundle bundle = (Bundle) o;
+
+        return name.equalsIgnoreCase(bundle.name);
+    }
+
+    
+    @Override
+    public int hashCode() {
+        //Hash code based on the unique name
+        //Use Locale.ROOT to ensure case-insensitive hashing is consistent across all systems
+        return name.toLowerCase(Locale.ROOT).hashCode();
+    }
 }
