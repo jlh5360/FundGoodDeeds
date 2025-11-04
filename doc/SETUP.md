@@ -3,11 +3,18 @@
 ## Prerequisite
 
 Make sure Maven is installed on your PC and available in your system PATH. If you don't know how to set it up... here is a youtube [video](https://www.youtube.com/watch?v=dQw4w9WgXcQ).
+
 OR
-Chocolately has a one liner to install it:
+
+a. Install Chocolatey
+
+b. Chocolately to install Maven 
+
+(MUST HAVE ADMIN SHELL FOR BOTH COMMANDS!!!)
 
 ```bash 
 Set-ExecutionPolicy Bypass -Scope Process -Force; [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072; iex ((New-Object System.Net.WebClient).DownloadString('https://community.chocolatey.org/install.ps1'))`
+choco install maven
 ```
 
 ## Commands to Run
