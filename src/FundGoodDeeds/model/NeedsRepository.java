@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Observable;
+import java.util.stream.Collectors;
 
 public class NeedsRepository extends Observable {
 
@@ -22,9 +23,18 @@ public class NeedsRepository extends Observable {
 	{
 		List<String[]> rawNeeds = getNeedsFromCSV();
 		List<String[]> rawBundles = getBundlesFromCSV();
-
+		
 		addNeedsToNeedsArray(convertNeedsToObject(rawNeeds));
+		String names = needsCatalog.stream()
+			.map(NeedComponent::getName)
+			.collect(Collectors.joining(", "));
+		System.out.println("Needs catalog after loading needs only: " + names + "\n");
+		
 		addBundlesToBundlesArray((convertBundlesToBundlesObject(rawBundles)));
+		String bundles = needsCatalog.stream()
+			.map(NeedComponent::getName)
+			.collect(Collectors.joining(", "));
+		System.out.println("Needs catalog after loading needs only: " + bundles + "\n");
 	}
 
 
@@ -86,6 +96,7 @@ public class NeedsRepository extends Observable {
 		{
 			//Set the name, it is always the second index
 			Bundle bundleObject = new Bundle(bundle[1]);
+			needsCatalog.add(bundleObject);
 
 			//Start from index 2, iterate by 2 for needName and count pair
 			//This is more robust than relying on index % 2 and manual index increments.
@@ -107,8 +118,13 @@ public class NeedsRepository extends Observable {
 				}
 				
 				if(count > 0.0) {
-					
+					Need currentNeed = new Need(needName, getNeedByName(needName).getTotal(), getNeedByName(needName).getFixed(), getNeedByName(needName).getVariable(), getNeedByName(needName).getFees());
+					bundleObject.add(currentNeed);
 					//Look up the need from the catalog - prevents adding needs that don't exist
+					String names = needsCatalog.stream()
+						.map(NeedComponent::getName)
+						.collect(Collectors.joining(", "));
+					System.out.println("Needs catalog right before name query: " + names + "\n");
 					NeedComponent need = getNeedByName(needName);
 					
 					// DEBUGGING PURPOSE
@@ -122,6 +138,7 @@ public class NeedsRepository extends Observable {
 						}
 					} else {
 						//ADDED WARNING: This alerts you to missing components like 'Monthly Rent'
+						System.out.println("Need in question: " + need + "\n");
 						System.out.println("Warning: Component '" + needName + "' referenced in bundle '" + bundleObject.getName() + "' not found in catalog. Skipping component.");
 					}
 

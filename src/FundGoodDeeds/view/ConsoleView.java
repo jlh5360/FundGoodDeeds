@@ -57,7 +57,9 @@ public class ConsoleView implements Observer {
     /** Start the loop. Safe to run with empty CSVs. */
     public void startup() {
         // Initial loads (no dupes recomended)
+        System.out.println("Loading data from needs ...\n");
         safe(() -> needs.loadData(), "Loading needs");
+        System.out.println("Loading data from ledger ...\n");
         safe(() -> ledger.loadData(),  "Loading ledger");
 
         System.out.println("=== FundGoodDeeds CLI (V1.0) ===");

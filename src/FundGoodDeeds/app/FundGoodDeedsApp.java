@@ -59,7 +59,7 @@ public class FundGoodDeedsApp {
         //Initialize the application via the View/Controller
         //(Sequence Diagram #1: ConsoleView -> startup() initiates the load)
         
-
+        System.out.println("Starting app...\n");
         view.startup();
 
     }
