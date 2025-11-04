@@ -32,5 +32,5 @@ mvn clean compile
 ### 2. Run the Application
 
 ```bash
-mvn exec:java -Dexec.args="ledger-new.csv"
+mvn exec:java
 ```

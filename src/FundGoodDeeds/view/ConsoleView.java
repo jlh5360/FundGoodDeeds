@@ -75,7 +75,6 @@ public class ConsoleView implements Observer {
             System.out.println(" 4) Add donation/fulfillment");
             System.out.println(" 5) Set funds for date");
             System.out.println(" 6) Set goal for date");
-            // System.out.println(" 7) Check current goal");
             // System.out.println(" 8) Display goal status");
             System.out.println();
             System.out.println("Data");
@@ -85,6 +84,15 @@ public class ConsoleView implements Observer {
             // System.out.println(" 10) Save CSVs   (needs/log)");
             System.out.println();
             System.out.println(" 0) Exit");
+
+            // Display current funds and goal directly on the screen
+            LocalDate today = LocalDate.now();
+            double funds = ledger.getFunds(today);
+            double goal = ledger.getGoal(today);
+            double donations = ledger.getTodayDonations(today); // Get today's donations
+            System.out.printf("Current Funds: $%.2f | Today's Goal: $%.2f/$%.2f%n", funds, donations, goal);
+            System.out.println(); // Add a blank line for separation
+
             System.out.print("Select: ");
 
             switch (in.nextLine().trim()) {
@@ -96,10 +104,6 @@ public class ConsoleView implements Observer {
                 case "6" -> setGoalFlow();
                 case "7" -> reloadAll();
                 case "8" -> saveAll();
-                // case "7" -> checkCurrentGoal();
-                // case "8" -> displayGoalStatus();
-                // case "9" -> reloadAll();
-                // case "10" -> saveAll();
                 case "0" -> run = false;
                 default  -> System.out.println("Invalid choice.");
             }
@@ -162,8 +166,12 @@ public class ConsoleView implements Observer {
         //on the user's input for tyhe fixed, var, and fees costs
         double calculatedTotal = (fixed + var + fees);
 
-        needs.addNeed(name, calculatedTotal, fixed, var, fees);
-        System.out.println("Need added.");
+        try {
+            needs.addNeed(name, calculatedTotal, fixed, var, fees);
+            System.out.println("Need added.");
+        } catch (Exception e) {
+            System.out.println("Error adding need: " + e.getMessage());
+        }
     }
 
     // PLEASE INVESTIGATE THIS METHOD and workings.
@@ -171,24 +179,23 @@ public class ConsoleView implements Observer {
         System.out.println("-- Add Bundle --");
         String bundleName = askString("Bundle name: ");
 
-        // List to hold the NeedComponents that will be added to the bundle
-        List<NeedComponent> bundleParts = new ArrayList<>();
+        // Map to hold components and their integer quantities
+        Map<NeedComponent, Integer> bundleParts = new LinkedHashMap<>();
         
         boolean more = true;
         while (more) {
             String componentName = askString(" Component name (existing need or bundle): ");
-            int quantity = (int) askDouble(" Quantity: ");
+            int quantity = askInt(" Quantity (whole number): "); // Changed to ask for integer
             
             // Look up the component from the needs catalog
             NeedComponent component = needs.getNeedByName(componentName);
             
             if (component == null) {
                 System.out.println("Warning: Component '" + componentName + "' not found in catalog. Skipping.");
+            } else if (quantity <= 0) {
+                System.out.println("Warning: Quantity must be a positive whole number. Skipping.");
             } else {
-                // Add the component n times to the bundle
-                for (int i = 0; i < quantity; i++) {
-                    bundleParts.add(component);
-                }
+                bundleParts.put(component, bundleParts.getOrDefault(component, 0) + quantity);
                 System.out.println("Added " + quantity + "x " + componentName);
             }
             
@@ -201,10 +208,13 @@ public class ConsoleView implements Observer {
         }
 
         // Create the bundle with the list of components
-        needs.addBundle(bundleName, bundleParts);
-        System.out.println("Bundle added.");
-        System.out.printf("Success: Bundle '%s' created with %d components and added to catalog.%n", 
-            bundleName, bundleParts.size());
+        try {
+            needs.addBundle(bundleName, bundleParts);
+            System.out.printf("Success: Bundle '%s' created with %d components and added to catalog.%n", 
+                bundleName, bundleParts.size());
+        } catch (Exception e) {
+            System.out.println("Error adding bundle: " + e.getMessage());
+        }
     }
 
     private void addLedgerEntryFlow() {
@@ -212,8 +222,12 @@ public class ConsoleView implements Observer {
         LocalDate day = askDate("Date (YYYY-MM-DD, blank=today): ");
         String name   = askString("Need/Bundle name: ");
         double count  = askDouble("Units fulfilled: ");
-        ledger.addEntry(day, name, count);
-        System.out.println("Ledger entry added.");
+        try {
+            ledger.addEntry(day, name, count);
+            System.out.println("Ledger entry added.");
+        } catch (Exception e) {
+            System.out.println("Error adding ledger entry: " + e.getMessage());
+        }
     }
 
     // PLEASE INVESTIGATE THIS METHOD.
@@ -240,12 +254,11 @@ public class ConsoleView implements Observer {
     }
 
     // PLEASE INVESTIGATE THIS METHOD.
-    // should live within repositories, but for simplicity placed here
-    // private void saveAll() {
-    //     safe(() -> needs.saveNeeds(), "Save needs");
-    //     safe(() -> ledger.saveLog(),  "Save ledger");
-    //     System.out.println("Saved.");
-    // }
+    private void saveAll() {
+        safe(() -> needs.saveNeeds(), "Save needs");
+        safe(() -> ledger.saveLog(),  "Save ledger");
+        System.out.println("Saved.");
+    }
 
     // ---------- Tiny helpers ----------
 
@@ -293,6 +306,18 @@ public class ConsoleView implements Observer {
         }
     }
 
+    private int askInt(String prompt) {
+        while (true) {
+            System.out.print(prompt);
+            String s = in.nextLine().trim();
+            try {
+                return Integer.parseInt(s);
+            } catch (NumberFormatException e) {
+                System.out.println("Enter a whole number.");
+            }
+        }
+    }
+
     private LocalDate askDate(String prompt) {
         // LocalDate currentDate = LocalDate.now();
         // DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
@@ -307,11 +332,6 @@ public class ConsoleView implements Observer {
             System.out.println("Invalid date, using today.");
             return LocalDate.now();
         }
-    }
-
-    private void saveAll() {    
-        safe(() -> ledger.saveAllData(),  "Save All");
-        System.out.println("Everything has been saved to csv files.");
     }
 
     ////NEEDS WORK (ESPECIALLY WITH MEMORY)

@@ -6,10 +6,9 @@ import java.util.stream.Collectors;
 
 public class Bundle implements NeedComponent {
     public String name;	 
-    public List<NeedComponent> components;
     public Map<NeedComponent, Integer> componentCounts;
     /**
-	 * Theorietically, a Bundle can look like this:
+	 * Theoretically, a Bundle can look like this:
 	 * 
 	 * [Bus Pass, Buss Pass, Monthly Rent, PB&J, PB&J]
 	 * 
@@ -20,43 +19,27 @@ public class Bundle implements NeedComponent {
     public Bundle(String name) {
         this.name = name;
 		// initialize with an empty list NeedComponents, then use add() for each Need in the bundle
-        this.components = new ArrayList<>();
-        // this.componentCounts = new HashMap<>();
         this.componentCounts = new LinkedHashMap<>();
     }
 
     // Constructor with predefined Needs for the bundle
-    public Bundle(String name, List<NeedComponent> components) {
+    // Changed to accept a Map for component and their integer counts
+    public Bundle(String name, Map<NeedComponent, Integer> componentsWithCounts) {
         this.name = name;
-        this.components = components;
-
-        this.componentCounts = new LinkedHashMap<>();
-
-        // Count each component object using a for loop and store in the map
-        for (NeedComponent component : components) {
-            componentCounts.put(component, componentCounts.getOrDefault(component, 0) + 1);
-        }
-
+        this.componentCounts = new LinkedHashMap<>(componentsWithCounts);
     }
     
-    // Adds compnonent to the bundle and updates count
-    public void add(NeedComponent component) {
-        components.add(component);
-        componentCounts.put(component, componentCounts.getOrDefault(component, 0) + 1);
+    // Adds component to the bundle with a specific integer quantity
+    public void add(NeedComponent component, int quantity) {
+        if (quantity <= 0) {
+            throw new IllegalArgumentException("Bundle component quantity must be positive.");
+        }
+        componentCounts.put(component, componentCounts.getOrDefault(component, 0) + quantity);
     }
     
     // Removes component from the bundle and updates count
     public void remove(NeedComponent component) {
-        components.remove(component);
-        
-        Integer currentCount = componentCounts.get(component);
-        if (currentCount != null) {
-            if (currentCount > 1) {
-                componentCounts.put(component, currentCount - 1);
-            } else {
-                componentCounts.remove(component);
-            }
-        }
+        componentCounts.remove(component); // Removes the component entirely
     }
     
     
@@ -64,7 +47,8 @@ public class Bundle implements NeedComponent {
         return componentCounts;
     }
     public List<NeedComponent> getComponents() {
-        return components;
+        // Returns a list of unique components, not reflecting quantities
+        return new ArrayList<>(componentCounts.keySet());
     }
     /**
      * Returns a list of all need names in this bundle with their counts
@@ -91,29 +75,29 @@ public class Bundle implements NeedComponent {
 	 */
     @Override
     public double getTotal() {
-        return components.stream()
-                .mapToDouble(NeedComponent::getTotal)
+        return componentCounts.entrySet().stream()
+                .mapToDouble(entry -> entry.getKey().getTotal() * entry.getValue())
                 .sum();
     }
     
     @Override
     public double getFixed() {
-        return components.stream()
-                .mapToDouble(NeedComponent::getFixed)
+        return componentCounts.entrySet().stream()
+                .mapToDouble(entry -> entry.getKey().getFixed() * entry.getValue())
                 .sum();
     }
     
     @Override
     public double getVariable() {
-        return components.stream()
-                .mapToDouble(NeedComponent::getVariable)
+        return componentCounts.entrySet().stream()
+                .mapToDouble(entry -> entry.getKey().getVariable() * entry.getValue())
                 .sum();
     }
     
     @Override
     public double getFees() {
-        return components.stream()
-                .mapToDouble(NeedComponent::getFees)
+        return componentCounts.entrySet().stream()
+                .mapToDouble(entry -> entry.getKey().getFees() * entry.getValue())
                 .sum();
     }
 

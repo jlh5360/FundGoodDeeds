@@ -1,6 +1,7 @@
 package FundGoodDeeds.controller;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Observer;
 
 import FundGoodDeeds.model.Bundle;
@@ -53,11 +54,11 @@ public class NeedsController {
     }
 
     //Note: This assumes the BundleParts' names can be resolved later.
-    public void addBundle(String name, List<NeedComponent> parts) {
+    public void addBundle(String name, Map<NeedComponent, Integer> parts) {
         if (name == null || name.trim().isEmpty()) {
             throw new IllegalArgumentException("Bundle name cannot be empty.");
         }
-        if (parts == null || parts.isEmpty()) {
+        if (parts == null || parts.isEmpty()) { // This check is correct for a Map as well
             throw new IllegalArgumentException("A Bundle must contain at least one part.");
         }
         if (needsRepository.getNeedByName(name) != null) {
@@ -67,7 +68,6 @@ public class NeedsController {
         Bundle newBundle = new Bundle(name, parts);
         
         needsRepository.appendNeed(newBundle);
-        newBundle.resolveAllNames();
     }
 
     //--- Display Methods for ConsoleView ---
