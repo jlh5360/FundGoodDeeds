@@ -119,23 +119,21 @@ public class NeedsRepository extends Observable {
 				}
 				
 				if(count > 0.0) {
-					Need currentNeed = new Need(needName, getNeedByName(needName).getTotal(), getNeedByName(needName).getFixed(), getNeedByName(needName).getVariable(), getNeedByName(needName).getFees());
-					
-					//Look up the need from the catalog - prevents adding needs that don't exist
-					// String names = needsCatalog.stream()
-					// 	.map(NeedComponent::getName)
-					// 	.collect(Collectors.joining(", "));
-					// System.out.println("Needs catalog right before name query: " + names + "\n");
-					
-					// DEBUGGING PURPOSE
-					// System.out.println("need --------> " + need);
-				
-					//Add the need 'count' times to the bundle
-					for(int i = 0; i < (int)count; i++)
-					{
-						bundleObject.add(currentNeed);
+					NeedComponent component = getNeedByName(needName);
+					if (component != null) {
+						// Parse as integer, as per clarified design
+						int intCount = (int) count;
+						if (intCount <= 0) {
+							System.out.println("Warning: Bundle '" + bundleObject.getName() + "' has non-positive integer count for component '" + needName + "'. It will be skipped.");
+							continue;
+						}
+						if (count != intCount) {
+							System.out.println("Warning: Bundle '" + bundleObject.getName() + "' has a fractional count for component '" + needName + "'. The fractional part will be ignored.");
+						}
+						bundleObject.add(component, intCount);
+					} else {
+						System.out.println("Error: Component '" + needName + "' for bundle '" + bundleObject.getName() + "' not found in catalog. It will be skipped.");
 					}
-
 				}
 			}
 
@@ -226,7 +224,7 @@ public class NeedsRepository extends Observable {
 		// Write to file (this will append, so clear file first if needed)
 		manager.writeData("needs.csv", csvLines);
 		setChanged();
-		notifyObservers();
+		notifyObservers("Needs catalog saved to needs.csv");
 	}
 
 

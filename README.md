@@ -26,32 +26,28 @@ An online application to be developed in Java 11=>**17** for the purpose of...  
 - Java **17=>21**
 - VSCode IDE - as developer platform
 - Maven
-- Chocolatey
+- Chocolately
 
 ## Instructions
-Details on how to run our project are provided by the team in the **doc/SETUP.md** and updated to each major release.
+Details on how to run our project are provided by the team in the **doc/SETUP.md** file prior to each major release. 
 
-## Fund Good Deeds
+## Disclaimers
 
-### Design Choice
-- Users will NOT be able to have fractional values for bundle component quantities such as (Monthly Rent, 2.5) as a team we agreed this doesn't make any sense for the system to process but a logical error on the user. If the cost is 2.5x for your "Monthly Rent", that should be reflected in the price not the quantities. If you pay for two people and a dog then the acceptable values are whole, positive integer values. Example: (Monthly Rent, 2) with the dog fee listed a fee. 
+*   **Integer-Only Bundle Quantities:** When creating or editing a bundle, component quantities must be whole numbers (e.g., 1, 2, 3). While the system stores these as floating-point numbers (e.g., 1.0) in `needs.csv` per file format requirements, any fractional parts entered by the user (e.g., 1.5) will be ignored. This is a design choice to ensure that partial fulfillments are handled through cost adjustments in the basic need itself, not through fractional quantities in a bundle.
+*   **Case-Insensitive Naming:** Need and bundle names are treated as case-insensitive (e.g., 'Phone Plan' is the same as 'phone plan'). You cannot create two items that differ only by capitalization.
+*   **Observer Alerts in Console:** When data is saved or loaded, an `[ALERT]` message is printed to the console. This is a feature of the Observer pattern implementation to confirm that data models have been updated and is not an error message.
 
-### Disclaimers
-- When you do donation/fulfillment, there isn't any error checking for an existing need/bundle. Please use existing needs/bundles only.
-- "If no funding goal has ever been set, the system will use a default goal of $200.00, not the documented default of $2000.00."
-- The application expects the ledger file name as a command-line argument (java FundGoodDeedsApp.java <ledger-csv-file>). The requirements, however, mandate a specific file name: log.csv
-- "This application requires the path to your ledger file as a startup argument. It does not automatically use log.csv. Furthermore, when saving, the application writes ledger data to ledger-new.csv, not the original file, so your changes will not be loaded next time."
-- The application currently does not load any existing data from the ledger file (log.csv). All previous entries will be ignored at startup, and saving will overwrite them.
+## Limitations
 
-### Shortcomings
-- When a new donation is entered, there is no functionality to delete needs from inventory. Although, each donation is tracked in the ledger and can be exported on exit.
-- The available funds and and goal are not tracked, nor visible on the front-end CLI.
-- The requirements specify a default funding goal of 2000.0. Your LedgerRepository class has a DEFAULT_GOAL constant, but it is not used in the getGoalForDate method, which instead returns a hardcoded value of 200.0 from the old findGoal method.
-- The loadLog() method in LedgerRepository is almost empty. It reads the CSV data but never processes it or adds it to the logEntries list. As a result, any previously saved ledger entries are ignored when the application starts
-- The saveLogEntries method in LedgerRepository writes to a new file named ledger-new.csv instead of overwriting the original ledger file. This means user changes are not persisted in the correct file.
-- 
-### Known Bugs 
-- When entering the date for donations (dd) if dd is 1 instead of 01, the code breaks and exits the program.
+*   **No Spending Visualization:** The application does not currently implement the daily spending visualization feature mentioned in the overview ("...generate visualizations showing the distribution of spending across fixed costs, variable costs, and fees."). While all the necessary data is being calculated and stored, there is no menu option to display this breakdown.
+*   **No "On Track" Goal Indicator:** The overview mentions, "The program should indicate whether the user is on track to meet their goal...". While the main menu now helpfully displays `Today's Goal: $Current/$Target`, it does not explicitly state if the user is "on track," "underfunded," or has a "surplus."
+*   **No Editing or Deleting:** The application's interface supports adding new needs, bundles, and ledger entries. However, there is no functionality to edit or delete existing items. To remove an item, the user must manually edit the `needs.csv` or `log.csv` files.
+
+## Known Issues and Edge Cases
+
+*   **Bundle Definition Order on Save:** The `saveNeedsCatalog` method writes items to `needs.csv` in the order they exist in memory. If the application were ever modified to allow reordering of needs/bundles, it could potentially save a parent bundle before a sub-bundle, violating the "no forward reference" rule for the CSV file. The current implementation is safe, but this is a point of fragility.
+*   **Error Handling for Malformed CSVs:** The application's CSV parsing logic assumes the CSV files are well-formed. If a user manually edits `log.csv` or `needs.csv` and enters non-numeric text in a cost or count field (e.g., `2025,11,05,f,abc`), the application will crash on startup with a `NumberFormatException`.
+*   **Performance with Very Large Files:** The application loads the entire `needs.csv` and `log.csv` into memory at startup. If these files were to grow extremely large (e.g., hundreds of thousands of entries), the application could experience slow startup times and high memory consumption.
 
 ## License
 MIT License

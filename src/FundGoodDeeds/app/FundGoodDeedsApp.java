@@ -22,23 +22,16 @@ public class FundGoodDeedsApp {
     public static void main(String[] args) throws FileNotFoundException{
         //1. Model 
         //Instantiate csv manager
-        if (args.length < 1) {
-            System.out.println("Usage: java FundGoodDeedsApp.java <ledger-csv-file>");
-            return;
-        }
-        else if (args.length > 1) {
-            System.out.println("Warning: Extra arguments will be ignored.");
-            return;
-        }
 
-        // Read arguments
-        String ledgerCSV = args[0];
+        // Per requirements, the ledger file is named "log.csv"
+        String ledgerCSV = "log.csv";
         CSVManager csvManager = new CSVManager(ledgerCSV);
 
         //Instantiate Repositories and inject CSVManager
         
         NeedsRepository needsRepo = new NeedsRepository(csvManager);
-        LedgerRepository ledgerRepo = new LedgerRepository(csvManager);
+        // Inject NeedsRepository into LedgerRepository
+        LedgerRepository ledgerRepo = new LedgerRepository(csvManager, needsRepo);
         
         // 2. Controller  
         //Instantiate Controllers, inject Repositories (Model)
@@ -64,4 +57,3 @@ public class FundGoodDeedsApp {
 
     }
 }
-

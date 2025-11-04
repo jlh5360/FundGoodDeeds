@@ -22,7 +22,7 @@ public class LedgerController {
     //Dependency Injection via constructor
     public LedgerController(LedgerRepository ledgerRepository, NeedsRepository needsRepository) {
         this.ledgerRepository = ledgerRepository;
-        this.needsRepository = needsRepository;
+        this.needsRepository = needsRepository; // This is still needed for other methods like recordFulfillment
         
     }
 
@@ -42,8 +42,12 @@ public class LedgerController {
     // }
 
     //Triggers the model to save ledger data.
-    public void saveLog(LedgerEntity entry) {
-        ledgerRepository.save(entry);
+    public void saveLog() {
+        try {
+            ledgerRepository.saveLogEntries();
+        } catch (Exception e) {
+            throw new RuntimeException("Save failed: " + e.getMessage(), e);
+        }
     }
 
     //Retrieves the daily funding goal for the specified date.
@@ -56,6 +60,11 @@ public class LedgerController {
     //Retrieves the active funding goal for a specific date, applying fallback logic.
     public double getGoal(LocalDate date) {
         return ledgerRepository.getGoalForDate(date);
+    }
+    
+    //Expose the getFundsForDate method to the view
+    public double getFunds(LocalDate date) {
+        return ledgerRepository.getFundsForDate(date);
     }
     
     //Retrieves the total donations/fulfillment value for the specified date.
@@ -80,7 +89,7 @@ public class LedgerController {
         
         double totalCost = (need.getTotal() * quantity);
         
-        LedgerEntity entry = new LedgerEntity(date, LedgerEntity.EntryType.NEED, needName, (int) quantity);
+        LedgerEntity entry = new LedgerEntity(date, LedgerEntity.EntryType.NEED, needName, quantity);
         
         ledgerRepository.save(entry);
     }
@@ -109,7 +118,7 @@ public class LedgerController {
             throw new IllegalArgumentException("Goal cannot be negative.");
         }
 
-        LedgerEntity entry = new LedgerEntity(date, LedgerEntity.EntryType.GOAL, (int) goal);
+        LedgerEntity entry = new LedgerEntity(date, LedgerEntity.EntryType.GOAL, goal);
         ledgerRepository.save(entry);
     }
 
@@ -127,7 +136,7 @@ public class LedgerController {
             throw new IllegalArgumentException("Quantity must be > 0.");
         }
 
-        LedgerEntity entry = new LedgerEntity(date, LedgerEntity.EntryType.NEED, needOrBundleName, (int) quantity);
+        LedgerEntity entry = new LedgerEntity(date, LedgerEntity.EntryType.NEED, needOrBundleName, quantity);
         ledgerRepository.save(entry);
     }
 

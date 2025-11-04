@@ -7,7 +7,7 @@ public class LedgerEntity implements AbstractLedgerEntry {
 	private final EntryType type;
 	private final String needName;
 	private final double amount;
-	private final int count;
+	private final double count;
 
 	//Constructor for FUND/GOAL entries
 	public LedgerEntity(LocalDate date, EntryType type, double amount) {
@@ -19,7 +19,7 @@ public class LedgerEntity implements AbstractLedgerEntry {
 	}
 
 	//Contructor for NEED fulfillment entries
-	public LedgerEntity(LocalDate date, EntryType type, String needName, int count) {
+	public LedgerEntity(LocalDate date, EntryType type, String needName, double count) {
 		this.date = date;
 		this.type = type;
 		this.needName = needName;
@@ -45,7 +45,7 @@ public class LedgerEntity implements AbstractLedgerEntry {
 		return date;
 	}
 	
-	public int getCount() {
+	public double getCount() {
 		return count;
 	}
 }

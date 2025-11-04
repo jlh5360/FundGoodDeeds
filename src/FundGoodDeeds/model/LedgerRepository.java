@@ -11,12 +11,16 @@ import java.util.Optional;
 public class LedgerRepository extends Observable {
 	private final List<LedgerEntity> logEntries = new ArrayList<>();
 	public CSVManager manager;
+	private final NeedsRepository needsRepository; // Dependency for cost lookups
 
 	private static final double DEFAULT_GOAL = 2000.0;
+	private static final double DEFAULT_FUNDS = 150.0;
 
-	public LedgerRepository(CSVManager manager)
+	// Updated constructor to accept NeedsRepository
+	public LedgerRepository(CSVManager manager, NeedsRepository needsRepository)
 	{
 		this.manager = manager;
+		this.needsRepository = needsRepository;
 	}
 
 	public void loadLog()
@@ -28,22 +32,25 @@ public class LedgerRepository extends Observable {
 			int year = Integer.parseInt(raw[0]);
 			int month = Integer.parseInt(raw[1]);
 			int day = Integer.parseInt(raw[2]);
-			LedgerEntity entity;
+			LedgerEntity entity; // Declare entity once
 
 			LocalDate entityDate = LocalDate.of(year,month,day);
 			switch(raw[3])
 			{
 				
 				case "n":
-					entity = new LedgerEntity(entityDate, LedgerEntity.EntryType.NEED,raw[4] ,Integer.parseInt(raw[5]));
+					entity = new LedgerEntity(entityDate, LedgerEntity.EntryType.NEED,raw[4] ,Double.parseDouble(raw[5]));
+					entries.add(entity);
 				break;
 
 				case "f":
 					entity = new LedgerEntity(entityDate, LedgerEntity.EntryType.FUND, Double.parseDouble(raw[4]));
+					entries.add(entity);
 				break;
 					
 				case "g":
 					entity = new LedgerEntity(entityDate, LedgerEntity.EntryType.GOAL, Double.parseDouble(raw[4]));
+					entries.add(entity);
 				default:
 
 				break;
@@ -74,75 +81,33 @@ public class LedgerRepository extends Observable {
 	}
 
 	public String getSummary() {
-		//Logic to calculate summary
-		double availableFunds = 0;
-		if(!logEntries.isEmpty())
-		{
-			for(LedgerEntity entity : logEntries)
-			{
-				if(entity.getType() == LedgerEntity.EntryType.FUND)
-				{
-					availableFunds = entity.getAmount();
-					break;
-				}
-			}
-		}
-
-		// In case there was no entry
-
-		if(!(availableFunds > 0))
-		{
-			List<String> rawData = manager.readData("log_test.csv");
-
-			// Placeholder to compare against
-
-			LocalDate previousDate = LocalDate.MIN;
-			double funds = 0;
-
-			// Gets the most recent funding entry
-
-			for(String dataString : rawData)
-			{
-				String[] splittedString = dataString.split(",");
-				if(splittedString[3].equals("f"))
-				{
-					// Converting the raw data
-
-					int year = Integer.parseInt(splittedString[0]);
-					int month = Integer.parseInt(splittedString[1]);
-					int day = Integer.parseInt(splittedString[2]);
-
-					LocalDate currentIndexDate = LocalDate.of(year,month,day);
-
-					if(currentIndexDate.isAfter(previousDate))
-					{
-						previousDate = currentIndexDate;
-						funds = Double.parseDouble(splittedString[3]);
-					}
-				}
-			}
-
-
-			availableFunds = funds;
-		}
-
+		// This method should provide a summary for the current day.
+		// It now correctly uses the getFundsForDate logic.
+		LocalDate today = LocalDate.now();
+		double availableFunds = getFundsForDate(today);
 		return "Daily Summary: " + availableFunds + " funding available.";
 	}
 
 	public double findGoal(LocalDate todaysDate) {
-		//Logic to find the current goal for the date
-
-		//I'll retrieve all the goals that have been entered and compare them to today's date to find today's goal
-		
-		return 200.00;
+		return getGoalForDate(todaysDate);
 	}
 
 	public double calculateDonations(LocalDate todaysDate) {
-		//Logic to aggregate donations for the date
-
-		// Almost the same logic as findGoal
-
-		return 50.00;
+		// Sum the total value of all NEED entries for the given date.
+		return logEntries.stream()
+			.filter(entry -> entry.getType() == LedgerEntity.EntryType.NEED && entry.getDate().equals(todaysDate))
+			.mapToDouble(entry -> {
+				NeedComponent component = needsRepository.getNeedByName(entry.getNeedName());
+				if (component != null) {
+					// Total cost for this entry is the component's total cost * quantity fulfilled
+					return component.getTotal() * entry.getCount();
+				} else {
+					// If need/bundle not found, it contributes 0 to the total.
+					// A warning could be logged here.
+					System.out.println("[Warning] Could not find need/bundle '" + entry.getNeedName() + "' in catalog for donation calculation.");
+					return 0.0;
+				}
+			}).sum();
 	}
 
 	public void addDonations(double donation1, double donation2) {
@@ -185,7 +150,7 @@ public class LedgerRepository extends Observable {
 					
 				case NEED:
 					
-					line = String.format("%d,%d,%d,n,%s,%d",
+					line = String.format("%d,%d,%d,n,%s,%.1f",
 						year, month, day, entry.getNeedName(), entry.getCount());
 					break;
 					
@@ -197,9 +162,9 @@ public class LedgerRepository extends Observable {
 		}
 		
 		// Write to file
-		manager.writeData("ledger-new.csv", csvLines);
+		manager.writeData(manager.ledgerCSV, csvLines);
 		setChanged();
-		notifyObservers();
+		notifyObservers("Ledger saved to " + manager.ledgerCSV);
 	}
 
 	//THIS NEEDS WORK ESPECIALLY CHECKING WITH THE FILE AND MEMORY
@@ -217,17 +182,55 @@ public class LedgerRepository extends Observable {
 	public double getGoalForDate(LocalDate date) {
         //Fix for "effectively final" error: Use a new variable for stream logic
         LocalDate finalDate = (date == null) ? LocalDate.now() : date;
-
-        //1. & 2. Find the most recent GOAL entry on or before the given date.
-        Optional<LedgerEntity> mostRecentGoal = logEntries.stream()
+		
+		// 1. Find the last entry for the exact date.
+        Optional<LedgerEntity> entryForDate = logEntries.stream()
             .filter(entry -> entry.getType() == LedgerEntity.EntryType.GOAL)
-            //Use finalDate which is effectively final
-            .filter(entry -> !entry.getDate().isAfter(finalDate)) 
-            .max(Comparator.comparing(LedgerEntity::getDate)); 
-        
-        //3. Return the goal amount or the default value
-        return mostRecentGoal.isPresent() 
-            ? mostRecentGoal.get().getAmount() 
-            : DEFAULT_GOAL;
+            .filter(entry -> entry.getDate().equals(finalDate))
+            .reduce((first, second) -> second); // Get the last element
+
+        if (entryForDate.isPresent()) {
+            return entryForDate.get().getAmount();
+        }
+
+        // 2. If no entry for the exact date, find the most recent one before it.
+        return logEntries.stream()
+            .filter(entry -> entry.getType() == LedgerEntity.EntryType.GOAL)
+            .filter(entry -> entry.getDate().isBefore(finalDate))
+            .max(Comparator.comparing(LedgerEntity::getDate))
+            .map(LedgerEntity::getAmount)
+            .orElse(DEFAULT_GOAL); // 3. Fallback to default
     }
+
+	/**
+     * Finds the active available funds for the given date.
+     * The logic follows these rules:
+     *     1. If funds exist for the exact date, use that value.
+     *     2. If no funds for the exact date, use the funds from the most recent
+     *        entry that is on or before the given date.
+     *     3. If funds were never entered, the system default is 150.0.
+     * @param date The date for which to find the active funds.
+     * @return The active available funds amount.
+     */
+	public double getFundsForDate(LocalDate date) {
+		LocalDate finalDate = (date == null) ? LocalDate.now() : date;
+
+		// 1. Find the last entry for the exact date.
+		Optional<LedgerEntity> entryForDate = logEntries.stream()
+			.filter(entry -> entry.getType() == LedgerEntity.EntryType.FUND)
+			.filter(entry -> entry.getDate().equals(finalDate))
+			.reduce((first, second) -> second); // Get the last element
+
+		if (entryForDate.isPresent()) {
+			return entryForDate.get().getAmount();
+		}
+
+		// 2. If no entry for the exact date, find the most recent one before it.
+		return logEntries.stream()
+			.filter(entry -> entry.getType() == LedgerEntity.EntryType.FUND)
+			.filter(entry -> entry.getDate().isBefore(finalDate))
+			.max(Comparator.comparing(LedgerEntity::getDate))
+			.map(LedgerEntity::getAmount)
+			.orElse(DEFAULT_FUNDS); // 3. Fallback to default
+	}
 }
