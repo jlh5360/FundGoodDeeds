@@ -12,15 +12,18 @@ import java.util.List;
 
 public class CSVManager 
 {
-    private final String absoluteDataPath = "term-project-rit-swen-383-01-1a/src/data/";
+    // starting from "src/"
+    private final String absoluteDataPath = "src/FundGoodDeeds/data/";
+    public String ledgerCSV;
     
-    public CSVManager() throws FileNotFoundException
+    public CSVManager(String ledgerCSVFile) throws FileNotFoundException
     {
         Path path = Path.of(absoluteDataPath);
         if(!Files.exists(path))
         {   
             throw new FileNotFoundException(absoluteDataPath + " does not exist!");
         }
+        this.ledgerCSV = ledgerCSVFile;
     }
 
     public List<String> readData(String csvPath)
@@ -41,7 +44,7 @@ public class CSVManager
 
             // Skips the header
 
-            header = reader.readLine();
+            // header = reader.readLine();
 
             while(reader.ready())
             {
@@ -70,7 +73,7 @@ public class CSVManager
 
         // Appends to a file using a encapsulating class
         
-        FileWriter writer = new FileWriter(csvPath,true);
+        FileWriter writer = new FileWriter(this.absoluteDataPath + csvPath,false);
 
         // Buffered writer for increased performance
 

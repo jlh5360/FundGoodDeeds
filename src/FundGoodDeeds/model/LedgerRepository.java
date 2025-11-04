@@ -3,13 +3,16 @@ package FundGoodDeeds.model;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Observable;
+import java.util.Optional;
 
 public class LedgerRepository extends Observable {
-
 	private final List<LedgerEntity> logEntries = new ArrayList<>();
 	public CSVManager manager;
+
+	private static final double DEFAULT_GOAL = 2000.0;
 
 	public LedgerRepository(CSVManager manager)
 	{
@@ -60,7 +63,7 @@ public class LedgerRepository extends Observable {
 	{
 		List<String[]> rawData = new ArrayList<>();
 
-		List<String> csvData = manager.readData("log.csv");
+		List<String> csvData = manager.readData(manager.ledgerCSV);
 		for(String data : csvData)
 		{
 			rawData.add(data.split(","));
@@ -149,4 +152,82 @@ public class LedgerRepository extends Observable {
 		this.logEntries.add(new LedgerEntity(today, LedgerEntity.EntryType.FUND, donation2));
 		setChanged();
 	}
+
+	// Writes all log entries back to the CSV file.
+	public void saveLogEntries() throws IOException
+	{
+		List<String> csvLines = new ArrayList<>();
+		
+		
+		
+		for(LedgerEntity entry : logEntries)
+		{
+			LocalDate date = entry.getDate();
+			int year = date.getYear();
+			int month = date.getMonthValue();
+			int day = date.getDayOfMonth();
+			
+			String line;
+			
+			switch(entry.getType())
+			{
+				case FUND:
+					
+					line = String.format("%d,%d,%d,f,%.1f",
+						year, month, day, entry.getAmount());
+					break;
+					
+				case GOAL:
+					
+					line = String.format("%d,%d,%d,g,%.1f",
+						year, month, day, entry.getAmount());
+					break;
+					
+				case NEED:
+					
+					line = String.format("%d,%d,%d,n,%s,%d",
+						year, month, day, entry.getNeedName(), entry.getCount());
+					break;
+					
+				default:
+					continue; 
+			}
+			
+			csvLines.add(line);
+		}
+		
+		// Write to file
+		manager.writeData("ledger-new.csv", csvLines);
+		setChanged();
+		notifyObservers();
+	}
+
+	//THIS NEEDS WORK ESPECIALLY CHECKING WITH THE FILE AND MEMORY
+
+	/**
+     * Finds the active funding goal for the given date.
+     * The logic follows these rules:
+     *     1. If a goal exists for the exact date, use that value.
+     *     2. If no goal for the exact date, use the goal from the most recent 
+     *        funding goal entry that is on or before the given date.
+     *     3. If a funding goal was never entered, the system default is 2000.0.
+     * * @param date The date for which to find the active goal.
+     * @return The active funding goal amount.
+     */
+	public double getGoalForDate(LocalDate date) {
+        //Fix for "effectively final" error: Use a new variable for stream logic
+        LocalDate finalDate = (date == null) ? LocalDate.now() : date;
+
+        //1. & 2. Find the most recent GOAL entry on or before the given date.
+        Optional<LedgerEntity> mostRecentGoal = logEntries.stream()
+            .filter(entry -> entry.getType() == LedgerEntity.EntryType.GOAL)
+            //Use finalDate which is effectively final
+            .filter(entry -> !entry.getDate().isAfter(finalDate)) 
+            .max(Comparator.comparing(LedgerEntity::getDate)); 
+        
+        //3. Return the goal amount or the default value
+        return mostRecentGoal.isPresent() 
+            ? mostRecentGoal.get().getAmount() 
+            : DEFAULT_GOAL;
+    }
 }
