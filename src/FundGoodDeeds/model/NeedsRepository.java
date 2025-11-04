@@ -10,6 +10,7 @@ import java.util.stream.Collectors;
 public class NeedsRepository extends Observable {
 	private final List<NeedComponent> needsCatalog = new ArrayList<>();
 	private final CSVManager manager;
+	
 
 	public NeedsRepository(CSVManager manager)
 	{
