@@ -29,7 +29,7 @@ public class NeedsController {
 	//     -  NeedsController is implied between ConsoleUI and NeedsRepository
     public void loadData() {
         //Delegate data loading to the repository
-        needsRepository.getNeedsFromCSV();
+        needsRepository.loadNeeds();
     }
     // ***Future feature marked for refactoring***
     //Triggers the model to save all need and bundle data.
@@ -74,5 +74,17 @@ public class NeedsController {
     //Retrieves the entire catalog of Needs and Bundles.
     public List<NeedComponent> getNeedsCatalog() {
         return needsRepository.getNeedsCatalog();
+    }
+
+    public void saveNeeds() {
+        try {
+            this.needsRepository.saveNeedsCatalog();
+        } catch (Exception e) {
+            throw new RuntimeException("Save failed: " + e.getMessage(), e);
+        }
+    }
+
+    public NeedComponent getNeedByName(String name) {
+        return needsRepository.getNeedByName(name);
     }
 }

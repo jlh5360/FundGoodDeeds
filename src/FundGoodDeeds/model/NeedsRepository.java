@@ -3,6 +3,7 @@ package FundGoodDeeds.model;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Observable;
 
 public class NeedsRepository extends Observable {
@@ -10,6 +11,7 @@ public class NeedsRepository extends Observable {
 	private final List<NeedComponent> needsCatalog = new ArrayList<>();
 
 	private final CSVManager manager;
+	
 
 	public NeedsRepository(CSVManager manager)
 	{
@@ -159,6 +161,57 @@ public class NeedsRepository extends Observable {
 	public List<NeedComponent> getNeedsCatalog() 
 	{
 		return this.needsCatalog;
+	}
+
+	/**
+	 * Writes the entire needsCatalog back to the CSV format for csv reader.
+	 * Overwrites the existing file with current catalog data.
+	 */
+	public void saveNeedsCatalog() throws IOException
+	{
+		List<String> csvLines = new ArrayList<>();
+		
+		
+		for(NeedComponent component : needsCatalog)
+		{
+			//After testing, I think the need logic is fine (did not mess up the need data)
+			if(component instanceof Need)
+			{
+				// Format: n,name,total,fixed,variable,fees
+				Need need = (Need) component;
+				String line = String.format("n,%s,%.1f,%.1f,%.1f,%.1f",
+					need.getName(),
+					need.getTotal(),
+					need.getFixed(),
+					need.getVariable(),
+					need.getFees()
+				);
+				csvLines.add(line);
+			}
+			//After testing, it messes up the order and even deletes some bundle data
+			else if(component instanceof Bundle)
+			{
+				// Format: b,name,n1name,n1count,n2name,n2count,...
+				Bundle bundle = (Bundle) component;
+				StringBuilder line = new StringBuilder("b," + bundle.getName());
+				
+				Map<NeedComponent, Integer> componentCounts = bundle.getComponentsAndCounts();
+				
+				for(Map.Entry<NeedComponent, Integer> entry : componentCounts.entrySet())
+				{
+					String needName = entry.getKey().getName();
+					double count = entry.getValue();
+					line.append(",").append(needName).append(",").append(count);
+				}
+				
+				csvLines.add(line.toString());
+			}
+		}
+		
+		// Write to file (this will append, so clear file first if needed)
+		manager.writeData("needs.csv", csvLines);
+		setChanged();
+		notifyObservers();
 	}
 
 
