@@ -14,3 +14,5 @@ b,Home Utilities,Electric Bill,1.0,Water Bill,1.0,Internet Service,1.0
 b,Communication Plan,Phone Plan,1.0,Internet Service,1.0
 b,Living Essentials,Monthly Rent,1.0,Grocery Budget,1.0,Water Bill,1.0,Electric Bill,1.0
 b,Complete Lifestyle Bundle,Living Essentials,1.0,Grocery Budget,4.0,Fitness Package,1.0,Communication Plan,1.0,Streaming Subscription,1.0
+n,TEST1,15.0,10.0,3.0,2.0
+b,BUNDLETEST1,Gym Membership,7.0,Electric Bill,4.0,Living Essentials,3.0,Fitness Package,1.0

@@ -28,13 +28,13 @@ public class NeedsRepository extends Observable {
 		String names = needsCatalog.stream()
 			.map(NeedComponent::getName)
 			.collect(Collectors.joining(", "));
-		System.out.println("Needs catalog after loading needs only: " + names + "\n");
+		// System.out.println("Needs catalog after loading needs only: " + names + "\n");
 		
 		convertBundlesToBundlesObject(rawBundles);
 		String bundles = needsCatalog.stream()
 			.map(NeedComponent::getName)
 			.collect(Collectors.joining(", "));
-		System.out.println("Needs catalog after loading needs only: " + bundles + "\n");
+		// System.out.println("Needs catalog after loading needs only: " + bundles + "\n");
 	}
 
 
@@ -126,7 +126,7 @@ public class NeedsRepository extends Observable {
 					String names = needsCatalog.stream()
 						.map(NeedComponent::getName)
 						.collect(Collectors.joining(", "));
-					System.out.println("Needs catalog right before name query: " + names + "\n");
+					// System.out.println("Needs catalog right before name query: " + names + "\n");
 					
 					
 					// DEBUGGING PURPOSE
