@@ -22,7 +22,7 @@ public class ConsoleView implements Observer {
 
     public ConsoleView(MasterController master) {
         this.master = master;
-        master.registerObserver(this);
+        master.registerObservers(this);
     }
 
     /** Entry point for the CLI. Assumes data is already loaded by the App. */
@@ -106,13 +106,17 @@ public class ConsoleView implements Observer {
         Day d = master.getDaySummary();
         System.out.println("\n---------------------------------------------");
         System.out.println(" Active Date: " + master.getSelectedDate());
-        System.out.println(" Snapshot Date: " + d.getDate());
+        System.out.println(" Snapshot Date: " + d.getCurrentDate());
         System.out.printf(" Funds: $%.2f | Threshold: $%.2f%n",
                 d.getFunds(), d.getThreshold());
+        // System.out.printf(" Need Costs: $%.2f | Income: $%.2f%n",
+        //         d.getTotalNeedCost(), d.getTotalIncome());
+        // System.out.printf(" Net Cost: $%.2f | Exceeded? %s%n",
+        //         d.getNetCost(), d.isThresholdExceeded() ? "YES" : "NO");
         System.out.printf(" Need Costs: $%.2f | Income: $%.2f%n",
-                d.getTotalNeedCost(), d.getTotalIncome());
+                master.getTotalNeedCost(), master.getTotalIncome());
         System.out.printf(" Net Cost: $%.2f | Exceeded? %s%n",
-                d.getNetCost(), d.isThresholdExceeded() ? "YES" : "NO");
+                master.getNetCost(), master.isThresholdExceeded() ? "YES" : "NO");
         System.out.println("---------------------------------------------");
     }
 

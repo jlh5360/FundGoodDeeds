@@ -5,6 +5,7 @@ import java.util.Map;
 import java.util.Observer;
 
 import FundGoodDeeds.model.Bundle;
+import FundGoodDeeds.model.LedgerRepository;
 import FundGoodDeeds.model.Need;
 import FundGoodDeeds.model.NeedComponent;
 import FundGoodDeeds.model.NeedsRepository;
@@ -86,5 +87,9 @@ public class NeedsController {
 
     public NeedComponent getNeedByName(String name) {
         return needsRepository.getNeedByName(name);
+    }
+
+    public NeedsRepository getNeedsRepository() {
+        return this.needsRepository;
     }
 }

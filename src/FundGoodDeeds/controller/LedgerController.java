@@ -50,6 +50,10 @@ public class LedgerController {
         }
     }
 
+    public LedgerRepository getLedgerRepository() {
+        return this.LedgerRepository;
+    }
+
     //Retrieves the daily funding goal for the specified date.
     //Note to self: This is for sequence diagram #3, step 1-5 loop
     public double getDailyGoal(LocalDate date) {
@@ -95,9 +99,9 @@ public class LedgerController {
     }
 
     //Record the available funds for a date (writes a "FUND" entry)
-    public void setFunds(java.time.LocalDate date, double amount) {
+    public void setFunds(LocalDate date, double amount) {
         if (date == null) {
-            date = java.time.LocalDate.now();
+            date = LocalDate.now();
         }
 
         if (amount < 0) {
@@ -109,9 +113,9 @@ public class LedgerController {
     }
 
     //Record the fundraising goal for a date (writes a "GOAL" entry)
-    public void setGoal(java.time.LocalDate date, double goal) {
+    public void setGoal(LocalDate date, double goal) {
         if (date == null) {
-            date = java.time.LocalDate.now();
+            date = LocalDate.now();
         }
 
         if (goal < 0) {
@@ -123,9 +127,9 @@ public class LedgerController {
     }
 
     //Record fulfillment for a specific Need/Bundle by name (writes a "NEED" entry)
-    public void addEntry(java.time.LocalDate date, String needOrBundleName, double quantity) {
+    public void addEntry(LocalDate date, String needOrBundleName, double quantity) {
         if (date == null) {
-            date = java.time.LocalDate.now();
+            date = LocalDate.now();
         }
 
         if ((needOrBundleName == null) || (needOrBundleName.isBlank())) {
@@ -140,19 +144,24 @@ public class LedgerController {
         ledgerRepository.save(entry);
     }
 
-    //Saves BOTH sides (needs + ledger). One-stop for the CLI.
-    public void saveAllData() {
-        try {
-            if (this.needsRepository != null) {
-                this.needsRepository.saveNeedsCatalog();
-            }
+    //FOR FUTURE IMPLEMENTATION
+    public void addIncomeEntry(LocalDate date, String fundingSource, double units) {
 
-            ledgerRepository.saveLogEntries();
-
-        } catch (Exception e) {
-            throw new RuntimeException("Save failed: " + e.getMessage(), e);
-        }
     }
+
+    // //Saves BOTH sides (needs + ledger). One-stop for the CLI.
+    // public void saveAllData() {
+    //     try {
+    //         if (this.needsRepository != null) {
+    //             this.needsRepository.saveNeedsCatalog();
+    //         }
+
+    //         ledgerRepository.saveLogEntries();
+
+    //     } catch (Exception e) {
+    //         throw new RuntimeException("Save failed: " + e.getMessage(), e);
+    //     }
+    // }
 
     public void loadData() {
         ledgerRepository.loadLog();

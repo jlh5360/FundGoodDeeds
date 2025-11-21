@@ -19,7 +19,7 @@ public class FundGoodDeedsApp {
 
         NeedsRepository needsRepo = new NeedsRepository(csvManager);
         LedgerRepository ledgerRepo = new LedgerRepository(csvManager, needsRepo);
-        FundingRepository fundingRepo = new FundingRepository();
+        FundingRepository fundingRepo = new FundingRepository(csvManager);
 
         // -----------------------------
         // 2) CONTROLLERS
@@ -29,9 +29,6 @@ public class FundGoodDeedsApp {
         FundingController fundingCtrl = new FundingController(fundingRepo);
 
         MasterController master = new MasterController(
-                needsRepo,
-                ledgerRepo,
-                fundingRepo,
                 needsCtrl,
                 ledgerCtrl,
                 fundingCtrl
@@ -45,7 +42,7 @@ public class FundGoodDeedsApp {
         if (useSwing) {
 
             SwingUIView ui = new SwingUIView(master);
-            master.registerObserver(ui);
+            master.registerObservers(ui);
 
             master.loadAll();
             ui.start();
@@ -53,7 +50,7 @@ public class FundGoodDeedsApp {
         } else {
 
             ConsoleView ui = new ConsoleView(master);
-            master.registerObserver(ui);
+            master.registerObservers(ui);
 
             master.loadAll();
             ui.startup();
