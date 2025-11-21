@@ -227,5 +227,13 @@ public class NeedsRepository extends Observable {
 		notifyObservers("Needs catalog saved to needs.csv");
 	}
 
+	public double getTotalNeedsCost() {
+		double totalCost = 0.0;
+		for (NeedComponent component : needsCatalog) {
+			totalCost += component.getTotal();
+		}
+		return totalCost;
+	}
+
 
 }

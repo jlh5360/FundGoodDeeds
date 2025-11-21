@@ -233,4 +233,10 @@ public class LedgerRepository extends Observable {
 			.map(LedgerEntity::getAmount)
 			.orElse(DEFAULT_FUNDS); // 3. Fallback to default
 	}
+
+	public Day buildDay(LocalDate date) {
+		double goal = getGoalForDate(date);
+		double funds = getFundsForDate(date);
+		return new Day(date.getYear(), date.getMonthValue(), date.getDayOfMonth(), goal, funds);
+	}
 }
