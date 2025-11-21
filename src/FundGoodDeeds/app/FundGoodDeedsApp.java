@@ -1,59 +1,63 @@
-/**
- * The main entry point for the FundGoodDeeds App.
- * Acts as the Composition Root, setting up the MVC and injecting dependencies.
- * Connor Bashaw - FundGoodDeedsApp.java
- */
-
-
 package FundGoodDeeds.app;
 
 import java.io.FileNotFoundException;
 
-import FundGoodDeeds.controller.LedgerController;
-import FundGoodDeeds.controller.NeedsController;
-import FundGoodDeeds.model.CSVManager;
-import FundGoodDeeds.model.LedgerRepository;
-import FundGoodDeeds.model.NeedsRepository;
-import FundGoodDeeds.view.ConsoleView;
-
-
+import FundGoodDeeds.controller.*;
+import FundGoodDeeds.model.*;
+import FundGoodDeeds.view.*;
 
 public class FundGoodDeedsApp {
-    public static void main(String[] args) throws FileNotFoundException{
-        //1. Model 
-        //Instantiate csv manager
 
-        // Per requirements, the ledger file is named "log.csv"
-        String ledgerCSV = "log.csv";
-        CSVManager csvManager = new CSVManager(ledgerCSV);
+    public static void main(String[] args) throws FileNotFoundException {
 
-        //Instantiate Repositories and inject CSVManager
-        
+        System.out.println("Starting FundGoodDeeds...\n");
+
+        // -----------------------------
+        // 1) MODEL
+        // -----------------------------
+        CSVManager csvManager = new CSVManager("log.csv");
+
         NeedsRepository needsRepo = new NeedsRepository(csvManager);
-        // Inject NeedsRepository into LedgerRepository
         LedgerRepository ledgerRepo = new LedgerRepository(csvManager, needsRepo);
-        
-        // 2. Controller  
-        //Instantiate Controllers, inject Repositories (Model)
-        NeedsController needs=new NeedsController(needsRepo);
-        LedgerController ledger=new LedgerController(ledgerRepo ,needsRepo);
+        FundingRepository fundingRepo = new FundingRepository();
 
-        
-        //3. VIEW IMPORTANT TO CONNOR WORK
-        //Instantiate View and inject Controllers into View (View knows Controller controller knows repo)
-        ConsoleView view=new ConsoleView(needs, ledger);
+        // -----------------------------
+        // 2) CONTROLLERS
+        // -----------------------------
+        NeedsController needsCtrl = new NeedsController(needsRepo);
+        LedgerController ledgerCtrl = new LedgerController(ledgerRepo, needsRepo);
+        FundingController fundingCtrl = new FundingController(fundingRepo);
 
-        // Register view as observer 
-        needs.addObserver(view);
-        ledger.addObserver(view);
-        
+        MasterController master = new MasterController(
+                needsRepo,
+                ledgerRepo,
+                fundingRepo,
+                needsCtrl,
+                ledgerCtrl,
+                fundingCtrl
+        );
 
-        //4.STARTUP
-        //Initialize the application via the View/Controller
-        //(Sequence Diagram #1: ConsoleView -> startup() initiates the load)
-        
-        System.out.println("Starting app...\n");
-        view.startup();
+        // -----------------------------
+        // 3) VIEW
+        // -----------------------------
+        boolean useSwing = args.length > 0 && args[0].equalsIgnoreCase("swing");
 
+        if (useSwing) {
+
+            SwingUIView ui = new SwingUIView(master);
+            master.registerObserver(ui);
+
+            master.loadAll();
+            ui.start();
+
+        } else {
+
+            ConsoleView ui = new ConsoleView(master);
+            master.registerObserver(ui);
+
+            master.loadAll();
+            ui.startup();
+            master.saveAll();
+        }
     }
 }

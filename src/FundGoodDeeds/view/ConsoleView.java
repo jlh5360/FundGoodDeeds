@@ -1,350 +1,292 @@
-/**
- * CLI "front-end" per R1 spec.
- * - Thin and delegates all work to controllers
- * - No direct file IO
- *
- * Assumed controller APIs (tweak names if needed):
- *  NeedsController:
- *    void loadData();                // load needs.csv
- *    void loadData();                // save needs.csv
- *    List<NeedComponent> getNeedsCatalog();
- * 
- *    void addNeed(String name, double total, double fixed, double variable, double fees);
- *    void addBundle(String bundleName, Map<String, Double> partToQty);
- *
- *  LedgerController:
- *    NEEDED void loadLog();                  // load log.csv
- *    NEEDED void saveLog();                  // save log.csv
- *    NEEDED void setFunds(LocalDate date, double amount); // "f" line
- * 
- *    void setGoal(LocalDate date, double goal);    // "g" line
- *    void addEntry(LocalDate date, String name, double count); // "n" line (need or bundle)
- * Connor Bashaw - ConsoleView.java
- */
-
-
-
 package FundGoodDeeds.view;
 
-import FundGoodDeeds.controller.NeedsController;
-import FundGoodDeeds.controller.LedgerController;
-import FundGoodDeeds.model.Bundle;
-import FundGoodDeeds.model.LedgerEntity;
+import FundGoodDeeds.controller.MasterController;
+import FundGoodDeeds.model.Day;
 import FundGoodDeeds.model.NeedComponent;
-import FundGoodDeeds.model.*;
+
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
-import java.time.format.DateTimeParseException;
 import java.util.*;
 
-
+/**
+ * ConsoleView (V2)
+ * - Uses MasterController as the single entry point to the app
+ * - Supports Needs/Bundles, Funding Sources, Ledger, Thresholds, and Date selection
+ * - Keeps all persistence and business logic in controllers/repositories
+ */
 public class ConsoleView implements Observer {
 
-    private final NeedsController needs;
-    private final LedgerController ledger;
-
+    private final MasterController master;
     private final Scanner in = new Scanner(System.in);
     private final DateTimeFormatter YMD = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
-    public ConsoleView(NeedsController needs, LedgerController ledger) {
-        this.needs = needs;
-        this.ledger = ledger;
-
-        needs.addObserver(this);
-        ledger.addObserver(this);
+    public ConsoleView(MasterController master) {
+        this.master = master;
+        master.registerObserver(this);
     }
 
-    /** Start the loop. Safe to run with empty CSVs. */
+    /** Entry point for the CLI. Assumes data is already loaded by the App. */
     public void startup() {
-        // Initial loads (no dupes recomended)
-        System.out.println("Loading data from needs ...\n");
-        safe(() -> needs.loadData(), "Loading needs");
-        System.out.println("Loading data from ledger ...\n");
-        safe(() -> ledger.loadData(),  "Loading ledger");
+        System.out.println("=== FundGoodDeeds CLI (V2) ===");
 
-        System.out.println("=== FundGoodDeeds CLI (V1.0) ===");
         boolean run = true;
         while (run) {
-            System.out.println();
-            System.out.println("Catalog");
-            System.out.println(" 1) List needs & bundles");
-            System.out.println(" 2) Add Need (leaf)");
-            System.out.println(" 3) Add Bundle (composite)");
-            System.out.println();
-            System.out.println("Ledger");
-            System.out.println(" 4) Add donation/fulfillment");
-            System.out.println(" 5) Set funds for date");
-            System.out.println(" 6) Set goal for date");
-            // System.out.println(" 8) Display goal status");
-            System.out.println();
-            System.out.println("Data");
-            System.out.println(" 7) Reload CSVs (needs/log)");
-            System.out.println(" 8) Save CSVs   (needs/log)");
-            // System.out.println(" 9) Reload CSVs (needs/log)");
-            // System.out.println(" 10) Save CSVs   (needs/log)");
-            System.out.println();
-            System.out.println(" 0) Exit");
 
-            // Display current funds and goal directly on the screen
-            LocalDate today = LocalDate.now();
-            double funds = ledger.getFunds(today);
-            double goal = ledger.getGoal(today);
-            double donations = ledger.getTodayDonations(today); // Get today's donations
-            System.out.printf("Current Funds: $%.2f | Today's Goal: $%.2f/$%.2f%n", funds, donations, goal);
-            System.out.println(); // Add a blank line for separation
+            printSummaryHeader();
 
-            System.out.print("Select: ");
+            System.out.println("\nCatalog");
+            System.out.println(" 1) List Needs");
+            System.out.println(" 2) Add Need");
+            System.out.println(" 3) Add Bundle");
+
+            System.out.println("\nFunding Sources");
+            System.out.println(" 4) List Funding Sources");
+            System.out.println(" 5) Add Funding Source");
+            System.out.println(" 6) Edit Funding Source");
+            System.out.println(" 7) Delete Funding Source");
+
+            System.out.println("\nLedger");
+            System.out.println(" 8) Add Need Fulfillment");
+            System.out.println(" 9) Add Funding Income");
+            System.out.println("10) Set Funds");
+            System.out.println("11) Set Goal / Threshold");
+            System.out.println("12) Change Active Date");
+            System.out.println("13) Show Daily Summary");
+
+            System.out.println("\nSystem");
+            System.out.println("14) Reload CSVs");
+            System.out.println("15) Save CSVs");
+
+            System.out.println("\n 0) Exit");
+            System.out.print("\nSelect: ");
 
             switch (in.nextLine().trim()) {
-                case "1" -> listCatalog();
-                case "2" -> addNeedFlow();
-                case "3" -> addBundleFlow();
-                case "4" -> addLedgerEntryFlow();
-                case "5" -> setFundsFlow();
-                case "6" -> setGoalFlow();
-                case "7" -> reloadAll();
-                case "8" -> saveAll();
-                case "0" -> run = false;
-                default  -> System.out.println("Invalid choice.");
+                case "1" -> listNeeds();
+                case "2" -> addNeed();
+                case "3" -> addBundle();
+
+                case "4" -> listFundingSources();
+                case "5" -> addFundingSource();
+                case "6" -> editFundingSource();
+                case "7" -> deleteFundingSource();
+
+                case "8" -> addNeedEntry();
+                case "9" -> addIncomeEntry();
+                case "10" -> setFunds();
+                case "11" -> setThreshold();
+                case "12" -> changeDate();
+                case "13" -> printSummaryHeader();
+
+                case "14" -> master.loadAll();
+                case "15" -> master.saveAll();
+                case "0"  -> run = false;
+                default   -> System.out.println("Invalid option.");
             }
         }
 
-        // save prompt (not mandatory)
-        if (askYesNo("Save before exit? (y/n): ") == true) {
-            saveAll();
-        }
-        else {
-            System.out.println("Okay. Will not be saving.");
+        if (askYesNo("Save before exit? (y/n): ")) {
+            master.saveAll();
         }
 
-        System.out.println("Goodbye.");
+        System.out.println("Goodbye!");
     }
 
-    // ---------- Menu handlers ----------
-
-    //Will update when an Observable (NeedsRepository or LedgerRepository) changes.
+    // ===========================================================
+    // OBSERVER
+    // ===========================================================
     @Override
-    public void update(Observable o, Object arg) {
-        if (o instanceof FundGoodDeeds.model.NeedsRepository) {
-            System.out.println("\n[ALERT] Needs Catalog updated: " + arg);
-        }
-        else if (o instanceof FundGoodDeeds.model.LedgerRepository) {
-            System.out.println("\n[ALERT] Ledger updated: " + arg);
-        }
-        else {
-            System.out.println("\n[ALERT] Data model changed unexpectedly: " + arg);
-        }
+    public void update(java.util.Observable o, Object arg) {
+        System.out.println("[UPDATE] Data changed in model: " + o.getClass().getSimpleName());
     }
-    
-    private void listCatalog() {
-        List<NeedComponent> items = needs.getNeedsCatalog();
-        if (items == null || items.isEmpty()) {
-            System.out.println("(no needs/bundles)");
+
+    // ===========================================================
+    // DAILY SUMMARY HEADER
+    // ===========================================================
+    private void printSummaryHeader() {
+        Day d = master.getDaySummary();
+        System.out.println("\n---------------------------------------------");
+        System.out.println(" Active Date: " + master.getSelectedDate());
+        System.out.println(" Snapshot Date: " + d.getDate());
+        System.out.printf(" Funds: $%.2f | Threshold: $%.2f%n",
+                d.getFunds(), d.getThreshold());
+        System.out.printf(" Need Costs: $%.2f | Income: $%.2f%n",
+                d.getTotalNeedCost(), d.getTotalIncome());
+        System.out.printf(" Net Cost: $%.2f | Exceeded? %s%n",
+                d.getNetCost(), d.isThresholdExceeded() ? "YES" : "NO");
+        System.out.println("---------------------------------------------");
+    }
+
+    // ===========================================================
+    // CATALOG
+    // ===========================================================
+    private void listNeeds() {
+        var list = master.getNeedsController().getNeedsCatalog();
+        if (list.isEmpty()) {
+            System.out.println("(catalog empty)");
             return;
         }
-        System.out.println("-- Catalog --");
-        for (NeedComponent nc : items) {
-            try {
-                //get total cost comes from need component, will need implementation once code in model is created
-                System.out.printf("- %s [total=%.2f]%n", nc.getName(), nc.getTotal());
-            } catch (Exception e) {
-                System.out.println("- " + String.valueOf(nc));
-            }
-        }
+        list.forEach(n -> System.out.println(" - " + n.getName()));
     }
 
-    private void addNeedFlow() {
-        System.out.println("-- Add Need --");
-        String name   = askString("Name: ");
-        //I don't think we should be asking the user the total
-        // double total  = askDouble("Total cost: ");
-        double fixed  = askDouble("Fixed cost: ");
-        double var    = askDouble("Variable cost: ");
-        double fees   = askDouble("Fees: ");
+    private void addNeed() {
+        String name = ask("Name: ");
+        double fixed = askDouble("Fixed cost: ");
+        double var   = askDouble("Variable cost: ");
+        double fees  = askDouble("Fees: ");
+        double total = fixed + var + fees;
 
-        //I think we should be the one calculating the total based
-        //on the user's input for tyhe fixed, var, and fees costs
-        double calculatedTotal = (fixed + var + fees);
-
-        try {
-            needs.addNeed(name, calculatedTotal, fixed, var, fees);
-            System.out.println("Need added.");
-        } catch (Exception e) {
-            System.out.println("Error adding need: " + e.getMessage());
-        }
+        master.getNeedsController().addNeed(name, total, fixed, var, fees);
+        System.out.println("Need added.");
     }
 
-    // PLEASE INVESTIGATE THIS METHOD and workings.
-    private void addBundleFlow() {
-        System.out.println("-- Add Bundle --");
-        String bundleName = askString("Bundle name: ");
+    private void addBundle() {
+        String name = ask("Bundle name: ");
+        Map<NeedComponent, Integer> parts = new LinkedHashMap<>();
 
-        // Map to hold components and their integer quantities
-        Map<NeedComponent, Integer> bundleParts = new LinkedHashMap<>();
-        
         boolean more = true;
         while (more) {
-            String componentName = askString(" Component name (existing need or bundle): ");
-            int quantity = askInt(" Quantity (whole number): "); // Changed to ask for integer
-            
-            // Look up the component from the needs catalog
-            NeedComponent component = needs.getNeedByName(componentName);
-            
-            if (component == null) {
-                System.out.println("Warning: Component '" + componentName + "' not found in catalog. Skipping.");
-            } else if (quantity <= 0) {
-                System.out.println("Warning: Quantity must be a positive whole number. Skipping.");
-            } else {
-                bundleParts.put(component, bundleParts.getOrDefault(component, 0) + quantity);
-                System.out.println("Added " + quantity + "x " + componentName);
+            String cname = ask("Component name (blank=stop): ");
+            if (cname.isBlank()) break;
+
+            NeedComponent nc = master.getNeedsController().getNeedByName(cname);
+            if (nc == null) {
+                System.out.println("Not found.");
+                continue;
             }
-            
-            more = askYesNo(" Add another part? (y/n): ");
+
+            int qty = askInt("Quantity: ");
+            parts.put(nc, qty);
+
+            more = askYesNo("Add another component? ");
         }
 
-        if (bundleParts.isEmpty()) {
-            System.out.println("Issue: A bundle must contain at least one component.");
+        master.getNeedsController().addBundle(name, parts);
+        System.out.println("Bundle added.");
+    }
+
+    // ===========================================================
+    // FUNDING SOURCES
+    // ===========================================================
+    private void listFundingSources() {
+        var all = master.getFundingController().getAll();
+        if (all.isEmpty()) {
+            System.out.println("(no funding sources)");
             return;
         }
-
-        // Create the bundle with the list of components
-        try {
-            needs.addBundle(bundleName, bundleParts);
-            System.out.printf("Success: Bundle '%s' created with %d components and added to catalog.%n", 
-                bundleName, bundleParts.size());
-        } catch (Exception e) {
-            System.out.println("Error adding bundle: " + e.getMessage());
-        }
+        all.forEach(fs -> System.out.println(" - " + fs));
     }
 
-    private void addLedgerEntryFlow() {
-        System.out.println("-- Add Donation/Fulfillment --");
-        LocalDate day = askDate("Date (YYYY-MM-DD, blank=today): ");
-        String name   = askString("Need/Bundle name: ");
-        double count  = askDouble("Units fulfilled: ");
-        try {
-            ledger.addEntry(day, name, count);
-            System.out.println("Ledger entry added.");
-        } catch (Exception e) {
-            System.out.println("Error adding ledger entry: " + e.getMessage());
-        }
+    private void addFundingSource() {
+        String name = ask("Funding name: ");
+        double amt = askDouble("Amount per unit: ");
+        master.getFundingController().addFundingSource(name, amt);
+        System.out.println("Added.");
     }
 
-    // PLEASE INVESTIGATE THIS METHOD.
-    private void setFundsFlow() {
-        System.out.println("-- Set Available Funds --");
-        LocalDate day = askDate("Date (YYYY-MM-DD, blank=today): ");
-        double amt    = askDouble("Funds amount: ");
-        ledger.setFunds(day, amt);
-        System.out.println("Funds recorded.");
+    private void editFundingSource() {
+        String name = ask("Editing which source? ");
+        double amt = askDouble("New $/unit: ");
+        master.getFundingController().updateFundingSource(name, amt);
+        System.out.println("Updated.");
     }
 
-    private void setGoalFlow() {
-        System.out.println("-- Set Funding Goal --");
-        LocalDate day = askDate("Date (YYYY-MM-DD, blank=today): ");
-        double goal   = askDouble("Goal amount: ");
-        ledger.setGoal(day, goal);
-        System.out.println("Goal recorded.");
+    private void deleteFundingSource() {
+        String name = ask("Delete which? ");
+        master.getFundingController().deleteFundingSource(name);
+        System.out.println("Deleted.");
     }
 
-    private void reloadAll() {
-        safe(() -> needs.loadData(), "Reload needs");
-        safe(() -> ledger.loadData(),  "Reload ledger");
-        System.out.println("Reloaded.");
+    // ===========================================================
+    // LEDGER
+    // ===========================================================
+    private void addNeedEntry() {
+        LocalDate d = askDate("Date: ");
+        String name = ask("Need/Bundle: ");
+        double units = askDouble("Units: ");
+        master.getLedgerController().addEntry(d, name, units);
+        System.out.println("Entry added.");
     }
 
-    // PLEASE INVESTIGATE THIS METHOD.
-    private void saveAll() {
-        safe(() -> needs.saveNeeds(), "Save needs");
-        safe(() -> ledger.saveLog(),  "Save ledger");
-        System.out.println("Saved.");
+    private void addIncomeEntry() {
+        LocalDate d = askDate("Date: ");
+        String src = ask("Funding Source: ");
+        double units = askDouble("Units: ");
+
+        // need to validate source for income entries
+        master.getLedgerController().addIncomeEntry(d, src, units);
+        
+        System.out.println("Income added.");
     }
 
-    // ---------- Tiny helpers ----------
-
-    private void safe(Runnable r, String label) {
-        try { r.run(); } catch (Exception e) {
-            System.out.println(label + " failed: " + e.getMessage());
-        }
+    private void setFunds() {
+        LocalDate d = askDate("Date: ");
+        double amt = askDouble("Funds: ");
+        master.getLedgerController().setFunds(d, amt);
+        System.out.println("Funds updated.");
     }
 
-    private String askString(String prompt) {
-        System.out.print(prompt);
+    private void setThreshold() {
+        LocalDate d = askDate("Date: ");
+        double amt = askDouble("Threshold: ");
+        master.getLedgerController().setGoal(d, amt);
+        System.out.println("Threshold updated.");
+    }
+
+    private void changeDate() {
+        LocalDate d = askDate("New active date: ");
+        master.setSelectedDate(d);
+        System.out.println("Active date set.");
+    }
+
+    // ===========================================================
+    // INPUT HELPERS
+    // ===========================================================
+    private String ask(String p) {
+        System.out.print(p);
         return in.nextLine().trim();
     }
 
-    private boolean askYesNo(String prompt) {
-        //Loops until the user enters a valid 'y' or 'n'
+    private boolean askYesNo(String p) {
         while (true) {
-            System.out.print(prompt);
-            String s = in.nextLine().trim().toLowerCase(Locale.ROOT);
-
-            //Check for "yes" input
-            if (s.equals("y") || s.equals("1") || s.equals("yes")) {
-                return true;
-            }
-
-            //Check for "no" input
-            if (s.equals("n") || s.equals("0") || s.equals("no")) {
-                return false;
-            }
-
-            //If neither, inform the user and loop again
-            System.out.println("Invalid input. Please enter 'y' for yes or 'n' for no.");
+            System.out.print(p);
+            String s = in.nextLine().trim().toLowerCase();
+            if (s.equals("y") || s.equals("yes")) return true;
+            if (s.equals("n") || s.equals("no")) return false;
+            System.out.println("Enter y/n.");
         }
     }
 
-    private double askDouble(String prompt) {
+    private double askDouble(String p) {
         while (true) {
-            System.out.print(prompt);
-            String s = in.nextLine().trim();
+            System.out.print(p);
             try {
-                return Double.parseDouble(s);
-            } catch (NumberFormatException e) {
-                System.out.println("Enter a number.");
+                return Double.parseDouble(in.nextLine());
+            } catch (Exception e) {
+                System.out.println("Enter number.");
             }
         }
     }
 
-    private int askInt(String prompt) {
+    private int askInt(String p) {
         while (true) {
-            System.out.print(prompt);
-            String s = in.nextLine().trim();
+            System.out.print(p);
             try {
-                return Integer.parseInt(s);
-            } catch (NumberFormatException e) {
-                System.out.println("Enter a whole number.");
+                return Integer.parseInt(in.nextLine());
+            } catch (Exception e) {
+                System.out.println("Enter integer.");
             }
         }
     }
 
-    private LocalDate askDate(String prompt) {
-        // LocalDate currentDate = LocalDate.now();
-        // DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-        // String formattedDate = currentDate.format(formatter);
-
-        System.out.print(prompt);
+    private LocalDate askDate(String p) {
+        System.out.print(p);
         String s = in.nextLine().trim();
-        if (s.isEmpty()) return LocalDate.now();
+        if (s.isBlank()) return LocalDate.now();
         try {
             return LocalDate.parse(s, YMD);
-        } catch (DateTimeParseException e) {
+        } catch (Exception e) {
             System.out.println("Invalid date, using today.");
             return LocalDate.now();
         }
     }
-
-    ////NEEDS WORK (ESPECIALLY WITH MEMORY)
-    // private void checkCurrentGoal() {
-    //     LocalDate day = askDate("Date to check goal for (YYYY-MM-DD, blank=today): ");
-    //     double goal = ledger.getGoal(day);
-
-    //     System.out.printf("The active funding goal for %s is $%.2f%n", day, goal);
-    // }
-
-    // public void displayGoalStatus() {
-    //     double activeGoal = ledger.getGoal(LocalDate.now());
-
-    //     System.out.printf("Today's funding goal is $%.2f%n", activeGoal);
-    // }
 }
