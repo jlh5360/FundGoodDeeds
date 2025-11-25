@@ -31,6 +31,22 @@ public class FundingRepository extends Observable {
         }
     }
 
+
+    // Delegates saving funding sources
+
+    public void saveFundsCatalog()
+    {
+        saveSourcesToCSV();
+    }
+
+    // Loads funds from CSV
+
+    public void loadFunds()
+    {
+        getSourcesFromCSV();
+    }
+
+
     // list current funding sources
     public List<FundingSource> getFundingSources() {
         return this.fundingSources;

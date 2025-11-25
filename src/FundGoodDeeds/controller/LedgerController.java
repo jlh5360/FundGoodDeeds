@@ -51,7 +51,7 @@ public class LedgerController {
     }
 
     public LedgerRepository getLedgerRepository() {
-        return this.LedgerRepository;
+        return this.ledgerRepository;
     }
 
     //Retrieves the daily funding goal for the specified date.

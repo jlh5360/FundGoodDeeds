@@ -7,6 +7,7 @@ import java.util.Map;
 import java.util.Observable;
 import java.util.stream.Collectors;
 
+@SuppressWarnings("deprecation")
 public class NeedsRepository extends Observable {
 	private final List<NeedComponent> needsCatalog = new ArrayList<>();
 	private final CSVManager manager;
@@ -186,11 +187,10 @@ public class NeedsRepository extends Observable {
 		
 		for(NeedComponent component : needsCatalog)
 		{
-			if(component instanceof Need)
+			if(component instanceof Need need)
 			{
 				// Format: n,name,total,fixed,variable,fees
-				Need need = (Need) component;
-				String line = String.format("n,%s,%.1f,%.1f,%.1f,%.1f",
+                String line = String.format("n,%s,%.1f,%.1f,%.1f,%.1f",
 					need.getName(),
 					need.getTotal(),
 					need.getFixed(),
@@ -199,11 +199,10 @@ public class NeedsRepository extends Observable {
 				);
 				csvLines.add(line);
 			}
-			else if(component instanceof Bundle)
+			else if(component instanceof Bundle bundle)
 			{
 				// Format: b,name,n1name,n1count,n2name,n2count,...
-				Bundle bundle = (Bundle) component;
-				StringBuilder line = new StringBuilder("b," + bundle.getName());
+                StringBuilder line = new StringBuilder("b," + bundle.getName());
 				
 				Map<NeedComponent, Integer> componentCounts = bundle.getComponentsAndCounts();
 				

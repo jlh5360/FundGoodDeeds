@@ -5,6 +5,7 @@ import java.util.Observer;
 
 import FundGoodDeeds.model.Day;
 import FundGoodDeeds.model.FundingRepository;
+import FundGoodDeeds.model.LedgerEntity;
 import FundGoodDeeds.model.LedgerRepository;
 import FundGoodDeeds.model.NeedsRepository;
 
@@ -95,12 +96,15 @@ public class MasterController {
     }
 
     //FOR FUTURE IMPLEMENTATION
-    public double getNetCost() {
-        return this.needsController.getNeedsRepository().SOMEFUNCTIONNAME();
+    public double getNetCost() 
+    {
+        // Make sure it doesn't give negative values
+
+        return Math.max(0,getTotalNeedCost() - getTotalIncome());
     }
 
     //FOR FUTURE IMPLEMENTATION
     public boolean isThresholdExceeded() {
-        return this.ledgerRepository.getLedgerRepository().SOMEFUNCTIONNAME();
+        return getTotalNeedCost() > this.ledgerController.getLedgerRepository().getEntryForDate(LedgerEntity.EntryType.THRESHOLD,null);
     }
 }

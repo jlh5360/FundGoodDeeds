@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Observable;
 import java.util.Optional;
 
+@SuppressWarnings("deprecation")
 public class LedgerRepository extends Observable {
 	private final List<LedgerEntity> logEntries = new ArrayList<>();
 	public CSVManager manager;
@@ -15,6 +16,7 @@ public class LedgerRepository extends Observable {
 
 	private static final double DEFAULT_GOAL = 2000.0;
 	private static final double DEFAULT_FUNDS = 150.0;
+	private static final double DEFAULT_THRESHOLD = 2000.0;
 
 	// Updated constructor to accept NeedsRepository
 	public LedgerRepository(CSVManager manager, NeedsRepository needsRepository)
@@ -47,10 +49,19 @@ public class LedgerRepository extends Observable {
 					entity = new LedgerEntity(entityDate, LedgerEntity.EntryType.FUND, Double.parseDouble(raw[4]));
 					entries.add(entity);
 				break;
+
+				// In case we still need goal
 					
 				case "g":
 					entity = new LedgerEntity(entityDate, LedgerEntity.EntryType.GOAL, Double.parseDouble(raw[4]));
 					entries.add(entity);
+				break;
+					
+				case "t":
+					entity = new LedgerEntity(entityDate, LedgerEntity.EntryType.THRESHOLD, Double.parseDouble(raw[4]));
+					entries.add(entity);
+				break;
+				
 				default:
 
 				break;
@@ -155,7 +166,7 @@ public class LedgerRepository extends Observable {
 					break;
 					
 				default:
-					continue; 
+					continue;
 			}
 			
 			csvLines.add(line);
@@ -167,57 +178,40 @@ public class LedgerRepository extends Observable {
 		notifyObservers("Ledger saved to " + manager.ledgerCSV);
 	}
 
-	//THIS NEEDS WORK ESPECIALLY CHECKING WITH THE FILE AND MEMORY
-
 	/**
-     * Finds the active funding goal for the given date.
+     * Finds the active available entry for the given date.
      * The logic follows these rules:
-     *     1. If a goal exists for the exact date, use that value.
-     *     2. If no goal for the exact date, use the goal from the most recent 
-     *        funding goal entry that is on or before the given date.
-     *     3. If a funding goal was never entered, the system default is 2000.0.
-     * * @param date The date for which to find the active goal.
-     * @return The active funding goal amount.
-     */
-	public double getGoalForDate(LocalDate date) {
-        //Fix for "effectively final" error: Use a new variable for stream logic
-        LocalDate finalDate = (date == null) ? LocalDate.now() : date;
-		
-		// 1. Find the last entry for the exact date.
-        Optional<LedgerEntity> entryForDate = logEntries.stream()
-            .filter(entry -> entry.getType() == LedgerEntity.EntryType.GOAL)
-            .filter(entry -> entry.getDate().equals(finalDate))
-            .reduce((first, second) -> second); // Get the last element
-
-        if (entryForDate.isPresent()) {
-            return entryForDate.get().getAmount();
-        }
-
-        // 2. If no entry for the exact date, find the most recent one before it.
-        return logEntries.stream()
-            .filter(entry -> entry.getType() == LedgerEntity.EntryType.GOAL)
-            .filter(entry -> entry.getDate().isBefore(finalDate))
-            .max(Comparator.comparing(LedgerEntity::getDate))
-            .map(LedgerEntity::getAmount)
-            .orElse(DEFAULT_GOAL); // 3. Fallback to default
-    }
-
-	/**
-     * Finds the active available funds for the given date.
-     * The logic follows these rules:
-     *     1. If funds exist for the exact date, use that value.
-     *     2. If no funds for the exact date, use the funds from the most recent
+     *     1. If a entry exist for the exact date, use that value.
+     *     2. If no entries for the exact date, use the funds from the most recent
      *        entry that is on or before the given date.
-     *     3. If funds were never entered, the system default is 150.0.
+     *     3. If the entry was never entered, use the system default for the specified entry.
      * @param date The date for which to find the active funds.
+	 * @param entryType the Entry type you want to retrieve
      * @return The active available funds amount.
      */
-	public double getFundsForDate(LocalDate date) {
+	public double getEntryForDate(LedgerEntity.EntryType entryType, LocalDate date) {
 		LocalDate finalDate = (date == null) ? LocalDate.now() : date;
+		double defaultValue;
+
+		switch(entryType)
+		{
+			case LedgerEntity.EntryType.FUND:
+				defaultValue = DEFAULT_FUNDS;
+			
+			case LedgerEntity.EntryType.GOAL:
+				defaultValue = DEFAULT_GOAL;
+
+			case LedgerEntity.EntryType.THRESHOLD:
+				defaultValue = DEFAULT_THRESHOLD;
+
+			default:
+				break;
+			
+		}
 
 		// 1. Find the last entry for the exact date.
 		Optional<LedgerEntity> entryForDate = logEntries.stream()
-			.filter(entry -> entry.getType() == LedgerEntity.EntryType.FUND)
+			.filter(entry -> entry.getType() == entryType)
 			.filter(entry -> entry.getDate().equals(finalDate))
 			.reduce((first, second) -> second); // Get the last element
 
@@ -227,16 +221,16 @@ public class LedgerRepository extends Observable {
 
 		// 2. If no entry for the exact date, find the most recent one before it.
 		return logEntries.stream()
-			.filter(entry -> entry.getType() == LedgerEntity.EntryType.FUND)
+			.filter(entry -> entry.getType() == entryType)
 			.filter(entry -> entry.getDate().isBefore(finalDate))
 			.max(Comparator.comparing(LedgerEntity::getDate))
 			.map(LedgerEntity::getAmount)
-			.orElse(DEFAULT_FUNDS); // 3. Fallback to default
+			.orElse(defaultValue); // 3. Fallback to default
 	}
 
 	public Day buildDay(LocalDate date) {
 		double goal = getGoalForDate(date);
-		double funds = getFundsForDate(date);
+		double funds = getEntryForDate(LedgerEntity.EntryType.FUND, date);
 		return new Day(date.getYear(), date.getMonthValue(), date.getDayOfMonth(), goal, funds);
 	}
 }
