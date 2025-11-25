@@ -7,6 +7,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Observable;
 import java.util.Optional;
+import FundGoodDeeds.model.LedgerEntity;
 
 @SuppressWarnings("deprecation")
 public class LedgerRepository extends Observable {
@@ -95,12 +96,20 @@ public class LedgerRepository extends Observable {
 		// This method should provide a summary for the current day.
 		// It now correctly uses the getFundsForDate logic.
 		LocalDate today = LocalDate.now();
-		double availableFunds = getFundsForDate(today);
+		double availableFunds = getEntryForDate(LedgerEntity.EntryType.FUND,today);
 		return "Daily Summary: " + availableFunds + " funding available.";
 	}
 
 	public double findGoal(LocalDate todaysDate) {
-		return getGoalForDate(todaysDate);
+		return getEntryForDate(LedgerEntity.EntryType.GOAL,todaysDate);
+	}
+
+	public double findFunds(LocalDate date) {
+		return getEntryForDate(LedgerEntity.EntryType.FUND,date);
+	}
+
+	public double findThreshold(LocalDate date) {
+		return getEntryForDate(LedgerEntity.EntryType.THRESHOLD,date);
 	}
 
 	public double calculateDonations(LocalDate todaysDate) {
@@ -229,7 +238,7 @@ public class LedgerRepository extends Observable {
 	}
 
 	public Day buildDay(LocalDate date) {
-		double goal = getGoalForDate(date);
+		double goal = getEntryForDate(LedgerEntity.EntryType.GOAL,date);
 		double funds = getEntryForDate(LedgerEntity.EntryType.FUND, date);
 		return new Day(date.getYear(), date.getMonthValue(), date.getDayOfMonth(), goal, funds);
 	}

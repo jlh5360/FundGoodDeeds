@@ -1,20 +1,31 @@
-C:\Users\anime\SWEN 383\term-project-rit-swen-383-01-1a\src\activity 3b\KelvinTempSensor.java
-C:\Users\anime\SWEN 383\term-project-rit-swen-383-01-1a\src\FundGoodDeeds\model\AbstractLedgerEntry.java
-C:\Users\anime\SWEN 383\term-project-rit-swen-383-01-1a\src\activity 3b\TextUI.java
-C:\Users\anime\SWEN 383\term-project-rit-swen-383-01-1a\src\activity 3b\IBarometer.java
-C:\Users\anime\SWEN 383\term-project-rit-swen-383-01-1a\src\activity 3b\ITempSensor.java
-C:\Users\anime\SWEN 383\term-project-rit-swen-383-01-1a\src\FundGoodDeeds\model\Bundle.java
-C:\Users\anime\SWEN 383\term-project-rit-swen-383-01-1a\src\activity 3b\Barometer.java
-C:\Users\anime\SWEN 383\term-project-rit-swen-383-01-1a\src\FundGoodDeeds\model\LedgerRepository.java
-C:\Users\anime\SWEN 383\term-project-rit-swen-383-01-1a\src\FundGoodDeeds\model\NeedsRepository.java
-C:\Users\anime\SWEN 383\term-project-rit-swen-383-01-1a\src\FundGoodDeeds\app\FundGoodDeedsApp.java
-C:\Users\anime\SWEN 383\term-project-rit-swen-383-01-1a\src\FundGoodDeeds\model\NeedComponent.java
-C:\Users\anime\SWEN 383\term-project-rit-swen-383-01-1a\src\FundGoodDeeds\view\ConsoleView.java
-C:\Users\anime\SWEN 383\term-project-rit-swen-383-01-1a\src\FundGoodDeeds\controller\NeedsController.java
-C:\Users\anime\SWEN 383\term-project-rit-swen-383-01-1a\src\activity 3b\SwingUI.java
-C:\Users\anime\SWEN 383\term-project-rit-swen-383-01-1a\src\FundGoodDeeds\model\CSVManager.java
-C:\Users\anime\SWEN 383\term-project-rit-swen-383-01-1a\src\FundGoodDeeds\controller\LedgerController.java
-C:\Users\anime\SWEN 383\term-project-rit-swen-383-01-1a\src\activity 3b\WeatherStation.java
-C:\Users\anime\SWEN 383\term-project-rit-swen-383-01-1a\src\activity 3b\KelvinTempSensorAdapter.java
-C:\Users\anime\SWEN 383\term-project-rit-swen-383-01-1a\src\FundGoodDeeds\model\LedgerEntity.java
-C:\Users\anime\SWEN 383\term-project-rit-swen-383-01-1a\src\FundGoodDeeds\model\Need.java
+C:\Users\Evangalizar\SWEN383\term-project-rit-swen-383-01-1a\src\activity 3b\WeatherStation.java
+C:\Users\Evangalizar\SWEN383\term-project-rit-swen-383-01-1a\src\FundGoodDeeds\model\Bundle.java
+C:\Users\Evangalizar\SWEN383\term-project-rit-swen-383-01-1a\src\FundGoodDeeds\model\Day.java
+C:\Users\Evangalizar\SWEN383\term-project-rit-swen-383-01-1a\src\FundGoodDeeds\view\panels\FundingPanel.java
+C:\Users\Evangalizar\SWEN383\term-project-rit-swen-383-01-1a\src\activity 3b\KelvinTempSensorAdapter.java
+C:\Users\Evangalizar\SWEN383\term-project-rit-swen-383-01-1a\src\activity 3b\ITempSensor.java
+C:\Users\Evangalizar\SWEN383\term-project-rit-swen-383-01-1a\src\FundGoodDeeds\app\FundGoodDeedsApp.java
+C:\Users\Evangalizar\SWEN383\term-project-rit-swen-383-01-1a\src\FundGoodDeeds\view\panels\LedgerPanel.java
+C:\Users\Evangalizar\SWEN383\term-project-rit-swen-383-01-1a\src\FundGoodDeeds\controller\FundingController.java
+C:\Users\Evangalizar\SWEN383\term-project-rit-swen-383-01-1a\src\activity 3b\KelvinTempSensor.java
+C:\Users\Evangalizar\SWEN383\term-project-rit-swen-383-01-1a\src\FundGoodDeeds\model\NeedsRepository.java
+C:\Users\Evangalizar\SWEN383\term-project-rit-swen-383-01-1a\src\FundGoodDeeds\model\FundingRepository.java
+C:\Users\Evangalizar\SWEN383\term-project-rit-swen-383-01-1a\src\FundGoodDeeds\model\LedgerEntity.java
+C:\Users\Evangalizar\SWEN383\term-project-rit-swen-383-01-1a\src\FundGoodDeeds\model\Need.java
+C:\Users\Evangalizar\SWEN383\term-project-rit-swen-383-01-1a\src\activity 3b\IBarometer.java
+C:\Users\Evangalizar\SWEN383\term-project-rit-swen-383-01-1a\src\FundGoodDeeds\view\SwingUIView.java
+C:\Users\Evangalizar\SWEN383\term-project-rit-swen-383-01-1a\src\FundGoodDeeds\view\panels\NeedsPanel.java
+C:\Users\Evangalizar\SWEN383\term-project-rit-swen-383-01-1a\src\activity 3b\SwingUI.java
+C:\Users\Evangalizar\SWEN383\term-project-rit-swen-383-01-1a\src\FundGoodDeeds\controller\LedgerController.java
+C:\Users\Evangalizar\SWEN383\term-project-rit-swen-383-01-1a\src\FundGoodDeeds\model\LedgerRepository.java
+C:\Users\Evangalizar\SWEN383\term-project-rit-swen-383-01-1a\src\activity 3b\TextUI.java
+C:\Users\Evangalizar\SWEN383\term-project-rit-swen-383-01-1a\src\FundGoodDeeds\view\panels\SummaryPanel.java
+C:\Users\Evangalizar\SWEN383\term-project-rit-swen-383-01-1a\src\FundGoodDeeds\model\NeedComponent.java
+C:\Users\Evangalizar\SWEN383\term-project-rit-swen-383-01-1a\src\FundGoodDeeds\model\FundingSource.java
+C:\Users\Evangalizar\SWEN383\term-project-rit-swen-383-01-1a\src\FundGoodDeeds\model\AbstractLedgerEntry.java
+C:\Users\Evangalizar\SWEN383\term-project-rit-swen-383-01-1a\src\FundGoodDeeds\controller\MasterController.java
+C:\Users\Evangalizar\SWEN383\term-project-rit-swen-383-01-1a\src\FundGoodDeeds\view\panels\DatePanel.java
+C:\Users\Evangalizar\SWEN383\term-project-rit-swen-383-01-1a\src\FundGoodDeeds\controller\NeedsController.java
+C:\Users\Evangalizar\SWEN383\term-project-rit-swen-383-01-1a\src\FundGoodDeeds\model\CSVManager.java
+C:\Users\Evangalizar\SWEN383\term-project-rit-swen-383-01-1a\src\FundGoodDeeds\view\ConsoleView.java
+C:\Users\Evangalizar\SWEN383\term-project-rit-swen-383-01-1a\src\activity 3b\Barometer.java

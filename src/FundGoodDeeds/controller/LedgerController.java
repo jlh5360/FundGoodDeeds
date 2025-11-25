@@ -63,7 +63,7 @@ public class LedgerController {
 
     //Retrieves the active funding goal for a specific date, applying fallback logic.
     public double getGoal(LocalDate date) {
-        return ledgerRepository.getGoalForDate(date);
+        return ledgerRepository.findGoal(date);
     }
     
     //Expose the getFundsForDate method to the view
