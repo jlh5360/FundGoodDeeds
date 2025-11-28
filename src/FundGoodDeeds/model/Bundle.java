@@ -44,7 +44,9 @@ public class Bundle implements NeedComponent {
     
     
     public Map<NeedComponent, Integer> getComponentsAndCounts() {
-        return componentCounts;
+        // return componentCounts;
+        //Use a new LinkedHashMap to return a copy
+        return new LinkedHashMap<>(this.componentCounts);
     }
     public List<NeedComponent> getComponents() {
         // Returns a list of unique components, not reflecting quantities
@@ -80,32 +82,65 @@ public class Bundle implements NeedComponent {
                 .sum();
     }
     
-    @Override
-    public double getFixed() {
-        return componentCounts.entrySet().stream()
-                .mapToDouble(entry -> entry.getKey().getFixed() * entry.getValue())
-                .sum();
-    }
+    // @Override
+    // public double getFixed() {
+    //     return componentCounts.entrySet().stream()
+    //             .mapToDouble(entry -> entry.getKey().getFixed() * entry.getValue())
+    //             .sum();
+    // }
     
-    @Override
-    public double getVariable() {
-        return componentCounts.entrySet().stream()
-                .mapToDouble(entry -> entry.getKey().getVariable() * entry.getValue())
-                .sum();
-    }
+    // @Override
+    // public double getVariable() {
+    //     return componentCounts.entrySet().stream()
+    //             .mapToDouble(entry -> entry.getKey().getVariable() * entry.getValue())
+    //             .sum();
+    // }
     
-    @Override
-    public double getFees() {
-        return componentCounts.entrySet().stream()
-                .mapToDouble(entry -> entry.getKey().getFees() * entry.getValue())
-                .sum();
-    }
+    // @Override
+    // public double getFees() {
+    //     return componentCounts.entrySet().stream()
+    //             .mapToDouble(entry -> entry.getKey().getFees() * entry.getValue())
+    //             .sum();
+    // }
 
 	// ***FUTURE REFACTORING*** 
 	// Need cool_need = mybundle.getNeedFromBundle("Cool Need");
     // public double getNeedFromBundle() {
     //     return ...
     // }
+
+    /**
+     * Decreases the quantity of a component in the bundle.
+     * @param componentName The name of the component to decrease.
+     * @param quantity The amount to decrease by.
+     * @return The number of units successfully removed (max is current count, min is 0).
+     */
+    public int removeComponentUnits(String componentName, int quantity) {
+        NeedComponent componentToUpdate = componentCounts.keySet().stream()
+                .filter(nc -> nc.getName().equalsIgnoreCase(componentName))
+                .findFirst()
+                .orElse(null);
+
+        if (componentToUpdate == null) {
+            return 0; // Component not found
+        }
+
+        int currentCount = componentCounts.get(componentToUpdate);
+        
+        // Only remove up to the available quantity
+        int unitsToRemove = Math.min(quantity, currentCount);
+        int newCount = currentCount - unitsToRemove;
+
+        if (newCount <= 0) {
+            // If count is zero or less, remove the component entirely
+            componentCounts.remove(componentToUpdate);
+        } else {
+            // Otherwise, update the count
+            componentCounts.put(componentToUpdate, newCount);
+        }
+        
+        return unitsToRemove;
+    }
     
     @Override
     public boolean equals(Object o) {

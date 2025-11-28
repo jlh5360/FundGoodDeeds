@@ -15,9 +15,9 @@ import FundGoodDeeds.model.NeedsRepository;
  * the startup and shutdown logic for the application's data.
  */
 public class MasterController {
-    private final NeedsRepository needsRepository;
-    private final LedgerRepository ledgerRepository;
-    private final FundingRepository fundingRepository;
+    // private final NeedsRepository needsRepository;
+    // private final LedgerRepository ledgerRepository;
+    // private final FundingRepository fundingRepository;
 
     private final NeedsController needsController;
     private final LedgerController ledgerController;
@@ -44,6 +44,8 @@ public class MasterController {
         needsController.loadData();
         ledgerController.loadData();
         fundingController.loadData();
+
+        System.out.println("CSV reloaded");
     }
 
     //Saving all data the View's saveAll() function
@@ -79,12 +81,12 @@ public class MasterController {
         this.selectedDate = date;
     }
 
-    public Day getDaySummary() {
+    public Day getDaySummary(LocalDate date) {
         //The buildDay() function should get all the information from the 
         //needs and funding and ledger repositories on a particular day
         // return ledgerRepository.buildDay(selectedDate, needsRepository, fundingRepository);
         
-        return ledgerRepository.buildDay(selectedDate);
+        return this.ledgerController.getLedgerRepository().buildDay(selectedDate);
     }
 
     public double getTotalIncome() {
@@ -105,6 +107,6 @@ public class MasterController {
 
     //FOR FUTURE IMPLEMENTATION
     public boolean isThresholdExceeded() {
-        return getTotalNeedCost() > this.ledgerController.getLedgerRepository().getEntryForDate(LedgerEntity.EntryType.THRESHOLD,null);
+        return getTotalNeedCost() > this.ledgerController.getLedgerRepository().getEntryForDate(LedgerEntity.EntryType.THRESHOLD, getSelectedDate());
     }
 }

@@ -42,7 +42,8 @@ public class NeedsController {
     // }
     
     //Creates and adds a new Basic Need to the catalog.
-    public void addNeed(String name, double total, double fixed, double variable, double fees) {
+    public void addNeed(String name, double total) {
+    // public void addNeed(String name, double total, double fixed, double variable, double fees) {
         if (name == null || name.trim().isEmpty()) {
             throw new IllegalArgumentException("Need name cannot be empty.");
         }
@@ -50,7 +51,8 @@ public class NeedsController {
 			throw new IllegalArgumentException("A Need or Bundle with that name already exists.");
         }
         
-        Need newNeed = new Need(name, total, fixed, variable, fees);
+        Need newNeed = new Need(name, total);
+        // Need newNeed = new Need(name, total, fixed, variable, fees);
         needsRepository.appendNeed(newNeed);
     }
 

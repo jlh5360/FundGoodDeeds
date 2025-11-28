@@ -34,9 +34,10 @@ public class FundingRepository extends Observable {
 
     // Delegates saving funding sources
 
-    public void saveFundsCatalog()
-    {
+    public void saveFundsCatalog() throws IOException {
         saveSourcesToCSV();
+        setChanged();
+        notifyObservers();
     }
 
     // Loads funds from CSV
@@ -53,13 +54,16 @@ public class FundingRepository extends Observable {
     }
 
     // save funding sources to CSV
-    public void saveSourcesToCSV() {
+    public void saveSourcesToCSV() throws IOException {
         List<String> rawSourcesList = new ArrayList<>();
 
         for (FundingSource source : this.fundingSources) {
             String name = source.getName();
             String amount = Double.toString(source.getAmount());
             String rawSource = "i," + name + "," + amount;
+
+            // String rawSource = String.format("i,%s,%.2f", source.getName(), source.getAmount());
+
             rawSourcesList.add(rawSource);
 
         }

@@ -7,6 +7,8 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Observable;
 import java.util.Optional;
+import java.util.stream.Collectors;
+
 import FundGoodDeeds.model.LedgerEntity;
 
 @SuppressWarnings("deprecation")
@@ -42,7 +44,7 @@ public class LedgerRepository extends Observable {
 			{
 				
 				case "n":
-					entity = new LedgerEntity(entityDate, LedgerEntity.EntryType.NEED,raw[4] ,Double.parseDouble(raw[5]));
+					entity = new LedgerEntity(entityDate, LedgerEntity.EntryType.NEED, raw[4], Double.parseDouble(raw[5]), Double.parseDouble(raw[6]));
 					entries.add(entity);
 				break;
 
@@ -89,8 +91,12 @@ public class LedgerRepository extends Observable {
 		}
 
 		return rawData;
-
 	}
+
+	/** Retrieves a copy of all log entries. */
+    public List<LedgerEntity> getAllLogEntries() {
+        return List.copyOf(logEntries);
+    }
 
 	public String getSummary() {
 		// This method should provide a summary for the current day.
@@ -112,22 +118,44 @@ public class LedgerRepository extends Observable {
 		return getEntryForDate(LedgerEntity.EntryType.THRESHOLD,date);
 	}
 
-	public double calculateDonations(LocalDate todaysDate) {
-		// Sum the total value of all NEED entries for the given date.
-		return logEntries.stream()
-			.filter(entry -> entry.getType() == LedgerEntity.EntryType.NEED && entry.getDate().equals(todaysDate))
-			.mapToDouble(entry -> {
-				NeedComponent component = needsRepository.getNeedByName(entry.getNeedName());
-				if (component != null) {
-					// Total cost for this entry is the component's total cost * quantity fulfilled
-					return component.getTotal() * entry.getCount();
-				} else {
-					// If need/bundle not found, it contributes 0 to the total.
-					// A warning could be logged here.
-					System.out.println("[Warning] Could not find need/bundle '" + entry.getNeedName() + "' in catalog for donation calculation.");
-					return 0.0;
-				}
-			}).sum();
+	// public double calculateDonations(LocalDate todaysDate) {
+	// 	// Sum the total value of all NEED entries for the given date.
+	// 	return logEntries.stream()
+	// 		.filter(entry -> entry.getType() == LedgerEntity.EntryType.NEED && entry.getDate().equals(todaysDate))
+	// 		.mapToDouble(entry -> {
+	// 			NeedComponent component = needsRepository.getNeedByName(entry.getNeedName());
+	// 			if (component != null) {
+	// 				// Total cost for this entry is the component's total cost * quantity fulfilled
+	// 				return component.getTotal() * entry.getCount();
+	// 			} else {
+	// 				// If need/bundle not found, it contributes 0 to the total.
+	// 				// A warning could be logged here.
+	// 				System.out.println("[Warning] Could not find need/bundle '" + entry.getNeedName() + "' in catalog for donation calculation.");
+	// 				return 0.0;
+	// 			}
+	// 		}).sum();
+	// }
+
+	/**
+	 * Calculates the total value of all 'NEED' fulfillment entries 
+	 * for the specified date by summing the pre-calculated 'amount' field 
+	 * in the LedgerEntity.
+	 * This prevents the bug where the application tried to look up the cost of 
+	 * fulfilled (and now deleted) Needs from the NeedsRepository.
+	 * @param date The date for which to calculate total donations.
+	 * @return The total cost of fulfilled needs for that date.
+	 */
+	public double calculateDonations(LocalDate date) {
+		LocalDate finalDate = (date == null) ? LocalDate.now() : date;
+		
+		//Sum the 'amount' field (which stores the total cost) of all NEED entries for the date.
+		double totalDonations = logEntries.stream()
+			.filter(entry -> entry.getType() == LedgerEntity.EntryType.NEED)
+			.filter(entry -> entry.getDate().equals(finalDate))
+			.mapToDouble(LedgerEntity::getAmount)
+			.sum();
+			
+		return totalDonations;
 	}
 
 	public void addDonations(double donation1, double donation2) {
@@ -138,53 +166,128 @@ public class LedgerRepository extends Observable {
 		setChanged();
 	}
 
-	// Writes all log entries back to the CSV file.
-	public void saveLogEntries() throws IOException
-	{
-		List<String> csvLines = new ArrayList<>();
+	// //V1
+	// // Writes all log entries back to the CSV file.
+	// public void saveLogEntries() throws IOException
+	// {
+	// 	List<String> csvLines = new ArrayList<>();
 		
 		
 		
-		for(LedgerEntity entry : logEntries)
-		{
-			LocalDate date = entry.getDate();
-			int year = date.getYear();
-			int month = date.getMonthValue();
-			int day = date.getDayOfMonth();
+	// 	for(LedgerEntity entry : logEntries)
+	// 	{
+	// 		LocalDate date = entry.getDate();
+	// 		int year = date.getYear();
+	// 		int month = date.getMonthValue();
+	// 		int day = date.getDayOfMonth();
 			
-			String line;
+	// 		String line;
 			
-			switch(entry.getType())
-			{
-				case FUND:
+	// 		switch(entry.getType())
+	// 		{
+	// 			case FUND:
 					
-					line = String.format("%d,%d,%d,f,%.1f",
-						year, month, day, entry.getAmount());
-					break;
+	// 				line = String.format("%d,%d,%d,f,%.1f",
+	// 					year, month, day, entry.getAmount());
+	// 				break;
 					
-				case GOAL:
+	// 			case GOAL:
 					
-					line = String.format("%d,%d,%d,g,%.1f",
-						year, month, day, entry.getAmount());
-					break;
+	// 				line = String.format("%d,%d,%d,g,%.1f",
+	// 					year, month, day, entry.getAmount());
+	// 				break;
 					
-				case NEED:
+	// 			case NEED:
 					
-					line = String.format("%d,%d,%d,n,%s,%.1f",
-						year, month, day, entry.getNeedName(), entry.getCount());
-					break;
+	// 				line = String.format("%d,%d,%d,n,%s,%.1f",
+	// 					year, month, day, entry.getNeedName(), entry.getCount());
+	// 				break;
 					
-				default:
-					continue;
-			}
+	// 			default:
+	// 				continue;
+	// 		}
 			
-			csvLines.add(line);
-		}
+	// 		csvLines.add(line);
+	// 	}
 		
-		// Write to file
-		manager.writeData(manager.ledgerCSV, csvLines);
+	// 	// Write to file
+	// 	manager.writeData(manager.ledgerCSV, csvLines);
+	// 	setChanged();
+	// 	notifyObservers("Ledger saved to " + manager.ledgerCSV);
+	// }
+
+	private String toCSVLine(LedgerEntity entry) {
+        LocalDate date = entry.getDate();
+        
+        //Use String.format("%d,%02d,%02d") for zero-padding Day and Month
+        String datePart = String.format("%d,%02d,%02d", 
+                date.getYear(), 
+                date.getMonthValue(), 
+                date.getDayOfMonth());
+
+        switch (entry.getType()) {
+            case NEED:
+                return String.format("%s,n,%s,%.1f", datePart, entry.getNeedName(), entry.getCount());
+            case FUND:
+                return String.format("%s,f,%.1f", datePart, entry.getAmount());
+            case GOAL:
+                return String.format("%s,g,%.1f", datePart, entry.getAmount());
+            case THRESHOLD:
+                return String.format("%s,t,%.1f", datePart, entry.getAmount());
+            case INCOME:
+                return String.format("%s,i,%s,%.1f", datePart, entry.getNeedName(), entry.getCount());
+            default:
+                throw new UnsupportedOperationException("Unknown EntryType for CSV saving.");
+        }
+    }
+
+	// private List<String> logEntriesToString() {
+	// 	List<String> csvLines = new ArrayList<>();
+		
+	// 	for (LedgerEntity entry : logEntries) {
+	// 		String datePart = String.format("%d,%d,%d", 
+	// 			entry.getDate().getYear(), 
+	// 			entry.getDate().getMonthValue(), 
+	// 			entry.getDate().getDayOfMonth());
+
+	// 		// Map the EntryType enum to the required single-character literal
+	// 		String typeLiteral = switch (entry.getType()) {
+	// 			case FUND -> "f";         // Requirement: f (funds)
+	// 			case GOAL, THRESHOLD -> "t"; // ConsoleView sets GOAL for Threshold, Requirement: t
+	// 			case NEED -> "n";         // Requirement: n (fulfilled need)
+	// 			case INCOME -> "i";       // Requirement: i (funding income)
+	// 			default -> throw new IllegalStateException("Unknown EntryType: " + entry.getType());
+	// 		};
+
+	// 		String line = switch (entry.getType()) {
+	// 			// FUND (f), GOAL/THRESHOLD (t) entries: yyyy,mm,dd,type,amount
+	// 			case FUND, GOAL, THRESHOLD -> String.format("%s,%s,%.2f", 
+	// 														datePart, 
+	// 														typeLiteral, 
+	// 														entry.getAmount());
+	// 			// NEED (n), INCOME (i) entries: yyyy,mm,dd,type,name,count/units
+	// 			case NEED, INCOME -> String.format("%s,%s,%s,%.2f", 
+	// 												datePart, 
+	// 												typeLiteral, 
+	// 												entry.getNeedName(), // name/source name
+	// 												entry.getCount()); // count/units
+	// 			default -> throw new IllegalStateException("Unknown EntryType: " + entry.getType());
+	// 		};
+	// 		csvLines.add(line);
+	// 	}
+	// 	return csvLines;
+	// }
+	
+	//V2
+	public void saveLogEntries() throws IOException {
+		// List<String> data = logEntriesToString();
+		// manager.writeData(manager.ledgerCSV, data);
+		List<String> csvLines = logEntries.stream()
+                                  .map(this::toCSVLine)
+                                  .collect(Collectors.toList());
+        manager.writeData(manager.ledgerCSV, csvLines);
 		setChanged();
-		notifyObservers("Ledger saved to " + manager.ledgerCSV);
+		notifyObservers();
 	}
 
 	/**
@@ -206,15 +309,18 @@ public class LedgerRepository extends Observable {
 		{
 			case LedgerEntity.EntryType.FUND:
 				defaultValue = DEFAULT_FUNDS;
+				break;
 			
 			case LedgerEntity.EntryType.GOAL:
 				defaultValue = DEFAULT_GOAL;
+				break;
 
 			case LedgerEntity.EntryType.THRESHOLD:
 				defaultValue = DEFAULT_THRESHOLD;
+				break;
 
 			default:
-				break;
+				throw new IllegalArgumentException("Unknown Ledger Entry Type: " + entryType);
 			
 		}
 

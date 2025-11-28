@@ -19,12 +19,14 @@ public class LedgerEntity implements AbstractLedgerEntry {
 	}
 
 	//Contructor for NEED fulfillment entries
-	public LedgerEntity(LocalDate date, EntryType type, String needName, double count) {
+	public LedgerEntity(LocalDate date, EntryType type, String needName, double count, double totalCostOrIncome) {
+	// public LedgerEntity(LocalDate date, EntryType type, String needName, double count) {
 		this.date = date;
 		this.type = type;
 		this.needName = needName;
 		this.count = count;
-		this.amount = 0.0;
+		// this.amount = 0.0;
+		this.amount = totalCostOrIncome;
 	}
 
 	public String getNeedName() {

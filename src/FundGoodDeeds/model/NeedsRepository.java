@@ -64,7 +64,10 @@ public class NeedsRepository extends Observable {
 
 		for(String[] need : rawNeeds)
 		{
-			NeedComponent needComponent = new Need(need[1], Double.parseDouble(need[2]),Double.parseDouble(need[3]),Double.parseDouble(need[4]), Double.parseDouble(need[5]));
+			//Need(String name, double total)
+			NeedComponent needComponent = new Need(need[1], Double.parseDouble(need[2]));
+			// //Need(String name, double total, double fixed, double variable, double fees)
+			// NeedComponent needComponent = new Need(need[1], Double.parseDouble(need[2]),Double.parseDouble(need[3]),Double.parseDouble(need[4]), Double.parseDouble(need[5]));
 			needsList.add(needComponent);
 		}
 
@@ -184,18 +187,17 @@ public class NeedsRepository extends Observable {
 	{
 		List<String> csvLines = new ArrayList<>();
 		
-		
 		for(NeedComponent component : needsCatalog)
 		{
 			if(component instanceof Need need)
 			{
 				// Format: n,name,total,fixed,variable,fees
-                String line = String.format("n,%s,%.1f,%.1f,%.1f,%.1f",
+                String line = String.format("n,%s,%.1f",
 					need.getName(),
-					need.getTotal(),
-					need.getFixed(),
-					need.getVariable(),
-					need.getFees()
+					need.getTotal()
+					// need.getFixed(),
+					// need.getVariable(),
+					// need.getFees()
 				);
 				csvLines.add(line);
 			}
@@ -234,5 +236,60 @@ public class NeedsRepository extends Observable {
 		return totalCost;
 	}
 
+	/** Removes a NeedComponent (Need/Bundle) by name from the catalog. */
+    public void removeNeedComponent(String name) {
+        //Use removeIf to iterate and delete based on name comparison
+        needsCatalog.removeIf(nc -> nc.getName().equals(name));
+        setChanged();
+        notifyObservers();
+    }
 
+	/**
+     * Finds all Bundles that contain a Need component with the given name.
+     * @param needName The name of the component to search for.
+     * @return A list of Bundles that contain the specified Need.
+     */
+    public List<Bundle> findBundlesContainingNeed(String needName) {
+        List<Bundle> bundles = new ArrayList<>();
+        for (NeedComponent component : needsCatalog) {
+            if (component instanceof Bundle bundle) {
+                // Check if the bundle contains the need by iterating over its keys
+                for (NeedComponent innerComponent : bundle.getComponentsAndCounts().keySet()) {
+                    if (innerComponent.getName().equalsIgnoreCase(needName)) {
+                        bundles.add(bundle);
+                        break; // Move to the next bundle
+                    }
+                }
+            }
+        }
+        return bundles;
+    }
+
+    /**
+     * Checks if a basic NeedComponent is a part of any existing Bundle.
+     * @param needName The name of the NeedComponent to check.
+     * @return true if the Need is a component in one or more Bundles, false otherwise.
+     */
+    public boolean isNeedComponentOfAnyBundle(String needName) {
+        return findBundlesContainingNeed(needName).size() > 0;
+    }
+
+    /**
+     * Gets the total count of a specific Need component across all Bundles.
+     * @param needName The name of the need component.
+     * @return The total quantity of that need component across all bundles.
+     */
+    public int getTotalBundleComponentCount(String needName) {
+        int totalCount = 0;
+        List<Bundle> bundles = findBundlesContainingNeed(needName);
+        for (Bundle bundle : bundles) {
+            // Iterate over the bundle's components to find the specific component count
+            for (Map.Entry<NeedComponent, Integer> entry : bundle.getComponentsAndCounts().entrySet()) {
+                if (entry.getKey().getName().equalsIgnoreCase(needName)) {
+                    totalCount += entry.getValue();
+                }
+            }
+        }
+        return totalCount;
+    }
 }

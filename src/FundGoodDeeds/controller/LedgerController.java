@@ -54,6 +54,14 @@ public class LedgerController {
         return this.ledgerRepository;
     }
 
+    public NeedsRepository getNeedsRepository() {
+        return this.needsRepository;
+    }
+
+    public List<Bundle> getBundlesContainingNeed(String needName) {
+        return needsRepository.findBundlesContainingNeed(needName);
+    }
+
     //Retrieves the daily funding goal for the specified date.
     //Note to self: This is for sequence diagram #3, step 1-5 loop
     public double getDailyGoal(LocalDate date) {
@@ -68,7 +76,11 @@ public class LedgerController {
     
     //Expose the getFundsForDate method to the view
     public double getFunds(LocalDate date) {
-        return ledgerRepository.getFundsForDate(date);
+        return ledgerRepository.findFunds(date);
+    }
+
+    public double getThreshold(LocalDate date) {
+        return ledgerRepository.findThreshold(date);
     }
     
     //Retrieves the total donations/fulfillment value for the specified date.
@@ -78,6 +90,11 @@ public class LedgerController {
         //    -  3. LedgerRepository -> calculateDonations(todaysDate) -> LedgerRepository
         //    -  5. LedgerRepository -> return Donations -> LedgerController
         return ledgerRepository.calculateDonations(date);
+    }
+
+    //Expose log data to the view
+    public List<LedgerEntity> getLog() {
+        return ledgerRepository.getAllLogEntries();
     }
 
 	//Records the fulfillment of a Need or Bundle (NEED entry).
@@ -92,8 +109,12 @@ public class LedgerController {
         }
         
         double totalCost = (need.getTotal() * quantity);
+
+        // //Delete Need/Bundle after fulfillment
+        // this.needsRepository.removeNeedComponent(needName);
         
-        LedgerEntity entry = new LedgerEntity(date, LedgerEntity.EntryType.NEED, needName, quantity);
+        LedgerEntity entry = new LedgerEntity(date, LedgerEntity.EntryType.NEED, needName, quantity, totalCost);
+        // LedgerEntity entry = new LedgerEntity(date, LedgerEntity.EntryType.NEED, needName, quantity);
         
         ledgerRepository.save(entry);
     }
@@ -139,14 +160,45 @@ public class LedgerController {
         if (quantity <= 0) {
             throw new IllegalArgumentException("Quantity must be > 0.");
         }
+        
+        //Check for existence using the injected NeedsRepository
+        NeedComponent need = needsRepository.getNeedByName(needOrBundleName);
+        if (need == null) {
+            throw new IllegalArgumentException("Need or Bundle not found in catalog: " + needOrBundleName);
+        }
 
-        LedgerEntity entry = new LedgerEntity(date, LedgerEntity.EntryType.NEED, needOrBundleName, quantity);
+        double totalCost = (need.getTotal() * quantity);
+
+        // //Delete Need/Bundle after fulfillment
+        // this.needsRepository.removeNeedComponent(needOrBundleName);
+
+        LedgerEntity entry = new LedgerEntity(date, LedgerEntity.EntryType.NEED, needOrBundleName, quantity, totalCost);
+        // LedgerEntity entry = new LedgerEntity(date, LedgerEntity.EntryType.NEED, needOrBundleName, quantity);
         ledgerRepository.save(entry);
     }
 
     //FOR FUTURE IMPLEMENTATION
-    public void addIncomeEntry(LocalDate date, String fundingSource, double units) {
+    public void addIncomeEntry(LocalDate date, String fundingSourceName, double units, double amount) {
+        //Need to create a new LedgerEntity of type INCOME, tracking the funding source name and units.
+        //This is for the implementation to add an Income Entry to the ledger.
+        if (date == null) {
+            date = LocalDate.now();
+        }
 
+        if ((fundingSourceName == null) || (fundingSourceName.isBlank())) {
+            throw new IllegalArgumentException("Funding source name must not be empty.");
+        }
+
+        if (units <= 0) {
+            throw new IllegalArgumentException("Units must be > 0.");
+        }
+
+        double totalIncome = (units * amount);
+
+        //Creates a ledger entry of type INCOME, using the needName/count fields for sourceName/units.
+        LedgerEntity entry = new LedgerEntity(date, LedgerEntity.EntryType.INCOME, fundingSourceName, units, totalIncome);
+        // LedgerEntity entry = new LedgerEntity(date, LedgerEntity.EntryType.INCOME, fundingSourceName, units);
+        ledgerRepository.save(entry);
     }
 
     // //Saves BOTH sides (needs + ledger). One-stop for the CLI.
@@ -165,5 +217,45 @@ public class LedgerController {
 
     public void loadData() {
         ledgerRepository.loadLog();
+    }
+
+    /**
+     * Records fulfillment of a basic Need by drawing down its units from a specific Bundle.
+     * It handles recording the ledger entry, updating the bundle, and deleting the 
+     * base Need from the catalog if it's no longer a component of any bundle.
+     * @param date The date of fulfillment.
+     * @param needName The name of the basic need being fulfilled.
+     * @param bundle The specific bundle to draw the units from.
+     * @param unitsToFulfill The quantity to fulfill.
+     */
+    public void fulfillNeedFromBundle(LocalDate date, String needName, Bundle bundle, int unitsToFulfill) {
+        
+        NeedComponent originalNeed = needsRepository.getNeedByName(needName);
+        if (originalNeed == null) {
+            throw new IllegalArgumentException("Need not found in catalog: " + needName);
+        }
+        
+        double unitCost = originalNeed.getTotal();
+        double totalCost = unitCost * unitsToFulfill;
+
+        // 1. Reduce the units in the bundle
+        int unitsRemoved = bundle.removeComponentUnits(needName, unitsToFulfill);
+        
+        if (unitsRemoved != unitsToFulfill) {
+            throw new RuntimeException("Fulfillment error: Expected to remove " + unitsToFulfill + " units but removed " + unitsRemoved + ".");
+        }
+
+        // 2. Record the fulfillment entry (basic need fulfilled)
+        LedgerEntity entry = new LedgerEntity(date, LedgerEntity.EntryType.NEED, needName, unitsRemoved, totalCost);
+        ledgerRepository.save(entry);
+
+        // 3. Check if the basic need should now be removed from the catalog.
+        // It should be removed if it still exists as a top-level Need AND is no longer a component of any bundle.
+        if (needsRepository.getNeedByName(needName) instanceof Need) { // Check if it is a basic Need, not a Bundle
+            if (!needsRepository.isNeedComponentOfAnyBundle(needName)) {
+                // Remove the basic Need from the top-level catalog
+                needsRepository.removeNeedComponent(needName);
+            }
+        }
     }
 }

@@ -5,17 +5,17 @@ import java.util.Locale;
 public class Need implements NeedComponent {
     private String name;
     private double total;
-    private double fixed;
-    private double variable;
-    private double fees;
+    // private double fixed;
+    // private double variable;
+    // private double fees;
     
-    
-    public Need(String name, double total, double fixed, double variable, double fees) {
+    public Need(String name, double total) {
+    // public Need(String name, double total, double fixed, double variable, double fees) {
         this.name = name;
         this.total = total;
-        this.fixed = fixed;
-        this.variable = variable;
-        this.fees = fees;
+        // this.fixed = fixed;
+        // this.variable = variable;
+        // this.fees = fees;
     }
     
     // From NeedComponent interface
@@ -29,20 +29,20 @@ public class Need implements NeedComponent {
         return total;
     }
     
-    @Override
-    public double getFixed() {
-        return fixed;
-    }
+    // @Override
+    // public double getFixed() {
+    //     return fixed;
+    // }
     
-    @Override
-    public double getVariable() {
-        return variable;
-    }
+    // @Override
+    // public double getVariable() {
+    //     return variable;
+    // }
     
-    @Override
-    public double getFees() {
-        return fees;
-    }
+    // @Override
+    // public double getFees() {
+    //     return fees;
+    // }
     
     // To help with CRUD: (Setters)
     public void setName(String name) {
@@ -53,17 +53,17 @@ public class Need implements NeedComponent {
         this.total = total;
     }
     
-    public void setFixed(double fixed) {
-        this.fixed = fixed;
-    }
+    // public void setFixed(double fixed) {
+    //     this.fixed = fixed;
+    // }
     
-    public void setVariable(double variable) {
-        this.variable = variable;
-    }
+    // public void setVariable(double variable) {
+    //     this.variable = variable;
+    // }
     
-    public void setFees(double fees) {
-        this.fees = fees;
-    }
+    // public void setFees(double fees) {
+    //     this.fees = fees;
+    // }
 
     @Override
     public boolean equals(Object o) {

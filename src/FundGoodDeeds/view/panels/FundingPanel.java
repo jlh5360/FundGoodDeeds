@@ -5,6 +5,7 @@ package FundGoodDeeds.view.panels;
 
 import FundGoodDeeds.controller.MasterController;
 import FundGoodDeeds.model.FundingSource;
+import FundGoodDeeds.view.SwingUIView;
 
 import javax.swing.*;
 import java.awt.*;
@@ -24,6 +25,7 @@ public class FundingPanel extends JPanel {
     private static final long serialVersionUID = 1L;
 
     private final MasterController master;
+    private final SwingUIView parentFrame;
 
     private final DefaultListModel<String> model = new DefaultListModel<>();
     private final JList<String> list = new JList<>(model);
@@ -33,12 +35,21 @@ public class FundingPanel extends JPanel {
     private final JButton editBtn    = new JButton("Edit");
     private final JButton deleteBtn  = new JButton("Delete");
 
-    public FundingPanel(MasterController master) {
+    public FundingPanel(MasterController master, SwingUIView parentFrame) {
         this.master = master;
+        this.parentFrame = parentFrame;
 
         setLayout(new BorderLayout(8, 8));
 
         list.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+
+        // //Set colors explicitly for high contrast in dark mode
+        // list.setBackground(new Color(60, 60, 60)); 
+        // list.setForeground(new Color(230, 230, 230));
+
+        //Apply initial colors
+        refreshTheme();
+
         add(new JScrollPane(list), BorderLayout.CENTER);
 
         // Controls
@@ -61,6 +72,21 @@ public class FundingPanel extends JPanel {
         addBtn.addActionListener(e -> showAddDialog());
         editBtn.addActionListener(e -> showEditDialog());
         deleteBtn.addActionListener(e -> deleteSelected());
+    }
+
+    /** Applies the correct list background/foreground colors based on theme */
+    public void refreshTheme() {
+        boolean isDark = parentFrame.isDarkModeEnabled();
+        Color listBgColor = isDark ? new Color(60, 60, 60) : Color.WHITE;
+        Color listFgColor = isDark ? new Color(230, 230, 230) : Color.BLACK;
+        Color panelBgColor = isDark ? new Color(45, 45, 45) : UIManager.getColor("control");
+
+        //Need to set colors directly on the JList
+        list.setBackground(listBgColor); 
+        list.setForeground(listFgColor);
+        
+        //Also set the panel background for consistency
+        this.setBackground(panelBgColor);
     }
 
     /** Reload funding sources from model. */

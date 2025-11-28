@@ -49,8 +49,15 @@ public class CSVManager
             while(reader.ready())
             {
                 String line = reader.readLine();
-                dataList.add(line);
+                // dataList.add(line);
                 
+                //Trim the line and only add it if it is not empty.
+                //This if statement helps resolves the issue of not being
+                //able to switch between the ConsoleView (CLI) and SwingUIView
+                //(GUI) when starting/running the application.
+                if (line != null && !line.trim().isEmpty()) {
+                    dataList.add(line.trim());
+                }
             }
 
             reader.close();
