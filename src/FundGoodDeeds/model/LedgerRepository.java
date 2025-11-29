@@ -9,6 +9,7 @@ import java.util.Observable;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import FundGoodDeeds.model.AbstractLedgerEntry.EntryType;
 import FundGoodDeeds.model.LedgerEntity;
 
 @SuppressWarnings("deprecation")
@@ -16,20 +17,25 @@ public class LedgerRepository extends Observable {
 	private final List<LedgerEntity> logEntries = new ArrayList<>();
 	public CSVManager manager;
 	private final NeedsRepository needsRepository; // Dependency for cost lookups
+	private final FundingRepository fundingRepository;
 
 	private static final double DEFAULT_GOAL = 2000.0;
 	private static final double DEFAULT_FUNDS = 150.0;
 	private static final double DEFAULT_THRESHOLD = 2000.0;
 
 	// Updated constructor to accept NeedsRepository
-	public LedgerRepository(CSVManager manager, NeedsRepository needsRepository)
+	public LedgerRepository(CSVManager manager, NeedsRepository needsRepository, FundingRepository fundingRepository)
 	{
 		this.manager = manager;
 		this.needsRepository = needsRepository;
+		this.fundingRepository = fundingRepository;
 	}
 
 	public void loadLog()
 	{
+		//Clear the existing entries before loading from CSV
+        this.logEntries.clear();
+
 		List<String[]> rawData = getDataFromCSV();
 		List<LedgerEntity> entries = new ArrayList<>();
 		for(String[] raw : rawData)
@@ -40,40 +46,92 @@ public class LedgerRepository extends Observable {
 			LedgerEntity entity; // Declare entity once
 
 			LocalDate entityDate = LocalDate.of(year,month,day);
-			switch(raw[3])
+			double countOrUnits = Double.parseDouble(raw[5]);
+			String type = raw[3];
+
+			switch(type)
 			{
 				
 				case "n":
-					entity = new LedgerEntity(entityDate, LedgerEntity.EntryType.NEED, raw[4], Double.parseDouble(raw[5]), Double.parseDouble(raw[6]));
-					entries.add(entity);
-				break;
+					String needName = raw[4];
+					NeedComponent need = needsRepository.getNeedByName(needName);
+
+					if (need != null) {
+						double totalCost = (need.getTotal() * countOrUnits);
+
+						entity = new LedgerEntity(entityDate, LedgerEntity.EntryType.NEED, needName, countOrUnits, totalCost);
+						entries.add(entity);
+					}
+					else {
+						//Log and use $0 cost if the need is missing to keep the log entry
+						System.err.println("Warning: Need '" + needName + "' not found in catalog for ledger entry on " + entityDate + ". Using 0.00 cost.");
+						entity = new LedgerEntity(entityDate, LedgerEntity.EntryType.NEED, needName, countOrUnits, 0.00);
+						entries.add(entity);
+					}
+					break;
 
 				case "f":
-					entity = new LedgerEntity(entityDate, LedgerEntity.EntryType.FUND, Double.parseDouble(raw[4]));
+					double funds = Double.parseDouble(raw[4]);
+
+					entity = new LedgerEntity(entityDate, LedgerEntity.EntryType.FUND, funds);
 					entries.add(entity);
-				break;
+					break;
 
 				// In case we still need goal
 					
 				case "g":
-					entity = new LedgerEntity(entityDate, LedgerEntity.EntryType.GOAL, Double.parseDouble(raw[4]));
+					double goal = Double.parseDouble(raw[4]);
+
+					entity = new LedgerEntity(entityDate, LedgerEntity.EntryType.GOAL, goal);
 					entries.add(entity);
-				break;
+					break;
 					
 				case "t":
-					entity = new LedgerEntity(entityDate, LedgerEntity.EntryType.THRESHOLD, Double.parseDouble(raw[4]));
+					double threshold = Double.parseDouble(raw[4]);
+
+					entity = new LedgerEntity(entityDate, LedgerEntity.EntryType.THRESHOLD, threshold);
 					entries.add(entity);
-				break;
+					break;
+
+				case "i":
+					String fundingSourceName = raw[4];
+					System.out.println("fundingSourceName = raw[4] ---> " + fundingSourceName);
+					FundingSource source = fundingRepository.getFundingSourceByName(fundingSourceName);
+					System.out.println("source = fundingRepository.getFundingSourceByName(fundingSourceName) ---> " + source);
+					double unitAmount = 0.0;
+
+					if (source != null) {
+						// double totalIncome = (source.getAmount() * countOrUnits);
+
+						// entity = new LedgerEntity(entityDate, LedgerEntity.EntryType.INCOME, fundingSourceName, countOrUnits, totalIncome);
+						// entries.add(entity);
+
+						unitAmount = source.getAmount();
+					}
+
+					double totalIncome = (unitAmount * countOrUnits);
+
+					entity = new LedgerEntity(entityDate, LedgerEntity.EntryType.INCOME, fundingSourceName, countOrUnits, totalIncome);
+					entries.add(entity);
+
+					// else {
+					// 	//Log and use $0 income if the source is missing
+					// 		System.err.println("Warning: Funding source '" + fundingSourceName + "' not found in catalog for ledger entry on " + entityDate + ". Using 0.00 income.");
+					// 		entity = new LedgerEntity(entityDate, LedgerEntity.EntryType.INCOME, fundingSourceName, countOrUnits, 0.00);
+					// 		entries.add(entity);
+					// }
+					break;
 				
 				default:
-
-				break;
+					System.err.println("Skipping unknown ledger entry type: " + raw[3]);
+					break;
 			}
 		}
 
 		logEntries.addAll(entries);
 		
-
+		setChanged();
+        notifyObservers();
 	}
 
 	public void save(LedgerEntity entry) {
@@ -116,6 +174,12 @@ public class LedgerRepository extends Observable {
 
 	public double findThreshold(LocalDate date) {
 		return getEntryForDate(LedgerEntity.EntryType.THRESHOLD,date);
+	}
+
+	public void setThreshold(LocalDate date, double amount) {
+		// return getEntryForDate(LedgerEntity.EntryType.THRESHOLD, date);
+		LedgerEntity entity = new LedgerEntity(date, EntryType.THRESHOLD, amount);
+        addEntry(entity);
 	}
 
 	// public double calculateDonations(LocalDate todaysDate) {
@@ -164,6 +228,62 @@ public class LedgerRepository extends Observable {
 		this.logEntries.add(new LedgerEntity(today, LedgerEntity.EntryType.FUND, donation1));
 		this.logEntries.add(new LedgerEntity(today, LedgerEntity.EntryType.FUND, donation2));
 		setChanged();
+	}
+
+	/**
+	 * Retrieves the total income received (INCOME entries) for the specified date.
+	 * Implements logic for Program Operation #8.
+	 * @param date The date to check.
+	 * @return The total income for the day.
+	 */
+	public double calculateIncomeReceived(LocalDate date) {
+		return logEntries.stream()
+			.filter(entry -> entry.getDate().equals(date))
+			.filter(entry -> entry.getType() == LedgerEntity.EntryType.INCOME)
+			.mapToDouble(LedgerEntity::getAmount)
+			.sum();
+	}
+
+	/**
+	 * Adds a generic LedgerEntity to the log and notifies observers.
+	 * This is used for FUND, GOAL, and THRESHOLD entries.
+	 * @param entity The LedgerEntity to add.
+	 */
+	public void addEntry(LedgerEntity entity) {
+		this.logEntries.add(entity);
+		setChanged();
+		notifyObservers();
+	}
+
+	/**
+	 * Deletes a LedgerEntity at a specific index from the logEntries list.
+	 * Implements logic for Program Operations #11 and #12.
+	 * @param index The 0-based index of the entry to delete.
+	 * @return true if the entry was successfully removed, false otherwise.
+	 */
+	public boolean deleteLogEntry(int index) {
+		if (index >= 0 && index < logEntries.size()) {
+			LedgerEntity removedEntry = logEntries.remove(index);
+			// Do not notifyObservers here, as the Controller will do it after saving
+			// Note: For a real-time app, you might want to notify here, but for saveAll, it's safer to let the controller handle it.
+			setChanged();
+			notifyObservers();
+			return true;
+		}
+		return false;
+	}
+
+	/**
+	 * Checks if there are any NEED or INCOME entries for the given date.
+	 * This is used for restriction #5.
+	 * @param date The date to check.
+	 * @return true if there are NEED or INCOME entries, false otherwise.
+	 */
+	public boolean hasNonGoalOrFundEntries(LocalDate date) {
+		return logEntries.stream()
+			.filter(entry -> entry.getDate().equals(date))
+			.anyMatch(entry -> entry.getType() == LedgerEntity.EntryType.NEED 
+						|| entry.getType() == LedgerEntity.EntryType.INCOME);
 	}
 
 	// //V1

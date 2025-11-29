@@ -67,6 +67,11 @@ public class Bundle implements NeedComponent {
     public String getName() {
         return name;
     }
+    
+    public void setName(String name) {
+        this.name = name;
+    }
+    
     /*
 	 * This specific method gets the total cost of all Needs in the Bundle.
 	 * It will sum up the total values from each NeedComponent contained within the Bundle.
@@ -116,6 +121,10 @@ public class Bundle implements NeedComponent {
      * @return The number of units successfully removed (max is current count, min is 0).
      */
     public int removeComponentUnits(String componentName, int quantity) {
+        if (quantity <= 0) {
+            return 0;
+        }
+        
         NeedComponent componentToUpdate = componentCounts.keySet().stream()
                 .filter(nc -> nc.getName().equalsIgnoreCase(componentName))
                 .findFirst()
@@ -125,7 +134,16 @@ public class Bundle implements NeedComponent {
             return 0; // Component not found
         }
 
-        int currentCount = componentCounts.get(componentToUpdate);
+        // int currentCount = componentCounts.get(componentToUpdate);
+
+        // Integer currentQuantityObject = componentCounts.get(componentToUpdate);
+        Integer currentQuantityObject = componentCounts.getOrDefault(componentToUpdate, 0); 
+        
+        if (currentQuantityObject == null) {
+            return 0; // Should not happen if the key was found, but defends against NPE
+        }
+
+        int currentCount = currentQuantityObject.intValue();
         
         // Only remove up to the available quantity
         int unitsToRemove = Math.min(quantity, currentCount);
@@ -140,6 +158,71 @@ public class Bundle implements NeedComponent {
         }
         
         return unitsToRemove;
+    }
+
+    /**
+     * Adds units of an existing or new component to the bundle.
+     * Implements logic for Program Operation #14.
+     * @param component The NeedComponent to add/update.
+     * @param quantity The number of units to add.
+     */
+    public void addComponentUnits(NeedComponent component, int quantity) {
+        if (quantity <= 0) {
+            throw new IllegalArgumentException("Quantity to add must be positive.");
+        }
+        
+        // Find the component that matches by name (case-insensitive)
+        // We must ensure the component in the map is the one from the NeedsCatalog
+        NeedComponent existingComponent = componentCounts.keySet().stream()
+            .filter(nc -> nc.getName().equalsIgnoreCase(component.getName()))
+            .findFirst()
+            .orElse(null);
+
+        // If existing component found, use it, otherwise use the passed component
+        NeedComponent key = (existingComponent != null) ? existingComponent : component;
+
+        int currentCount = componentCounts.getOrDefault(key, 0);
+        int newCount = currentCount + quantity;
+        
+        componentCounts.put(key, newCount);
+    }
+
+    /**
+     * Updates the quantity of an existing component in the bundle.
+     * Implements logic for Program Operation #14.
+     * If newQuantity is 0 or less, the component is removed.
+     * @param componentName The name of the component to update.
+     * @param newQuantity The new total quantity of the component.
+     * @return true if the component was found and updated/removed, false otherwise.
+     */
+    public boolean updateComponentUnits(String componentName, int newQuantity) {
+        NeedComponent componentToUpdate = componentCounts.keySet().stream()
+            .filter(nc -> nc.getName().equalsIgnoreCase(componentName))
+            .findFirst()
+            .orElse(null);
+
+        if (componentToUpdate == null) {
+            return false; // Component not found
+        }
+
+        if (newQuantity <= 0) {
+            // If count is zero or less, remove the component entirely
+            componentCounts.remove(componentToUpdate);
+        } else {
+            // Otherwise, update the count
+            componentCounts.put(componentToUpdate, newQuantity);
+        }
+        
+        return true;
+    }
+
+    // Helper to get the count of a component (for view/controller logic)
+    public int getComponentCount(String componentName) {
+        return componentCounts.keySet().stream()
+            .filter(nc -> nc.getName().equalsIgnoreCase(componentName))
+            .map(componentCounts::get)
+            .findFirst()
+            .orElse(0);
     }
     
     @Override

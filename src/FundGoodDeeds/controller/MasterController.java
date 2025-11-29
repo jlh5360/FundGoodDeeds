@@ -42,8 +42,8 @@ public class MasterController {
     //Loading all data View's startup() function
     public void loadAll() {
         needsController.loadData();
-        ledgerController.loadData();
         fundingController.loadData();
+        ledgerController.loadData();
 
         System.out.println("CSV reloaded");
     }
@@ -105,8 +105,36 @@ public class MasterController {
         return Math.max(0,getTotalNeedCost() - getTotalIncome());
     }
 
+    /**
+     * Calculates the net cost (Costs Fulfilled - Funds Received) for the selected date.
+     * Implements logic for Program Operation #8.
+     * @return The net cost for the selected date.
+     */
+    public double getNetDayCost() {
+        LocalDate date = getSelectedDate();
+        // Assuming getTodayDonations gets NEED costs
+        double fulfilledCosts = ledgerController.getTodayDonations(date); 
+        // New method for INCOME
+        double fundsReceived = ledgerController.calculateDailyIncome(date); 
+        
+        return fulfilledCosts - fundsReceived;
+    }
+
     //FOR FUTURE IMPLEMENTATION
     public boolean isThresholdExceeded() {
         return getTotalNeedCost() > this.ledgerController.getLedgerRepository().getEntryForDate(LedgerEntity.EntryType.THRESHOLD, getSelectedDate());
+    }
+
+    /**
+     * Checks if the daily net costs exceed the set threshold for the selected date.
+     * Implements logic for Program Operation #8.
+     * @return true if net costs for the day exceed the threshold.
+     */
+    public boolean isDailyThresholdExceeded() {
+        LocalDate date = getSelectedDate();
+        double netCosts = getNetDayCost(); 
+        double threshold = ledgerController.getThreshold(date); 
+        
+        return netCosts > threshold;
     }
 }

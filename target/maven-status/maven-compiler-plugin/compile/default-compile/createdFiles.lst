@@ -4,6 +4,7 @@ FundGoodDeeds\model\LedgerRepository$1.class
 KelvinTempSensor.class
 FundGoodDeeds\view\panels\DatePanel.class
 FundGoodDeeds\app\FundGoodDeedsApp.class
+FundGoodDeeds\model\LedgerEntity$1.class
 FundGoodDeeds\model\Need.class
 FundGoodDeeds\model\CSVManager.class
 FundGoodDeeds\view\panels\NeedsPanel.class
@@ -27,6 +28,7 @@ FundGoodDeeds\model\AbstractLedgerEntry.class
 FundGoodDeeds\model\FundingRepository.class
 FundGoodDeeds\model\LedgerEntity.class
 FundGoodDeeds\controller\LedgerController.class
+FundGoodDeeds\view\ConsoleView$1.class
 WeatherStation.class
 KelvinTempSensorAdapter.class
 IBarometer.class

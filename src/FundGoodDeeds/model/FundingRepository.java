@@ -44,7 +44,10 @@ public class FundingRepository extends Observable {
 
     public void loadFunds()
     {
+        this.fundingSources.clear();
         getSourcesFromCSV();
+        setChanged();
+        notifyObservers();
     }
 
 
