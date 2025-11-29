@@ -167,7 +167,11 @@ public class SwingUIView extends JFrame implements Observer {
             
             //This is necessary to apply the new UIManager settings to all existing components
             SwingUtilities.updateComponentTreeUI(this);
-            
+
+            // Tells Swing to repaint everything
+
+            repaint();
+
             //Update button text
             datePanel.getThemeToggleBtn().setText(isDark ? "Toggle Light Mode" : "Toggle Dark Mode");
 
