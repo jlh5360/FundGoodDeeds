@@ -15,9 +15,9 @@ import FundGoodDeeds.model.NeedsRepository;
  * the startup and shutdown logic for the application's data.
  */
 public class MasterController {
-    private final NeedsRepository needsRepository;
-    private final LedgerRepository ledgerRepository;
-    private final FundingRepository fundingRepository;
+    // private final NeedsRepository needsRepository;
+    // private final LedgerRepository ledgerRepository;
+    // private final FundingRepository fundingRepository;
 
     private final NeedsController needsController;
     private final LedgerController ledgerController;
@@ -42,8 +42,10 @@ public class MasterController {
     //Loading all data View's startup() function
     public void loadAll() {
         needsController.loadData();
-        ledgerController.loadData();
         fundingController.loadData();
+        ledgerController.loadData();
+
+        System.out.println("CSV reloaded");
     }
 
     //Saving all data the View's saveAll() function
@@ -79,12 +81,12 @@ public class MasterController {
         this.selectedDate = date;
     }
 
-    public Day getDaySummary() {
+    public Day getDaySummary(LocalDate date) {
         //The buildDay() function should get all the information from the 
         //needs and funding and ledger repositories on a particular day
         // return ledgerRepository.buildDay(selectedDate, needsRepository, fundingRepository);
         
-        return ledgerRepository.buildDay(selectedDate);
+        return this.ledgerController.getLedgerRepository().buildDay(selectedDate);
     }
 
     public double getTotalIncome() {
@@ -103,8 +105,36 @@ public class MasterController {
         return Math.max(0,getTotalNeedCost() - getTotalIncome());
     }
 
+    /**
+     * Calculates the net cost (Costs Fulfilled - Funds Received) for the selected date.
+     * Implements logic for Program Operation #8.
+     * @return The net cost for the selected date.
+     */
+    public double getNetDayCost() {
+        LocalDate date = getSelectedDate();
+        // Assuming getTodayDonations gets NEED costs
+        double fulfilledCosts = ledgerController.getTodayDonations(date); 
+        // New method for INCOME
+        double fundsReceived = ledgerController.calculateDailyIncome(date); 
+        
+        return fulfilledCosts - fundsReceived;
+    }
+
     //FOR FUTURE IMPLEMENTATION
     public boolean isThresholdExceeded() {
-        return getTotalNeedCost() > this.ledgerController.getLedgerRepository().getEntryForDate(LedgerEntity.EntryType.THRESHOLD,null);
+        return getTotalNeedCost() > this.ledgerController.getLedgerRepository().getEntryForDate(LedgerEntity.EntryType.THRESHOLD, getSelectedDate());
+    }
+
+    /**
+     * Checks if the daily net costs exceed the set threshold for the selected date.
+     * Implements logic for Program Operation #8.
+     * @return true if net costs for the day exceed the threshold.
+     */
+    public boolean isDailyThresholdExceeded() {
+        LocalDate date = getSelectedDate();
+        double netCosts = getNetDayCost(); 
+        double threshold = ledgerController.getThreshold(date); 
+        
+        return netCosts > threshold;
     }
 }

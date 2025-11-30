@@ -25,11 +25,22 @@ public class SwingUIView extends JFrame implements Observer {
     private final MasterController master;
 
     // Panels (modular, self-contained)
-    private final SummaryPanel summaryPanel;
-    private final NeedsPanel needsPanel;
-    private final FundingPanel fundingPanel;
-    private final LedgerPanel ledgerPanel;
-    private final DatePanel datePanel;
+    private SummaryPanel summaryPanel;
+    private NeedsPanel needsPanel;
+    private FundingPanel fundingPanel;
+    private LedgerPanel ledgerPanel;
+    private DatePanel datePanel;
+
+    private boolean isDarkModeEnabled = true;   //Start in dark mode by default
+    
+    public boolean isDarkModeEnabled() {
+        return isDarkModeEnabled;
+    }
+    
+    public void toggleTheme() {
+        isDarkModeEnabled = !isDarkModeEnabled;
+        applyTheme(isDarkModeEnabled);
+    }
 
     public SwingUIView(MasterController master) {
         super("FundGoodDeeds (Swing UI V2)");
@@ -41,18 +52,21 @@ public class SwingUIView extends JFrame implements Observer {
             return;
         }
 
-        setSize(950, 700);
+        setSize(1050, 700);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLayout(new BorderLayout());
 
-        enableDarkMode();
+        // enableDarkMode();
 
         // Instantiate panels
-        summaryPanel = new SummaryPanel(master);
-        needsPanel   = new NeedsPanel(master);
-        fundingPanel = new FundingPanel(master);
-        ledgerPanel  = new LedgerPanel(master);
-        datePanel    = new DatePanel(master);
+        summaryPanel = new SummaryPanel(master, this);
+        needsPanel   = new NeedsPanel(master, this);
+        fundingPanel = new FundingPanel(master, this);
+        ledgerPanel  = new LedgerPanel(master, this);
+        datePanel    = new DatePanel(master, this);
+
+        applyTheme(isDarkModeEnabled);
+        master.registerObservers(this);
 
         // Tab System
         JTabbedPane tabs = new JTabbedPane();
@@ -75,6 +89,16 @@ public class SwingUIView extends JFrame implements Observer {
     @Override
     public void update(Observable o, Object arg) {
         refresh();
+        refreshTheme();
+    }
+
+    /** Refreshes only theme-related aspects */
+    private void refreshTheme() {
+        if (summaryPanel != null) summaryPanel.refreshTheme();
+        if (needsPanel != null)    needsPanel.refreshTheme();
+        if (fundingPanel != null)  fundingPanel.refreshTheme();
+        if (ledgerPanel != null)   ledgerPanel.refreshTheme();
+        if (datePanel != null)     datePanel.refreshTheme();
     }
 
     /** Refresh all panels safely */
@@ -102,5 +126,52 @@ public class SwingUIView extends JFrame implements Observer {
                 }
             }
         } catch (Exception ignored) {}
+    }
+
+    /** Applies the Nimbus light or dark theme. */
+    public void applyTheme(boolean isDark) {
+        try {
+            if (isDark) {
+                //Dark Theme Colors
+                UIManager.put("control", new Color(45, 45, 45));
+                UIManager.put("info", new Color(60, 60, 60));
+                UIManager.put("nimbusBase", new Color(30, 30, 30));
+                UIManager.put("nimbusBlueGrey", new Color(60, 60, 60));
+                UIManager.put("text", new Color(230, 230, 230));
+                UIManager.put("nimbusLightBackground", new Color(60, 60, 60));   //Crucial for lists/textareas
+                UIManager.put("List.background", new Color(60, 60, 60));
+                UIManager.put("TextArea.background", new Color(60, 60, 60));
+                
+            }
+            else {
+                //Light Theme Colors (Restored Defaults or standard light colors)
+                UIManager.put("control", new Color(240, 240, 240));
+                UIManager.put("info", new Color(255, 255, 255));
+                UIManager.put("nimbusBase", new Color(200, 200, 200));
+                UIManager.put("nimbusBlueGrey", new Color(170, 184, 200));
+                UIManager.put("text", Color.BLACK);
+                UIManager.put("nimbusLightBackground", Color.WHITE);
+                UIManager.put("List.background", Color.WHITE);
+                UIManager.put("TextArea.background", Color.WHITE);
+            }
+
+            //Apply Nimbus Look and Feel
+            for (UIManager.LookAndFeelInfo info : UIManager.getInstalledLookAndFeels()) {
+                if ("Nimbus".equals(info.getName())) {
+                    UIManager.setLookAndFeel(info.getClassName());
+                    break;
+                }
+            }
+            
+            //This is necessary to apply the new UIManager settings to all existing components
+            SwingUtilities.updateComponentTreeUI(this);
+            
+            //Update button text
+            datePanel.getThemeToggleBtn().setText(isDark ? "Toggle Light Mode" : "Toggle Dark Mode");
+
+        }
+        catch (Exception e) {
+            System.err.println("Could not set Nimbus Look and Feel or apply theme: " + e.getMessage());
+        }
     }
 }

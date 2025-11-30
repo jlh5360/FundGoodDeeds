@@ -5,6 +5,8 @@ package FundGoodDeeds.view.panels;
 
 import FundGoodDeeds.controller.MasterController;
 import FundGoodDeeds.model.Day;
+import FundGoodDeeds.model.FundingSource;
+import FundGoodDeeds.view.SwingUIView;
 
 import javax.swing.*;
 import java.awt.*;
@@ -26,6 +28,7 @@ public class LedgerPanel extends JPanel {
     private static final long serialVersionUID = 1L;
 
     private final MasterController master;
+    private final SwingUIView parentFrame;
     private final JTextArea text = new JTextArea();
 
     private final JButton refreshBtn     = new JButton("Refresh");
@@ -34,13 +37,21 @@ public class LedgerPanel extends JPanel {
 
     private final DateTimeFormatter YMD = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
-    public LedgerPanel(MasterController master) {
+    public LedgerPanel(MasterController master, SwingUIView parentFrame) {
         this.master = master;
+        this.parentFrame = parentFrame;
 
         setLayout(new BorderLayout(8, 8));
 
         text.setEditable(false);
         text.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 12));
+
+        // //Set colors explicitly for high contrast in dark mode
+        // text.setBackground(new Color(60, 60, 60));
+        // text.setForeground(new Color(230, 230, 230));
+
+        //Apply initial colors
+        refreshTheme();
 
         add(new JScrollPane(text), BorderLayout.CENTER);
 
@@ -61,18 +72,40 @@ public class LedgerPanel extends JPanel {
         addIncomeBtn.addActionListener(e -> showAddIncomeEntryDialog());
     }
 
+    /** Applies the correct text area background/foreground colors based on theme */
+    public void refreshTheme() {
+        boolean isDark = parentFrame.isDarkModeEnabled();
+        Color textAreaBgColor = isDark ? new Color(60, 60, 60) : Color.WHITE;
+        Color textAreaFgColor = isDark ? new Color(230, 230, 230) : Color.BLACK;
+        Color panelBgColor = isDark ? new Color(45, 45, 45) : UIManager.getColor("control");
+
+
+        //Need to set colors directly on the JTextArea
+        text.setBackground(textAreaBgColor);
+        text.setForeground(textAreaFgColor);
+        
+        //Also set the panel background for consistency
+        this.setBackground(panelBgColor);
+    }
+
     /** Refresh the daily ledger summary based on the active date. */
     public void refresh() {
-        Day d = master.getDaySummary();
+        //Get the currently active date
+        LocalDate activeDate = master.getSelectedDate();
+        Day d = master.getDaySummary(activeDate);
         StringBuilder sb = new StringBuilder();
 
         sb.append("Ledger Summary for ").append(d.getDate()).append("\n\n");
         sb.append("Funds:     $").append(String.format("%.2f", d.getFunds())).append("\n");
         sb.append("Threshold: $").append(String.format("%.2f", d.getThreshold())).append("\n");
-        sb.append("Need Cost: $").append(String.format("%.2f", d.getTotalNeedCost())).append("\n");
-        sb.append("Income:    $").append(String.format("%.2f", d.getTotalIncome())).append("\n");
-        sb.append("Net:       $").append(String.format("%.2f", d.getNetCost())).append("\n");
-        sb.append("Exceeded?  ").append(d.isThresholdExceeded() ? "YES" : "NO").append("\n");
+        // sb.append("Need Cost: $").append(String.format("%.2f", d.getTotalNeedCost())).append("\n");
+        // sb.append("Income:    $").append(String.format("%.2f", d.getTotalIncome())).append("\n");
+        // sb.append("Net:       $").append(String.format("%.2f", d.getNetCost())).append("\n");
+        // sb.append("Exceeded?  ").append(d.isThresholdExceeded() ? "YES" : "NO").append("\n");
+        sb.append("Need Cost: $").append(String.format("%.2f", master.getTotalNeedCost())).append("\n");
+        sb.append("Income:    $").append(String.format("%.2f", master.getTotalIncome())).append("\n");
+        sb.append("Net:       $").append(String.format("%.2f", master.getNetCost())).append("\n");
+        sb.append("Exceeded?  ").append(master.isThresholdExceeded() ? "YES" : "NO").append("\n");
 
         text.setText(sb.toString());
     }
@@ -155,7 +188,24 @@ public class LedgerPanel extends JPanel {
                 return;
             }
 
-            master.getLedgerController().addIncomeEntry(date, src, units);
+            var all = master.getFundingController().getAll();
+
+            if (all.isEmpty()) {
+                System.out.println("(no funding sources)");
+                return;
+            }
+            else {
+                for (FundingSource fs : all) {
+                    if (src == fs.getName()) {
+                        //Need to validate source for income entries
+                        master.getLedgerController().addIncomeEntry(date, src, units, fs.getAmount());
+                        
+                        System.out.println("Income added.");
+                    }
+                }
+            }
+
+            // master.getLedgerController().addIncomeEntry(date, src, units);
             master.setSelectedDate(date);
             refresh();
         } catch (Exception ex) {

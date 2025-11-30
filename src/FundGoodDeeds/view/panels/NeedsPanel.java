@@ -5,6 +5,7 @@ package FundGoodDeeds.view.panels;
 
 import FundGoodDeeds.controller.MasterController;
 import FundGoodDeeds.model.NeedComponent;
+import FundGoodDeeds.view.SwingUIView;
 
 import javax.swing.*;
 import java.awt.*;
@@ -29,6 +30,7 @@ public class NeedsPanel extends JPanel {
     private static final long serialVersionUID = 1L;
 
     private final MasterController master;
+    private final SwingUIView parentFrame;
     private final DefaultListModel<String> model = new DefaultListModel<>();
     private final JList<String> list = new JList<>(model);
 
@@ -36,13 +38,22 @@ public class NeedsPanel extends JPanel {
     private final JButton addNeedBtn = new JButton("Add Need");
     private final JButton addBundleBtn = new JButton("Add Bundle");
 
-    public NeedsPanel(MasterController master) {
+    public NeedsPanel(MasterController master, SwingUIView parentFrame) {
         this.master = master;
+        this.parentFrame = parentFrame;
 
         setLayout(new BorderLayout(8, 8));
 
         // Center: catalog list
         list.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+
+        // //Set colors explicitly for high contrast in dark mode
+        // list.setBackground(new Color(60, 60, 60)); 
+        // list.setForeground(new Color(230, 230, 230));
+
+        //Apply initial colors
+        refreshTheme();
+
         add(new JScrollPane(list), BorderLayout.CENTER);
 
         // South: controls
@@ -67,6 +78,21 @@ public class NeedsPanel extends JPanel {
         addBundleBtn.addActionListener(e -> showAddBundleDialog());
     }
 
+    /** Applies the correct list background/foreground colors based on theme */
+    public void refreshTheme() {
+        boolean isDark = parentFrame.isDarkModeEnabled();
+        Color listBgColor = isDark ? new Color(60, 60, 60) : Color.WHITE;
+        Color listFgColor = isDark ? new Color(230, 230, 230) : Color.BLACK;
+        Color panelBgColor = isDark ? new Color(45, 45, 45) : UIManager.getColor("control");
+
+        // Set colors directly on the JList
+        list.setBackground(listBgColor); 
+        list.setForeground(listFgColor);
+        
+        // Also set the panel background for consistency
+        this.setBackground(panelBgColor);
+    }
+
     /** Reload the list of needs/bundles from the model. */
     public void refresh() {
         model.clear();
@@ -81,19 +107,22 @@ public class NeedsPanel extends JPanel {
 
     private void showAddNeedDialog() {
         JTextField nameField  = new JTextField(15);
-        JTextField fixedField = new JTextField(8);
-        JTextField varField   = new JTextField(8);
-        JTextField feesField  = new JTextField(8);
+        // JTextField fixedField = new JTextField(8);
+        // JTextField varField   = new JTextField(8);
+        // JTextField feesField  = new JTextField(8);
+        JTextField totalField  = new JTextField(8);
 
         JPanel panel = new JPanel(new GridLayout(0, 2, 4, 4));
         panel.add(new JLabel("Name:"));
         panel.add(nameField);
-        panel.add(new JLabel("Fixed cost:"));
-        panel.add(fixedField);
-        panel.add(new JLabel("Variable cost:"));
-        panel.add(varField);
-        panel.add(new JLabel("Fees:"));
-        panel.add(feesField);
+        // panel.add(new JLabel("Fixed cost:"));
+        // panel.add(fixedField);
+        // panel.add(new JLabel("Variable cost:"));
+        // panel.add(varField);
+        // panel.add(new JLabel("Fees:"));
+        // panel.add(feesField);
+        panel.add(new JLabel("Total cost:"));
+        panel.add(totalField);
 
         int result = JOptionPane.showConfirmDialog(
                 this,
@@ -107,17 +136,19 @@ public class NeedsPanel extends JPanel {
 
         try {
             String name  = nameField.getText().trim();
-            double fixed = Double.parseDouble(fixedField.getText().trim());
-            double var   = Double.parseDouble(varField.getText().trim());
-            double fees  = Double.parseDouble(feesField.getText().trim());
-            double total = fixed + var + fees;
+            // double fixed = Double.parseDouble(fixedField.getText().trim());
+            // double var   = Double.parseDouble(varField.getText().trim());
+            // double fees  = Double.parseDouble(feesField.getText().trim());
+            // double total = fixed + var + fees;
+            double total = Double.parseDouble(totalField.getText().trim());
 
             if (name.isEmpty()) {
                 JOptionPane.showMessageDialog(this, "Name cannot be empty.");
                 return;
             }
 
-            master.getNeedsController().addNeed(name, total, fixed, var, fees);
+            master.getNeedsController().addNeed(name, total);
+            // master.getNeedsController().addNeed(name, total, fixed, var, fees);
             refresh();
         } catch (NumberFormatException ex) {
             JOptionPane.showMessageDialog(this, "Please enter valid numbers for the costs.");

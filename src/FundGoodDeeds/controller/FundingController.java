@@ -1,6 +1,5 @@
 package FundGoodDeeds.controller;
 
-import java.io.IOException;
 import java.util.List;
 import java.util.Observer;
 
@@ -31,7 +30,7 @@ public class FundingController {
     public void saveData() {
         try {
             fundingRepository.saveFundsCatalog();
-        } catch (IOException e) {
+        } catch (Exception e) {
             throw new RuntimeException("Save failed for funding sources: " + e.getMessage(), e);
         }
     }

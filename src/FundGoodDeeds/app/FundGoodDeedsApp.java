@@ -18,8 +18,8 @@ public class FundGoodDeedsApp {
         CSVManager csvManager = new CSVManager("log.csv");
 
         NeedsRepository needsRepo = new NeedsRepository(csvManager);
-        LedgerRepository ledgerRepo = new LedgerRepository(csvManager, needsRepo);
         FundingRepository fundingRepo = new FundingRepository(csvManager);
+        LedgerRepository ledgerRepo = new LedgerRepository(csvManager, needsRepo, fundingRepo);
 
         // -----------------------------
         // 2) CONTROLLERS
