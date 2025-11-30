@@ -66,10 +66,7 @@ public class NeedsRepository extends Observable {
 
 		for(String[] need : rawNeeds)
 		{
-			//Need(String name, double total)
 			NeedComponent needComponent = new Need(need[1], Double.parseDouble(need[2]));
-			// //Need(String name, double total, double fixed, double variable, double fees)
-			// NeedComponent needComponent = new Need(need[1], Double.parseDouble(need[2]),Double.parseDouble(need[3]),Double.parseDouble(need[4]), Double.parseDouble(need[5]));
 			needsList.add(needComponent);
 		}
 
@@ -194,12 +191,10 @@ public class NeedsRepository extends Observable {
 			if(component instanceof Need need)
 			{
 				// Format: n,name,total,fixed,variable,fees
-                String line = String.format("n,%s,%.1f",
+				Need need = (Need) component;
+				String line = String.format("n,%s,%.1f",
 					need.getName(),
 					need.getTotal()
-					// need.getFixed(),
-					// need.getVariable(),
-					// need.getFees()
 				);
 				csvLines.add(line);
 			}

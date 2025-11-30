@@ -43,7 +43,6 @@ public class NeedsController {
     
     //Creates and adds a new Basic Need to the catalog.
     public void addNeed(String name, double total) {
-    // public void addNeed(String name, double total, double fixed, double variable, double fees) {
         if (name == null || name.trim().isEmpty()) {
             throw new IllegalArgumentException("Need name cannot be empty.");
         }
@@ -52,7 +51,6 @@ public class NeedsController {
         }
         
         Need newNeed = new Need(name, total);
-        // Need newNeed = new Need(name, total, fixed, variable, fees);
         needsRepository.appendNeed(newNeed);
     }
 
@@ -62,7 +60,7 @@ public class NeedsController {
             throw new IllegalArgumentException("Bundle name cannot be empty.");
         }
         if (parts == null || parts.isEmpty()) { // This check is correct for a Map as well
-            throw new IllegalArgumentException("A Bundle must contain at least one part.");
+            throw new IllegalArgumentException("A Bundle must contain at least one need.");
         }
         if (needsRepository.getNeedByName(name) != null) {
 			throw new IllegalArgumentException("A Need or Bundle with that name already exists.");

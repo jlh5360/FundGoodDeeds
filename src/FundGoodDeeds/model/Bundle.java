@@ -86,27 +86,6 @@ public class Bundle implements NeedComponent {
                 .mapToDouble(entry -> entry.getKey().getTotal() * entry.getValue())
                 .sum();
     }
-    
-    // @Override
-    // public double getFixed() {
-    //     return componentCounts.entrySet().stream()
-    //             .mapToDouble(entry -> entry.getKey().getFixed() * entry.getValue())
-    //             .sum();
-    // }
-    
-    // @Override
-    // public double getVariable() {
-    //     return componentCounts.entrySet().stream()
-    //             .mapToDouble(entry -> entry.getKey().getVariable() * entry.getValue())
-    //             .sum();
-    // }
-    
-    // @Override
-    // public double getFees() {
-    //     return componentCounts.entrySet().stream()
-    //             .mapToDouble(entry -> entry.getKey().getFees() * entry.getValue())
-    //             .sum();
-    // }
 
 	// ***FUTURE REFACTORING*** 
 	// Need cool_need = mybundle.getNeedFromBundle("Cool Need");

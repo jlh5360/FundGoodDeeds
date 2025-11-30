@@ -170,16 +170,10 @@ public class ConsoleView implements Observer {
     }
 
     private void addNeed() {
-        // String name = ask("Name: ");
-        String name = askForNonExistingNeedOrBundle("Need name: ");
-        // double fixed = askDouble("Fixed cost: ");
-        // double var   = askDouble("Variable cost: ");
-        // double fees  = askDouble("Fees: ");
-        // double total = fixed + var + fees;
-        double total = askDouble("Total cost: $");
+        String name = ask("Name: ");
+        double total = askDouble("Total cost: ");
 
         master.getNeedsController().addNeed(name, total);
-        // master.getNeedsController().addNeed(name, total, fixed, var, fees);
         System.out.println("Need added.");
     }
 

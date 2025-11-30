@@ -20,9 +20,9 @@ import FundGoodDeeds.view.panels.*;
  */
 public class SwingUIView extends JFrame implements Observer {
 
-    private static final long serialVersionUID = 1L;
+    private static long serialVersionUID = 1L;
 
-    private final MasterController master;
+    private MasterController master;
 
     // Panels (modular, self-contained)
     private SummaryPanel summaryPanel;
