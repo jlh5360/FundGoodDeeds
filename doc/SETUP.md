@@ -29,8 +29,15 @@ Removes previous build artifacts and compiles the source code:
 mvn clean compile
 ```
 
-### 2. Run the Application
+### 2. Run the User Interfaces
+
+### a. For CLI
 
 ```bash
 mvn exec:java
+```
+### b. For GUI (Swing UI)
+
+```bash
+mvn exec:java -Dexec.args="swing"
 ```
