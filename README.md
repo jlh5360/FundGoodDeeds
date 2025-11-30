@@ -28,9 +28,9 @@ An online application to be developed in Java 11=>**17** for the purpose of...  
 - Maven
 - Chocolately
 
-## Instructions
+## Startup Instructions 
 
-Details on how to run our project are provided by the team in the **doc/SETUP.md** file prior to each major release.
+Details on how to run our project are provided by the team in the **doc/SETUP.md** file prior to each major release. Link [here](https://github.com/RIT-SWEN-383/term-project-rit-swen-383-01-1a/blob/master/doc/SETUP.md)
 
 ## Disclaimers
 
