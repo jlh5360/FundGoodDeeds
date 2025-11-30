@@ -133,6 +133,7 @@ public class SwingUIView extends JFrame implements Observer {
         try {
             if (isDark) {
                 //Dark Theme Colors
+                this.getContentPane().setBackground(new Color(45, 45, 45));
                 UIManager.put("control", new Color(45, 45, 45));
                 UIManager.put("info", new Color(60, 60, 60));
                 UIManager.put("nimbusBase", new Color(30, 30, 30));
@@ -145,6 +146,7 @@ public class SwingUIView extends JFrame implements Observer {
             }
             else {
                 //Light Theme Colors (Restored Defaults or standard light colors)
+                this.getContentPane().setBackground(Color.WHITE);
                 UIManager.put("control", new Color(240, 240, 240));
                 UIManager.put("info", new Color(255, 255, 255));
                 UIManager.put("nimbusBase", new Color(200, 200, 200));
@@ -165,7 +167,11 @@ public class SwingUIView extends JFrame implements Observer {
             
             //This is necessary to apply the new UIManager settings to all existing components
             SwingUtilities.updateComponentTreeUI(this);
-            
+
+            // Tells Swing to repaint everything
+
+            repaint();
+
             //Update button text
             datePanel.getThemeToggleBtn().setText(isDark ? "Toggle Light Mode" : "Toggle Dark Mode");
 

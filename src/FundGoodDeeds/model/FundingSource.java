@@ -27,5 +27,9 @@ public class FundingSource {
         this.amount = amount;
     }
     
+    @Override
+    public String toString(){
+        return getName() + ": " + getAmount();
+    }
     
 }
