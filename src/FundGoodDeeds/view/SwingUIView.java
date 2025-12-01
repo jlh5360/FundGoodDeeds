@@ -26,7 +26,8 @@ public class SwingUIView extends JFrame implements Observer {
 
     private final MasterController master;
 
-    // Panels (modular, self-contained)
+    // Create all the different panels up front.
+    // This keeps the GUI modular — you can modify one panel without breaking the others.
     private SummaryPanel summaryPanel;
     private NeedsPanel needsPanel;
     private FundingPanel fundingPanel;
@@ -48,24 +49,26 @@ public class SwingUIView extends JFrame implements Observer {
         super("FundGoodDeeds (Swing UI V2)");
         this.master = master;
 
-        // 1. Initialize Panels
+        // Create all the different panels up front.
+        // This keeps the GUI modular — you can modify one panel without breaking the others.
         summaryPanel = new SummaryPanel(master);
         needsPanel = new NeedsPanel(master);
         fundingPanel = new FundingPanel(master);
         ledgerPanel = new LedgerPanel(master);
         datePanel = new DatePanel(master); // New/Updated panel for date and theme toggle
 
-        // 2. Register for updates
+        // Registering this view as an Observer lets it react when the repositories change.
+        // Swing handles its own repainting, so we just trigger updates inside the panels.
         master.registerObservers(this);
 
         // 3. Set up main container and layout
         Container contentPane = getContentPane();
         contentPane.setLayout(new BorderLayout());
 
-        // 4. Add DatePanel to the top
+        // Date panel sits at the top kind of like a "status bar" (current date + theme toggle)
         contentPane.add(datePanel, BorderLayout.NORTH);
 
-        // 5. Setup Tabbed Pane for main content
+        // Tabs make the UI feel more organized — each feature gets its own space.
         JTabbedPane tabbedPane = new JTabbedPane();
         tabbedPane.addTab("Summary & System", summaryPanel);
         tabbedPane.addTab("Needs Catalog", needsPanel);
@@ -74,14 +77,13 @@ public class SwingUIView extends JFrame implements Observer {
 
         contentPane.add(tabbedPane, BorderLayout.CENTER);
 
-        // 6. Final frame setup
+        // 6. Basic Final frame setup
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setSize(800, 600);
         setLocationRelativeTo(null); // Center the window
 
+        // Hook up top-panel button actions (date reset + theme toggle)
         setupDatePanelListeners();
-
-        // 7. Add theme toggle action listener
         datePanel.getThemeToggleBtn().addActionListener(e -> toggleTheme());
         
         // Apply initial theme
@@ -143,7 +145,7 @@ public class SwingUIView extends JFrame implements Observer {
                 UIManager.put("TitledBorder.titleColor", Color.BLACK);
             }
 
-            //Apply Nimbus Look and Feel
+            // Re-apply look and feel after updates
             for (UIManager.LookAndFeelInfo info : UIManager.getInstalledLookAndFeels()) {
                 if ("Nimbus".equals(info.getName())) {
                     UIManager.setLookAndFeel(info.getClassName());
