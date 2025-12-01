@@ -1,207 +1,178 @@
 // ==========================
 // FundingPanel.java
-// ==========================
+// =========================
 package FundGoodDeeds.view.panels;
 
 import FundGoodDeeds.controller.MasterController;
 import FundGoodDeeds.model.FundingSource;
-import FundGoodDeeds.view.SwingUIView;
 
 import javax.swing.*;
+import javax.swing.table.DefaultTableModel;
 import java.awt.*;
+import java.util.List;
+import java.util.Observable;
+import java.util.Observer;
+import java.text.NumberFormat;
+import java.util.Locale;
 
 /**
  * FundingPanel (V2)
  * - Swing version of CLI Funding Source management
  * - Allows:
- *   ✓ List Sources
- *   ✓ Add Source
- *   ✓ Edit Source
- *   ✓ Delete Source
- *   ✓ Refresh
+ *   -List Sources
+ *   -Add Source
+ *   -Edit Source
+ *   -Delete Source
+ *   -Refresh
  */
-public class FundingPanel extends JPanel {
-
-    private static final long serialVersionUID = 1L;
+@SuppressWarnings("deprecation")
+public class FundingPanel extends JPanel implements Observer {
 
     private final MasterController master;
-    private final SwingUIView parentFrame;
+    private JTable fundingTable;
+    private DefaultTableModel tableModel;
+    private final NumberFormat currencyFormatter = NumberFormat.getCurrencyInstance(Locale.US);
 
-    private final DefaultListModel<String> model = new DefaultListModel<>();
-    private final JList<String> list = new JList<>(model);
-
-    private final JButton refreshBtn = new JButton("Refresh");
-    private final JButton addBtn     = new JButton("Add");
-    private final JButton editBtn    = new JButton("Edit");
-    private final JButton deleteBtn  = new JButton("Delete");
-
-    public FundingPanel(MasterController master, SwingUIView parentFrame) {
+    // Constructor 
+    public FundingPanel(MasterController master) {
         this.master = master;
-        this.parentFrame = parentFrame;
+        master.registerObservers(this);
 
-        setLayout(new BorderLayout(8, 8));
-
-        list.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-
-        // //Set colors explicitly for high contrast in dark mode
-        // list.setBackground(new Color(60, 60, 60)); 
-        // list.setForeground(new Color(230, 230, 230));
-
-        //Apply initial colors
-        refreshTheme();
-
-        add(new JScrollPane(list), BorderLayout.CENTER);
-
-        // Controls
-        JPanel controls = new JPanel(new FlowLayout(FlowLayout.LEFT));
-        controls.add(refreshBtn);
-        controls.add(addBtn);
-        controls.add(editBtn);
-        controls.add(deleteBtn);
-
-        add(controls, BorderLayout.SOUTH);
-
-        // Event listeners
-        installListeners();
-
-        refresh();
-    }
-
-    private void installListeners() {
-        refreshBtn.addActionListener(e -> refresh());
-        addBtn.addActionListener(e -> showAddDialog());
-        editBtn.addActionListener(e -> showEditDialog());
-        deleteBtn.addActionListener(e -> deleteSelected());
-    }
-
-    /** Applies the correct list background/foreground colors based on theme */
-    public void refreshTheme() {
-        boolean isDark = parentFrame.isDarkModeEnabled();
-        Color listBgColor = isDark ? new Color(60, 60, 60) : Color.WHITE;
-        Color listFgColor = isDark ? new Color(230, 230, 230) : Color.BLACK;
-        Color panelBgColor = isDark ? new Color(45, 45, 45) : UIManager.getColor("control");
-
-        //Need to set colors directly on the JList
-        list.setBackground(listBgColor); 
-        list.setForeground(listFgColor);
+        setLayout(new BorderLayout(5, 5));
         
-        //Also set the panel background for consistency
-        this.setBackground(panelBgColor);
-    }
-
-    /** Reload funding sources from model. */
-    public void refresh() {
-        model.clear();
-        for (FundingSource fs : master.getFundingController().getAll()) {
-            model.addElement(fs.toString());
-        }
-    }
-
-    // ====================================================
-    // Add Funding Source
-    // ====================================================
-    private void showAddDialog() {
-        JTextField nameField = new JTextField(12);
-        JTextField amountField = new JTextField(8);
-
-        JPanel panel = new JPanel(new GridLayout(0, 2, 6, 6));
-        panel.add(new JLabel("Name:"));
-        panel.add(nameField);
-        panel.add(new JLabel("$/Unit:"));
-        panel.add(amountField);
-
-        int result = JOptionPane.showConfirmDialog(
-                this,
-                panel,
-                "Add Funding Source",
-                JOptionPane.OK_CANCEL_OPTION,
-                JOptionPane.PLAIN_MESSAGE
-        );
-
-        if (result != JOptionPane.OK_OPTION) return;
-
-        try {
-            String name = nameField.getText().trim();
-            double amt = Double.parseDouble(amountField.getText().trim());
-            if (name.isEmpty()) {
-                JOptionPane.showMessageDialog(this, "Name cannot be empty.");
-                return;
+        // Table Setup
+    
+        // Simple two-column table: funding source name + amount.
+        // Each row = one FundingSource from the repository.
+        String[] columnNames = {"Name", "Initial Amount ($)"};
+        tableModel = new DefaultTableModel(columnNames, 0) {
+            @Override
+            public boolean isCellEditable(int row, int column) {
+                return false;
             }
-            master.getFundingController().addFundingSource(name, amt);
-            refresh();
-        } catch (Exception e) {
-            JOptionPane.showMessageDialog(this, "Invalid input.\n" + e.getMessage());
+        };
+        fundingTable = new JTable(tableModel);
+        JScrollPane scrollPane = new JScrollPane(fundingTable);
+        add(scrollPane, BorderLayout.CENTER);
+
+        // Button Panel Setup
+        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        buttonPanel.setBorder(BorderFactory.createTitledBorder("Funding Source Actions (List Funding Sources)"));
+
+        JButton addSourceButton = new JButton("Add Source");
+        addSourceButton.addActionListener(e -> addFundingSource());
+        
+        JButton editSourceButton = new JButton("Edit Source Amount");
+        editSourceButton.addActionListener(e -> editFundingSource());
+        
+        JButton deleteSourceButton = new JButton("Delete Source");
+        deleteSourceButton.addActionListener(e -> deleteFundingSource());
+
+        buttonPanel.add(addSourceButton);
+        buttonPanel.add(editSourceButton);
+        buttonPanel.add(deleteSourceButton);
+        
+        add(buttonPanel, BorderLayout.SOUTH);
+
+        updateTable();
+    }
+
+    // Add Funding Source — asks for name + amount, then delegates.
+    private void addFundingSource() {
+        // Basic two-input dialog flow: name to amount
+        String name = JOptionPane.showInputDialog(this, "Enter Funding Source Name:", "Add Funding Source", JOptionPane.PLAIN_MESSAGE);
+        if (name == null || name.trim().isEmpty()) return;
+
+        String amountStr = JOptionPane.showInputDialog(this, "Enter Initial Amount ($):", "Add Funding Source", JOptionPane.PLAIN_MESSAGE);
+        if (amountStr == null || amountStr.trim().isEmpty()) return;
+        
+        try {
+            double amount = Double.parseDouble(amountStr.trim());
+            // Controller handles validation + adding the object.
+            master.getFundingController().addFundingSource(name.trim(), amount);
+            
+            JOptionPane.showMessageDialog(this, "Funding Source '" + name.trim() + "' added successfully.", "Success", JOptionPane.INFORMATION_MESSAGE);
+        
+        } catch (NumberFormatException ex) {
+            JOptionPane.showMessageDialog(this, "Invalid amount entered.", "Input Error", JOptionPane.ERROR_MESSAGE);
+        } catch (IllegalArgumentException ex) {
+            JOptionPane.showMessageDialog(this, ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
         }
     }
 
-    // ====================================================
-    // Edit Funding Source
-    // ====================================================
-    private void showEditDialog() {
-        String selected = list.getSelectedValue();
-        if (selected == null) {
-            JOptionPane.showMessageDialog(this, "Select a funding source first.");
+    // Edit Funding Source — changes only the amount field.
+    private void editFundingSource() {
+        int selectedRow = fundingTable.getSelectedRow();
+        if (selectedRow == -1) {
+            // no selected rows = cant edit anything
+            JOptionPane.showMessageDialog(this, "Please select a Funding Source to edit.", "Selection Error", JOptionPane.ERROR_MESSAGE);
             return;
         }
 
-        // Extract name from "Name ($X.XX)" display string
-        String oldName = selected.contains("(")
-                ? selected.substring(0, selected.indexOf("(")).trim()
-                : selected.trim();
-
-        JTextField amountField = new JTextField(8);
-
-        JPanel panel = new JPanel(new GridLayout(0, 2, 6, 6));
-        panel.add(new JLabel("New $/Unit:"));
-        panel.add(amountField);
-
-        int result = JOptionPane.showConfirmDialog(
-                this,
-                panel,
-                "Edit Funding Source: " + oldName,
-                JOptionPane.OK_CANCEL_OPTION,
-                JOptionPane.PLAIN_MESSAGE
-        );
-
-        if (result != JOptionPane.OK_OPTION) return;
-
-        try {
-            double amt = Double.parseDouble(amountField.getText().trim());
-            master.getFundingController().updateFundingSource(oldName, amt);
-            refresh();
-        } catch (Exception e) {
-            JOptionPane.showMessageDialog(this, "Invalid input.\n" + e.getMessage());
+        // Grab existing name (names are unique identifiers in this design).
+        String name = (String) tableModel.getValueAt(selectedRow, 0);
+        
+        // prompt for new amount
+        String newAmountStr = JOptionPane.showInputDialog(this, 
+            "Enter new initial amount for '" + name + "':", 
+            "Edit Funding Source", 
+            JOptionPane.PLAIN_MESSAGE);
+        
+        if (newAmountStr != null && !newAmountStr.trim().isEmpty()) {
+            try {
+                double newAmount = Double.parseDouble(newAmountStr.trim());
+                
+                // Pass the update request through the controller.
+                master.getFundingController().updateFundingSource(name, newAmount);
+                
+                JOptionPane.showMessageDialog(this, "Amount for '" + name + "' updated successfully.", "Success", JOptionPane.INFORMATION_MESSAGE);
+            } catch (NumberFormatException ex) {
+                JOptionPane.showMessageDialog(this, "Invalid amount entered.", "Input Error", JOptionPane.ERROR_MESSAGE);
+            } catch (IllegalArgumentException ex) {
+                JOptionPane.showMessageDialog(this, ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+            }
         }
     }
 
-    // ====================================================
-    // Delete Funding Source
-    // ====================================================
-    private void deleteSelected() {
-        String selected = list.getSelectedValue();
-        if (selected == null) {
-            JOptionPane.showMessageDialog(this, "Select a source to delete.");
+    // Delete Funding Source — remove it entirely.
+    private void deleteFundingSource() {
+        int selectedRow = fundingTable.getSelectedRow();
+        if (selectedRow == -1) {
+            JOptionPane.showMessageDialog(this, "Please select a Funding Source to delete.", "Selection Error", JOptionPane.ERROR_MESSAGE);
             return;
         }
 
-        String name = selected.contains("(")
-                ? selected.substring(0, selected.indexOf("(")).trim()
-                : selected.trim();
-
-        int confirm = JOptionPane.showConfirmDialog(
-                this,
-                "Delete '" + name + "'?",
-                "Confirm Delete",
-                JOptionPane.YES_NO_OPTION
-        );
-
-        if (confirm != JOptionPane.YES_OPTION) return;
-
-        try {
-            master.getFundingController().deleteFundingSource(name);
-            refresh();
-        } catch (Exception e) {
-            JOptionPane.showMessageDialog(this, "Error deleting source:\n" + e.getMessage());
+        String name = (String) tableModel.getValueAt(selectedRow, 0);
+        int confirm = JOptionPane.showConfirmDialog(this, 
+            "Are you sure you want to delete '" + name + "'?", 
+            "Confirm Delete", JOptionPane.YES_NO_OPTION);
+        
+        if (confirm == JOptionPane.YES_OPTION) {
+            try {
+                master.getFundingController().deleteFundingSource(name);
+                JOptionPane.showMessageDialog(this, "'" + name + "' deleted successfully.", "Success", JOptionPane.INFORMATION_MESSAGE);
+            } catch (Exception ex) {
+                JOptionPane.showMessageDialog(this, "Error deleting item: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+            }
         }
+    }
+
+    // Rebuild the funding table — Observer callback + manual refresh.
+    private void updateTable() {
+        tableModel.setRowCount(0);
+
+        List<FundingSource> sources = master.getFundingController().getAll();
+        for (FundingSource source : sources) {
+            tableModel.addRow(new Object[]{
+                source.getName(),
+                currencyFormatter.format(source.getAmount())
+            });
+        }
+    }
+
+    // Every time model updates → refresh view automatically.
+    @Override
+    public void update(Observable o, Object arg) {
+        updateTable();
     }
 }
