@@ -17,19 +17,21 @@ import FundGoodDeeds.view.panels.*;
  * - Uses tabbed interface
  * - Auto-refreshes whenever repos update (Observer pattern)
  * - Completely driven by MasterController
+ * - Implements all ConsoleView features.
  */
+@SuppressWarnings("deprecation")
 public class SwingUIView extends JFrame implements Observer {
 
-    private static long serialVersionUID = 1L;
+    private static final long serialVersionUID = 1L;
 
-    private MasterController master;
+    private final MasterController master;
 
     // Panels (modular, self-contained)
     private SummaryPanel summaryPanel;
     private NeedsPanel needsPanel;
     private FundingPanel fundingPanel;
     private LedgerPanel ledgerPanel;
-    private DatePanel datePanel;
+    private DatePanel datePanel; // Now a panel at the top
 
     private boolean isDarkModeEnabled = true;   //Start in dark mode by default
     
@@ -46,107 +48,85 @@ public class SwingUIView extends JFrame implements Observer {
         super("FundGoodDeeds (Swing UI V2)");
         this.master = master;
 
-        // Ensure EDT safety if UI is created outside main
-        if (!SwingUtilities.isEventDispatchThread()) {
-            SwingUtilities.invokeLater(() -> new SwingUIView(master).start());
-            return;
-        }
+        // 1. Initialize Panels
+        summaryPanel = new SummaryPanel(master);
+        needsPanel = new NeedsPanel(master);
+        fundingPanel = new FundingPanel(master);
+        ledgerPanel = new LedgerPanel(master);
+        datePanel = new DatePanel(master); // New/Updated panel for date and theme toggle
 
-        setSize(1050, 700);
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setLayout(new BorderLayout());
-
-        // enableDarkMode();
-
-        // Instantiate panels
-        summaryPanel = new SummaryPanel(master, this);
-        needsPanel   = new NeedsPanel(master, this);
-        fundingPanel = new FundingPanel(master, this);
-        ledgerPanel  = new LedgerPanel(master, this);
-        datePanel    = new DatePanel(master, this);
-
-        applyTheme(isDarkModeEnabled);
+        // 2. Register for updates
         master.registerObservers(this);
 
-        // Tab System
-        JTabbedPane tabs = new JTabbedPane();
-        tabs.addTab("Needs", needsPanel);
-        tabs.addTab("Funding", fundingPanel);
-        tabs.addTab("Ledger", ledgerPanel);
+        // 3. Set up main container and layout
+        Container contentPane = getContentPane();
+        contentPane.setLayout(new BorderLayout());
 
-        // Add components to frame
-        add(summaryPanel, BorderLayout.NORTH);
-        add(tabs, BorderLayout.CENTER);
-        add(datePanel, BorderLayout.SOUTH);
+        // 4. Add DatePanel to the top
+        contentPane.add(datePanel, BorderLayout.NORTH);
+
+        // 5. Setup Tabbed Pane for main content
+        JTabbedPane tabbedPane = new JTabbedPane();
+        tabbedPane.addTab("Summary & System", summaryPanel);
+        tabbedPane.addTab("Needs Catalog", needsPanel);
+        tabbedPane.addTab("Funding Sources", fundingPanel);
+        tabbedPane.addTab("Ledger Log", ledgerPanel);
+
+        contentPane.add(tabbedPane, BorderLayout.CENTER);
+
+        // 6. Final frame setup
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setSize(800, 600);
+        setLocationRelativeTo(null); // Center the window
+
+        setupDatePanelListeners();
+
+        // 7. Add theme toggle action listener
+        datePanel.getThemeToggleBtn().addActionListener(e -> toggleTheme());
+        
+        // Apply initial theme
+        applyTheme(isDarkModeEnabled);
     }
 
-    /** Begin showing the window */
+    // New start method for Swing UI (equivalent to startup in ConsoleView)
     public void start() {
-        setVisible(true);
-        refresh();
+        // Since master.loadAll() is called in FundGoodDeedsApp.main, 
+        // we just need to make the GUI visible.
+        SwingUtilities.invokeLater(() -> setVisible(true));
+        
+        // Initial update to populate all panels
+        update(null, null);
     }
-
+    
+    // Observer pattern implementation
     @Override
     public void update(Observable o, Object arg) {
-        refresh();
-        refreshTheme();
+        // The panels handle their own updates; this is just the JFrame's observer contract.
     }
-
-    /** Refreshes only theme-related aspects */
-    private void refreshTheme() {
-        if (summaryPanel != null) summaryPanel.refreshTheme();
-        if (needsPanel != null)    needsPanel.refreshTheme();
-        if (fundingPanel != null)  fundingPanel.refreshTheme();
-        if (ledgerPanel != null)   ledgerPanel.refreshTheme();
-        if (datePanel != null)     datePanel.refreshTheme();
-    }
-
-    /** Refresh all panels safely */
-    public void refresh() {
-        if (summaryPanel != null) summaryPanel.refresh();
-        if (needsPanel != null)    needsPanel.refresh();
-        if (fundingPanel != null)  fundingPanel.refresh();
-        if (ledgerPanel != null)   ledgerPanel.refresh();
-        if (datePanel != null)     datePanel.refresh();
-    }
-
-    /** Apply Nimbus dark mode */
-    private void enableDarkMode() {
+    
+    private void applyTheme(boolean isDark) {
         try {
-            UIManager.put("control", new Color(45, 45, 45));
-            UIManager.put("info", new Color(60, 60, 60));
-            UIManager.put("nimbusBase", new Color(30, 30, 30));
-            UIManager.put("nimbusBlueGrey", new Color(60, 60, 60));
-            UIManager.put("text", new Color(230, 230, 230));
-
-            for (UIManager.LookAndFeelInfo info : UIManager.getInstalledLookAndFeels()) {
-                if ("Nimbus".equals(info.getName())) {
-                    UIManager.setLookAndFeel(info.getClassName());
-                    break;
-                }
-            }
-        } catch (Exception ignored) {}
-    }
-
-    /** Applies the Nimbus light or dark theme. */
-    public void applyTheme(boolean isDark) {
-        try {
+            // Set properties for Nimbus Look and Feel based on theme
             if (isDark) {
-                //Dark Theme Colors
-                this.getContentPane().setBackground(new Color(45, 45, 45));
-                UIManager.put("control", new Color(45, 45, 45));
-                UIManager.put("info", new Color(60, 60, 60));
-                UIManager.put("nimbusBase", new Color(30, 30, 30));
-                UIManager.put("nimbusBlueGrey", new Color(60, 60, 60));
-                UIManager.put("text", new Color(230, 230, 230));
-                UIManager.put("nimbusLightBackground", new Color(60, 60, 60));   //Crucial for lists/textareas
-                UIManager.put("List.background", new Color(60, 60, 60));
-                UIManager.put("TextArea.background", new Color(60, 60, 60));
+                // Dark Theme Colors
+                UIManager.put("control", new Color(64, 64, 64)); // Background color of most components
+                UIManager.put("info", new Color(40, 40, 40)); // Tooltip/Info background
+                UIManager.put("nimbusBase", new Color(30, 30, 30)); // Base color for primary components
+                UIManager.put("nimbusBlueGrey", new Color(50, 50, 50)); // Darker shading color
+                UIManager.put("text", Color.WHITE); // Text color
+                UIManager.put("nimbusLightBackground", new Color(80, 80, 80)); // Lightest background (e.g., text area)
+                UIManager.put("List.background", new Color(80, 80, 80)); // List background
+                UIManager.put("TextArea.background", new Color(80, 80, 80)); // TextArea background
+                UIManager.put("TextField.background", new Color(100, 100, 100));
+                UIManager.put("Table.background", new Color(80, 80, 80));
+                UIManager.put("Table.alternateRowColor", new Color(90, 90, 90));
+                UIManager.put("Table.foreground", Color.WHITE);
+                UIManager.put("Label.foreground", Color.WHITE);
+                UIManager.put("TitledBorder.titleColor", Color.LIGHT_GRAY);
                 
             }
             else {
                 //Light Theme Colors (Restored Defaults or standard light colors)
-                this.getContentPane().setBackground(Color.WHITE);
                 UIManager.put("control", new Color(240, 240, 240));
                 UIManager.put("info", new Color(255, 255, 255));
                 UIManager.put("nimbusBase", new Color(200, 200, 200));
@@ -155,6 +135,12 @@ public class SwingUIView extends JFrame implements Observer {
                 UIManager.put("nimbusLightBackground", Color.WHITE);
                 UIManager.put("List.background", Color.WHITE);
                 UIManager.put("TextArea.background", Color.WHITE);
+                UIManager.put("TextField.background", Color.WHITE);
+                UIManager.put("Table.background", Color.WHITE);
+                UIManager.put("Table.alternateRowColor", new Color(240, 240, 255));
+                UIManager.put("Table.foreground", Color.BLACK);
+                UIManager.put("Label.foreground", Color.BLACK);
+                UIManager.put("TitledBorder.titleColor", Color.BLACK);
             }
 
             //Apply Nimbus Look and Feel
@@ -167,11 +153,7 @@ public class SwingUIView extends JFrame implements Observer {
             
             //This is necessary to apply the new UIManager settings to all existing components
             SwingUtilities.updateComponentTreeUI(this);
-
-            // Tells Swing to repaint everything
-
-            repaint();
-
+            
             //Update button text
             datePanel.getThemeToggleBtn().setText(isDark ? "Toggle Light Mode" : "Toggle Dark Mode");
 
@@ -179,5 +161,11 @@ public class SwingUIView extends JFrame implements Observer {
         catch (Exception e) {
             System.err.println("Could not set Nimbus Look and Feel or apply theme: " + e.getMessage());
         }
+    }
+
+    private void setupDatePanelListeners() {
+        datePanel.getResetDateButton().addActionListener(e -> {
+            master.resetSelectedDateToToday();
+        });
     }
 }
