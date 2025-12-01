@@ -1,6 +1,8 @@
 package FundGoodDeeds.controller;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Observer;
 
 import FundGoodDeeds.model.Day;
@@ -24,6 +26,8 @@ public class MasterController {
     private final FundingController fundingController;
 
     private LocalDate selectedDate = LocalDate.now();
+
+    private final List<Observer> views = new ArrayList<>();
 
     //Dependency Injection via constructor
     public MasterController(NeedsController needsController, LedgerController ledgerController, FundingController fundingController) {
@@ -81,6 +85,11 @@ public class MasterController {
         this.selectedDate = date;
     }
 
+    public void resetSelectedDateToToday() {
+        LocalDate today = LocalDate.now();
+        setSelectedDate(today);
+    }
+    
     public Day getDaySummary(LocalDate date) {
         //The buildDay() function should get all the information from the 
         //needs and funding and ledger repositories on a particular day
@@ -136,5 +145,12 @@ public class MasterController {
         double threshold = ledgerController.getThreshold(date); 
         
         return netCosts > threshold;
+    }
+
+    private void notifyViews() {
+        for (Observer view : views) {
+            // Note: The null arguments are standard for the java.util.Observer pattern
+            view.update(null, null); 
+        }
     }
 }

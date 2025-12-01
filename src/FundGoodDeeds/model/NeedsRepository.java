@@ -191,7 +191,6 @@ public class NeedsRepository extends Observable {
 			if(component instanceof Need need)
 			{
 				// Format: n,name,total,fixed,variable,fees
-				Need need = (Need) component;
 				String line = String.format("n,%s,%.1f",
 					need.getName(),
 					need.getTotal()
