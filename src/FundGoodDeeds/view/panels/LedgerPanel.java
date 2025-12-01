@@ -4,212 +4,273 @@
 package FundGoodDeeds.view.panels;
 
 import FundGoodDeeds.controller.MasterController;
-import FundGoodDeeds.model.Day;
-import FundGoodDeeds.model.FundingSource;
-import FundGoodDeeds.view.SwingUIView;
+import FundGoodDeeds.model.LedgerEntity;
 
 import javax.swing.*;
+import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.List;
+import java.util.Observable;
+import java.util.Observer;
+import java.text.NumberFormat;
+import java.util.Locale;
 
 /**
  * LedgerPanel (V2)
  * - Shows daily ledger summary (same info as ConsoleView header)
  * - Provides buttons to:
- *   ✓ Refresh summary
- *   ✓ Add Need Fulfillment
- *   ✓ Add Funding Income
+ *   -Refresh summary
+ *   -Add Need Fulfillment
+ *   -Add Funding Income
  *
  * Deeper per-entry views can be added later if needed.
  */
-public class LedgerPanel extends JPanel {
 
-    private static final long serialVersionUID = 1L;
+@SuppressWarnings("deprecation")
+public class LedgerPanel extends JPanel implements Observer {
 
     private final MasterController master;
-    private final SwingUIView parentFrame;
-    private final JTextArea text = new JTextArea();
-
-    private final JButton refreshBtn     = new JButton("Refresh");
-    private final JButton addNeedBtn     = new JButton("Add Need Fulfillment");
-    private final JButton addIncomeBtn   = new JButton("Add Funding Income");
-
+    private JTable ledgerTable;
+    private DefaultTableModel tableModel;
+    
+    // Shared date/money format so the UI is consistent with other panels.
     private final DateTimeFormatter YMD = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+    private final NumberFormat currencyFormatter = NumberFormat.getCurrencyInstance(Locale.US);
 
-    public LedgerPanel(MasterController master, SwingUIView parentFrame) {
+    public LedgerPanel(MasterController master) {
         this.master = master;
-        this.parentFrame = parentFrame;
+        master.registerObservers(this); //subscribe to panel so it updates with changes
 
-        setLayout(new BorderLayout(8, 8));
-
-        text.setEditable(false);
-        text.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 12));
-
-        // //Set colors explicitly for high contrast in dark mode
-        // text.setBackground(new Color(60, 60, 60));
-        // text.setForeground(new Color(230, 230, 230));
-
-        //Apply initial colors
-        refreshTheme();
-
-        add(new JScrollPane(text), BorderLayout.CENTER);
-
-        JPanel controls = new JPanel(new FlowLayout(FlowLayout.LEFT));
-        controls.add(refreshBtn);
-        controls.add(addNeedBtn);
-        controls.add(addIncomeBtn);
-
-        add(controls, BorderLayout.SOUTH);
-
-        installListeners();
-        refresh();
-    }
-
-    private void installListeners() {
-        refreshBtn.addActionListener(e -> refresh());
-        addNeedBtn.addActionListener(e -> showAddNeedEntryDialog());
-        addIncomeBtn.addActionListener(e -> showAddIncomeEntryDialog());
-    }
-
-    /** Applies the correct text area background/foreground colors based on theme */
-    public void refreshTheme() {
-        boolean isDark = parentFrame.isDarkModeEnabled();
-        Color textAreaBgColor = isDark ? new Color(60, 60, 60) : Color.WHITE;
-        Color textAreaFgColor = isDark ? new Color(230, 230, 230) : Color.BLACK;
-        Color panelBgColor = isDark ? new Color(45, 45, 45) : UIManager.getColor("control");
-
-
-        //Need to set colors directly on the JTextArea
-        text.setBackground(textAreaBgColor);
-        text.setForeground(textAreaFgColor);
+        // Basic layout: table in the center, action buttons at the bottom.
+        setLayout(new BorderLayout(5, 5));
         
-        //Also set the panel background for consistency
-        this.setBackground(panelBgColor);
-    }
-
-    /** Refresh the daily ledger summary based on the active date. */
-    public void refresh() {
-        //Get the currently active date
-        LocalDate activeDate = master.getSelectedDate();
-        Day d = master.getDaySummary(activeDate);
-        StringBuilder sb = new StringBuilder();
-
-        sb.append("Ledger Summary for ").append(d.getDate()).append("\n\n");
-        sb.append("Funds:     $").append(String.format("%.2f", d.getFunds())).append("\n");
-        sb.append("Threshold: $").append(String.format("%.2f", d.getThreshold())).append("\n");
-        // sb.append("Need Cost: $").append(String.format("%.2f", d.getTotalNeedCost())).append("\n");
-        // sb.append("Income:    $").append(String.format("%.2f", d.getTotalIncome())).append("\n");
-        // sb.append("Net:       $").append(String.format("%.2f", d.getNetCost())).append("\n");
-        // sb.append("Exceeded?  ").append(d.isThresholdExceeded() ? "YES" : "NO").append("\n");
-        sb.append("Need Cost: $").append(String.format("%.2f", master.getTotalNeedCost())).append("\n");
-        sb.append("Income:    $").append(String.format("%.2f", master.getTotalIncome())).append("\n");
-        sb.append("Net:       $").append(String.format("%.2f", master.getNetCost())).append("\n");
-        sb.append("Exceeded?  ").append(master.isThresholdExceeded() ? "YES" : "NO").append("\n");
-
-        text.setText(sb.toString());
-    }
-
-    // ------------------------------------------------------
-    // Dialogs for adding ledger entries
-    // ------------------------------------------------------
-
-    private void showAddNeedEntryDialog() {
-        JTextField dateField  = new JTextField(master.getSelectedDate().format(YMD), 10);
-        JTextField nameField  = new JTextField(12);
-        JTextField unitsField = new JTextField(6);
-
-        JPanel panel = new JPanel(new GridLayout(0, 2, 6, 6));
-        panel.add(new JLabel("Date (yyyy-MM-dd):"));
-        panel.add(dateField);
-        panel.add(new JLabel("Need/Bundle name:"));
-        panel.add(nameField);
-        panel.add(new JLabel("Units:"));
-        panel.add(unitsField);
-
-        int result = JOptionPane.showConfirmDialog(
-                this,
-                panel,
-                "Add Need Fulfillment",
-                JOptionPane.OK_CANCEL_OPTION,
-                JOptionPane.PLAIN_MESSAGE
-        );
-
-        if (result != JOptionPane.OK_OPTION) return;
-
-        try {
-            LocalDate date = LocalDate.parse(dateField.getText().trim(), YMD);
-            String name = nameField.getText().trim();
-            double units = Double.parseDouble(unitsField.getText().trim());
-
-            if (name.isEmpty()) {
-                JOptionPane.showMessageDialog(this, "Name cannot be empty.");
-                return;
+        // Table Setup
+        String[] columnNames = {"Index", "Date", "Type", "Name/Source", "Count/Units", "Amount/Total ($)"};
+        tableModel = new DefaultTableModel(columnNames, 0) {
+            @Override
+            public boolean isCellEditable(int row, int column) {
+                // Ledger is controlled by buttons + controller logic, not inline editing.
+                return false;
             }
+            @Override
+            public Class<?> getColumnClass(int column) {
+                return (column == 0) ? Integer.class : super.getColumnClass(column);
+            }
+        };
+        ledgerTable = new JTable(tableModel);
+        // Keep the index column narrow — we only need room for a small number.
+        ledgerTable.getColumnModel().getColumn(0).setMaxWidth(50); // Set small width for Index column
+        JScrollPane scrollPane = new JScrollPane(ledgerTable);
+        add(scrollPane, BorderLayout.CENTER);
 
-            master.getLedgerController().addEntry(date, name, units);
-            master.setSelectedDate(date); // move active date if useful
-            refresh();
-        } catch (Exception ex) {
-            JOptionPane.showMessageDialog(this, "Error adding need entry:\n" + ex.getMessage());
+        // Button Panel Setup
+        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        buttonPanel.setBorder(BorderFactory.createTitledBorder("Ledger Actions (Show All Entries)"));
+
+        JButton addFulfillmentButton = new JButton("Add Need Fulfillment");
+        addFulfillmentButton.addActionListener(e -> addNeedFulfillment());
+        
+        JButton addIncomeButton = new JButton("Add Funding Income");
+        addIncomeButton.addActionListener(e -> addFundingIncome());
+        
+        JButton setFundsButton = new JButton("Set Funds");
+        setFundsButton.addActionListener(e -> setFunds());
+        
+        JButton setGoalThresholdButton = new JButton("Set Goal/Threshold");
+        setGoalThresholdButton.addActionListener(e -> setGoalThreshold());
+        
+        JButton deleteEntryButton = new JButton("Delete Selected Entry");
+        deleteEntryButton.addActionListener(e -> deleteSelectedEntry());
+
+        buttonPanel.add(addFulfillmentButton);
+        buttonPanel.add(addIncomeButton);
+        buttonPanel.add(setFundsButton);
+        buttonPanel.add(setGoalThresholdButton);
+        buttonPanel.add(deleteEntryButton);
+        
+        add(buttonPanel, BorderLayout.SOUTH);
+
+        updateTable();
+    }
+
+    /**
+     * Dialog flow for recording a Need fulfillment in the ledger.
+     * Uses the currently-selected date as the date of the entry.
+     */
+    private void addNeedFulfillment() {
+        LocalDate date = master.getSelectedDate();
+        String needName = JOptionPane.showInputDialog(this, "Enter Need or Bundle Name:", "Add Need Fulfillment", JOptionPane.PLAIN_MESSAGE);
+        if (needName == null || needName.trim().isEmpty()) return;
+
+        String quantityStr = JOptionPane.showInputDialog(this, "Enter Quantity Fulfilled (e.g., 1.0):", "Add Need Fulfillment", JOptionPane.PLAIN_MESSAGE);
+        if (quantityStr == null || quantityStr.trim().isEmpty()) return;
+        
+        try {
+            double quantity = Double.parseDouble(quantityStr.trim());
+            // This calls addEntry which performs the necessary validation and logging
+            master.getLedgerController().addEntry(date, needName.trim(), quantity);
+            JOptionPane.showMessageDialog(this, "Need Fulfillment recorded successfully.", "Success", JOptionPane.INFORMATION_MESSAGE);
+        } catch (NumberFormatException ex) {
+            JOptionPane.showMessageDialog(this, "Invalid quantity entered.", "Input Error", JOptionPane.ERROR_MESSAGE);
+        } catch (IllegalArgumentException ex) {
+            JOptionPane.showMessageDialog(this, ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
         }
     }
 
-    private void showAddIncomeEntryDialog() {
-        JTextField dateField  = new JTextField(master.getSelectedDate().format(YMD), 10);
-        JTextField srcField   = new JTextField(12);
-        JTextField unitsField = new JTextField(6);
+    /**
+     * Dialog flow for recording Funding income into the ledger.
+     * This is tied to the selected date as well.
+     */    
+    private void addFundingIncome() {
+        LocalDate date = master.getSelectedDate();
+        String sourceName = JOptionPane.showInputDialog(this, "Enter Funding Source Name:", "Add Funding Income", JOptionPane.PLAIN_MESSAGE);
+        if (sourceName == null || sourceName.trim().isEmpty()) return;
 
-        JPanel panel = new JPanel(new GridLayout(0, 2, 6, 6));
-        panel.add(new JLabel("Date (yyyy-MM-dd):"));
-        panel.add(dateField);
-        panel.add(new JLabel("Funding Source name:"));
-        panel.add(srcField);
-        panel.add(new JLabel("Units:"));
-        panel.add(unitsField);
-
-        int result = JOptionPane.showConfirmDialog(
-                this,
-                panel,
-                "Add Funding Income",
-                JOptionPane.OK_CANCEL_OPTION,
-                JOptionPane.PLAIN_MESSAGE
-        );
-
-        if (result != JOptionPane.OK_OPTION) return;
+        String unitsStr = JOptionPane.showInputDialog(this, "Enter Units Received (e.g., 1.0):", "Add Funding Income", JOptionPane.PLAIN_MESSAGE);
+        if (unitsStr == null || unitsStr.trim().isEmpty()) return;
+        
+        String amountStr = JOptionPane.showInputDialog(this, "Enter Unit Amount/Value ($):", "Add Funding Income", JOptionPane.PLAIN_MESSAGE);
+        if (amountStr == null || amountStr.trim().isEmpty()) return;
 
         try {
-            LocalDate date = LocalDate.parse(dateField.getText().trim(), YMD);
-            String src = srcField.getText().trim();
-            double units = Double.parseDouble(unitsField.getText().trim());
+            double units = Double.parseDouble(unitsStr.trim());
+            double amount = Double.parseDouble(amountStr.trim());
+            master.getLedgerController().addIncomeEntry(date, sourceName.trim(), units, amount);
+            JOptionPane.showMessageDialog(this, "Funding Income recorded successfully.", "Success", JOptionPane.INFORMATION_MESSAGE);
+        } catch (NumberFormatException ex) {
+            JOptionPane.showMessageDialog(this, "Invalid number entered for units or amount.", "Input Error", JOptionPane.ERROR_MESSAGE);
+        } catch (IllegalArgumentException ex) {
+            JOptionPane.showMessageDialog(this, ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+        }
+    }
 
-            if (src.isEmpty()) {
-                JOptionPane.showMessageDialog(this, "Source cannot be empty.");
-                return;
+    /**
+     * Dialog for setting the total "Funds" amount for the active date.
+     * Constraints (like only today/future) are enforced inside the controller.
+     */
+    private void setFunds() {
+        LocalDate date = master.getSelectedDate();
+        String amountStr = JOptionPane.showInputDialog(this, 
+            "Enter new total Funds amount for " + date.format(YMD) + " ($):\n(Note: Funds can only be set for today or future dates)", 
+            "Set Funds", JOptionPane.PLAIN_MESSAGE);
+        
+        if (amountStr != null && !amountStr.trim().isEmpty()) {
+            try {
+                double amount = Double.parseDouble(amountStr.trim());
+                master.getLedgerController().setFunds(date, amount);
+                JOptionPane.showMessageDialog(this, "Funds set successfully.", "Success", JOptionPane.INFORMATION_MESSAGE);
+            } catch (NumberFormatException ex) {
+                JOptionPane.showMessageDialog(this, "Invalid amount entered.", "Input Error", JOptionPane.ERROR_MESSAGE);
+            } catch (IllegalArgumentException ex) {
+                JOptionPane.showMessageDialog(this, ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
             }
+        }
+    }
 
-            var all = master.getFundingController().getAll();
+    /**
+     * Dialog for setting either the "Goal" or "Threshold" value for the active date.
+     * Same date rules as setFunds() — controller enforces business logic.
+     */
+    private void setGoalThreshold() {
+        LocalDate date = master.getSelectedDate();
+        
+        String[] options = {"Set Daily Goal", "Set Daily Threshold"};
+        int choice = JOptionPane.showOptionDialog(this, 
+            "Choose a value to set for " + date.format(YMD) + ":\n(Note: Goal/Threshold can only be set for today or future dates)", 
+            "Set Goal/Threshold", 
+            JOptionPane.DEFAULT_OPTION, 
+            JOptionPane.QUESTION_MESSAGE, 
+            null, 
+            options, 
+            options[0]);
 
-            if (all.isEmpty()) {
-                System.out.println("(no funding sources)");
-                return;
-            }
-            else {
-                for (FundingSource fs : all) {
-                    if (src == fs.getName()) {
-                        //Need to validate source for income entries
-                        master.getLedgerController().addIncomeEntry(date, src, units, fs.getAmount());
-                        
-                        System.out.println("Income added.");
-                    }
+        if (choice == -1) return; // Closed dialog
+        
+        String valueType = (choice == 0) ? "Goal" : "Threshold";
+        String amountStr = JOptionPane.showInputDialog(this, "Enter new " + valueType + " amount ($):", "Set " + valueType, JOptionPane.PLAIN_MESSAGE);
+        
+        if (amountStr != null && !amountStr.trim().isEmpty()) {
+            try {
+                double amount = Double.parseDouble(amountStr.trim());
+                if (choice == 0) {
+                    master.getLedgerController().setGoal(date, amount);
+                } else {
+                    master.getLedgerController().setThreshold(date, amount);
                 }
+                JOptionPane.showMessageDialog(this, valueType + " set successfully.", "Success", JOptionPane.INFORMATION_MESSAGE);
+            } catch (NumberFormatException ex) {
+                JOptionPane.showMessageDialog(this, "Invalid amount entered.", "Input Error", JOptionPane.ERROR_MESSAGE);
+            } catch (IllegalArgumentException ex) {
+                JOptionPane.showMessageDialog(this, ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
             }
-
-            // master.getLedgerController().addIncomeEntry(date, src, units);
-            master.setSelectedDate(date);
-            refresh();
-        } catch (Exception ex) {
-            JOptionPane.showMessageDialog(this, "Error adding income entry:\n" + ex.getMessage());
         }
+    }
+
+    /**
+     * Deletes the currently-selected ledger entry by index.
+     * Uses the row index in the table as the index into the underlying log list.
+     */
+    private void deleteSelectedEntry() {
+        int selectedRow = ledgerTable.getSelectedRow();
+        if (selectedRow == -1) {
+            JOptionPane.showMessageDialog(this, "Please select a ledger entry to delete.", "Selection Error", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
+        int confirm = JOptionPane.showConfirmDialog(this, 
+            "Are you sure you want to delete the selected ledger entry? (This cannot be undone)", 
+            "Confirm Delete", JOptionPane.YES_NO_OPTION);
+        
+        if (confirm == JOptionPane.YES_OPTION) {
+            // The index in the table corresponds to the index in the underlying list.
+            boolean success = master.getLedgerController().deleteEntryByIndex(selectedRow);
+            if (success) {
+                JOptionPane.showMessageDialog(this, "Entry deleted successfully.", "Success", JOptionPane.INFORMATION_MESSAGE);
+            } else {
+                JOptionPane.showMessageDialog(this, "Error: Could not find or delete the entry.", "Error", JOptionPane.ERROR_MESSAGE);
+            }
+        }
+    }
+
+    /**
+     * Rebuilds the table rows from the current ledger log.
+     * This is called on construction and whenever the model notifies observers.
+     */    
+    private void updateTable() {
+        // Clear existing rows
+        tableModel.setRowCount(0);
+
+        List<LedgerEntity> log = master.getLedgerController().getLog();
+        for (int i = 0; i < log.size(); i++) {
+            LedgerEntity entry = log.get(i);
+            // For NEED-type entries, name is the need/bundle name.
+            // For FUND-type entries, name is the funding source.
+            String nameOrSource = (entry.getNeedName() != null) ? entry.getNeedName() : "";
+            
+            // Always show the dollar amount in currency format.
+            String amountOrTotal = currencyFormatter.format(entry.getAmount());
+            
+            // For FUND/GOAL/THRESHOLD, the "count/units" doesn’t make sense,
+            // so we leave it blank. For NEED fulfilments, show the count.
+            String countOrUnits = (entry.getType() == LedgerEntity.EntryType.FUND || entry.getType() == LedgerEntity.EntryType.GOAL || entry.getType() == LedgerEntity.EntryType.THRESHOLD)
+                                  ? "" : String.format("%.2f", entry.getCount());
+            
+            tableModel.addRow(new Object[]{
+                i, // Index for deletion
+                entry.getDate().format(YMD), // date as yyyy-mm-dd
+                entry.getType().toString(), //enum to string 
+                nameOrSource, // need or funding name
+                countOrUnits, //units or blank
+                amountOrTotal //formatted currency
+            });
+        }
+    }
+
+    @Override
+    public void update(Observable o, Object arg) {
+        // Update the table when any relevant model changes
+        updateTable();
     }
 }
