@@ -75,7 +75,7 @@ public class DatePanel extends JPanel implements Observer {
 
     private void resetDateAlert()
     {
-        JOptionPane.showMessageDialog(this,"The date has been reset to the current date");
+        JOptionPane.showMessageDialog(this,"The date has been reset to today's date");
     }
 
     /**
