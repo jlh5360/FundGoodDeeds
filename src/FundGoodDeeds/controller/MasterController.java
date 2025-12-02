@@ -36,6 +36,12 @@ public class MasterController {
         this.fundingController = fundingController;
     }
 
+    //Allow the views to be registered in the view list
+    public void registerViews(Observer o)
+    {
+        views.add(o);
+    }
+
     //Allow the View/App to register as an Observer
     public void registerObservers(Observer o) {
         this.needsController.addObserver(o);
@@ -83,6 +89,7 @@ public class MasterController {
 
     public void setSelectedDate(LocalDate date) {
         this.selectedDate = date;
+        notifyViews();
     }
 
     public void resetSelectedDateToToday() {

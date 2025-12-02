@@ -49,8 +49,10 @@ public class DatePanel extends JPanel implements Observer {
         changeDateButton.addActionListener(e -> changeActiveDate());
 
         resetDateButton = new JButton("Reset to Today");
-        // This looks weird, but we're calling getResetDateButton() which returns the same object.
-        resetDateButton.addActionListener(e -> getResetDateButton());
+
+        // Alerts the user that the date has been reset to today's date
+
+        resetDateButton.addActionListener(e -> resetDateAlert());
         
         themeToggleBtn = new JButton("Toggle Light Mode"); // Set initial text
 
@@ -69,6 +71,11 @@ public class DatePanel extends JPanel implements Observer {
 
     public JButton getResetDateButton() {
         return resetDateButton;
+    }
+
+    private void resetDateAlert()
+    {
+        JOptionPane.showMessageDialog(this,"The date has been reset to the current date");
     }
 
     /**

@@ -7,7 +7,7 @@ public class Day {
     private LocalDate currentDate;
     private double threshold;
     private double funds;
-    private LocalDate date;
+    
     
 
     // make brand new day with current time
@@ -25,6 +25,7 @@ public class Day {
         this.threshold = 2000.0;
         this.funds = funds;
     }
+    
     // make brand new day with current time and funds and thresholds
     // possibly not used but good to have
     public Day(double funds, double threshold) {
@@ -41,8 +42,7 @@ public class Day {
     }
 
     // getters
-    //this can be either the current date or a specified date
-    public LocalDate getDate() {
+    public LocalDate getCurrentDate() {
         return this.currentDate;
     }
     public double getThreshold() {
