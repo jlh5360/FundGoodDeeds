@@ -142,9 +142,9 @@ public class ConsoleView implements Observer {
                 dailyDonations, dailyGoal);
         
         System.out.printf(" Need Costs: $%.2f | Income: $%.2f%n",
-                master.getTotalNeedCost(), master.getTotalIncome());
+                master.getTotalNeedCost(), master.getTotalIncome(date));
         System.out.printf(" Net Cost: $%.2f | Exceeded? %s%n",
-                master.getNetCost(), master.isThresholdExceeded() ? "YES" : "NO");
+                master.getNetCost(date), master.isThresholdExceeded() ? "YES" : "NO");
         System.out.println("---------------------------------------------");
     }
 

@@ -106,8 +106,10 @@ public class MasterController {
         return this.ledgerController.getLedgerRepository().buildDay(selectedDate);
     }
 
-    public double getTotalIncome() {
-        return this.fundingController.getFundingRepository().getTotalFunds();
+    public double getTotalIncome(LocalDate date) {
+        // return this.fundingController.getFundingRepository().getTotalFunds();
+        // changed to use ledgerController to calculate total income for specific date
+        return this.ledgerController.getLedgerRepository().findIncome(date);
     }
 
     public double getTotalNeedCost() {
@@ -115,11 +117,11 @@ public class MasterController {
     }
 
     //FOR FUTURE IMPLEMENTATION
-    public double getNetCost() 
+    public double getNetCost(LocalDate date) 
     {
         // Make sure it doesn't give negative values
 
-        return Math.max(0,getTotalNeedCost() - getTotalIncome());
+        return Math.max(0,getTotalNeedCost() - getTotalIncome(date));
     }
 
     /**
