@@ -4,12 +4,14 @@
 package FundGoodDeeds.view.panels;
 
 import FundGoodDeeds.controller.MasterController;
-import FundGoodDeeds.view.SwingUIView;
+import FundGoodDeeds.model.LedgerEntity;
 
 import javax.swing.*;
 import java.awt.*;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.Observable;
+import java.util.Observer;
 
 /**
  * DatePanel (V2)
@@ -17,103 +19,96 @@ import java.time.format.DateTimeFormatter;
  * - Small utility panel used by both CLI and Swing flows
  * - Mirrors CLI "Change Active Date" (option 12)
  */
-public class DatePanel extends JPanel {
-
-    private static final long serialVersionUID = 1L;
+@SuppressWarnings("deprecation")
+public class DatePanel extends JPanel implements Observer {
 
     private final MasterController master;
-    private final SwingUIView parentFrame;
-
-    private final JLabel activeDateLbl = new JLabel("Active Date:");
-    private final JTextField dateField = new JTextField(10);
-    private final JButton applyBtn     = new JButton("Apply");
-    private final JButton todayBtn     = new JButton("Today");
-
-    private final DateTimeFormatter YMD = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-    
+    private final JLabel activeDateLabel;
+    private final JButton changeDateButton;
+    private final JButton resetDateButton;
     private final JButton themeToggleBtn;
+    
+    private final DateTimeFormatter YMD = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
-    public DatePanel(MasterController master, SwingUIView parentFrame) {
+
+    public DatePanel(MasterController master) {
         this.master = master;
-        this.parentFrame = parentFrame;
-        this.themeToggleBtn = new JButton(
-                parentFrame.isDarkModeEnabled() ? "Light Mode" : "Dark Mode"
-        );
+        
+        // Registering here allows this tiny panel to update independently
+        // whenever the selected date changes in the controller.
+        master.registerObservers(this);
+        
+        // Use a FlowLayout for a simple, horizontal arrangement
+        setLayout(new FlowLayout(FlowLayout.LEFT, 10, 5));
+        
+        // Shows the currently active date used throughout the app.
+        activeDateLabel = new JLabel("Active Date: " + master.getSelectedDate().format(YMD));
+        activeDateLabel.setFont(new Font("SansSerif", Font.BOLD, 14));
+        
+        changeDateButton = new JButton("Change Active Date");
+        changeDateButton.addActionListener(e -> changeActiveDate());
 
-        setLayout(new FlowLayout(FlowLayout.LEFT, 10, 8));
-        setBorder(BorderFactory.createEmptyBorder(4, 8, 4, 8));
+        resetDateButton = new JButton("Reset to Today");
 
-        //Initial display of the date
-        dateField.setText(master.getSelectedDate().format(YMD));
+        // Alerts the user that the date has been reset to today's date
 
-        //Apply date logic
-        applyBtn.addActionListener(e -> {
-            try {
-                LocalDate d = LocalDate.parse(dateField.getText().trim(), YMD);
-                master.setSelectedDate(d);
-            } catch (Exception ex) {
-                JOptionPane.showMessageDialog(
-                        this,
-                        "Invalid date. Please use yyyy-MM-dd.",
-                        "Invalid Date",
-                        JOptionPane.ERROR_MESSAGE
-                );
-            }
-        });
+        resetDateButton.addActionListener(e -> resetDateAlert());
+        
+        themeToggleBtn = new JButton("Toggle Light Mode"); // Set initial text
 
-        //Reset to today's date
-        todayBtn.addActionListener(e -> {
-            LocalDate now = LocalDate.now();
-            master.setSelectedDate(now);
-            dateField.setText(now.format(YMD));
-        });
-
-        //Listener for theme toggle
-        themeToggleBtn.addActionListener(e -> {
-            parentFrame.toggleTheme();
-        });
-
-        // Add components
-        add(activeDateLbl);
-        // add(new JLabel("Active Date:"));
-        add(dateField);
-        add(applyBtn);
-        add(todayBtn);
-        add(Box.createHorizontalStrut(20));   //Separator
+        add(activeDateLabel);
+        add(changeDateButton);
+        add(resetDateButton);
+        add(new JSeparator(SwingConstants.VERTICAL)); // Separator
         add(themeToggleBtn);
     }
 
+
+    
     public JButton getThemeToggleBtn() {
-        return themeToggleBtn;
+        return this.themeToggleBtn;
     }
 
-    /** Applies the correct background and foreground colors based on theme */
-    public void refreshTheme() {
-        boolean isDark = parentFrame.isDarkModeEnabled();
-        
-        //Text/Foreground color: Light for dark mode, Black for light mode
-        Color fgColor = isDark ? new Color(230, 230, 230) : Color.BLACK;
-        
-        //Background color: Darker grey for dark mode, System default (or light) for light mode
-        //Note: For a JPanel, we often use the UIManager's 'control' color
-        Color panelBgColor = isDark ? new Color(45, 45, 45) : UIManager.getColor("control");
-
-        //Panel background
-        this.setBackground(panelBgColor); 
-        
-        //Label foreground
-        activeDateLbl.setForeground(fgColor);
-        
-        //Text field colors (need this for high contrast)
-        Color textFieldBg = isDark ? new Color(60, 60, 60) : Color.WHITE;
-        Color textFieldFg = isDark ? new Color(230, 230, 230) : Color.BLACK;
-
-        dateField.setBackground(textFieldBg);
-        dateField.setForeground(textFieldFg);
+    public JButton getResetDateButton() {
+        return resetDateButton;
     }
 
-    /** Update the text field when the selected date changes. */
-    public void refresh() {
-        dateField.setText(master.getSelectedDate().format(YMD));
+    private void resetDateAlert()
+    {
+        JOptionPane.showMessageDialog(this,"The date has been reset to today's date");
+    }
+
+    /**
+     * Pops up a Swing dialog asking the user for a new date.
+     * This keeps input logic out of the controller so the controller stays clean.
+     */
+    private void changeActiveDate() {
+        // Use a JOptionPane to ask for the new date
+        String current = master.getSelectedDate().format(YMD);
+        String newDateStr = JOptionPane.showInputDialog(
+            this, 
+            "Enter new active date (yyyy-MM-dd):",
+            "Change Active Date", 
+            JOptionPane.PLAIN_MESSAGE
+        );
+
+        if (newDateStr != null && !newDateStr.trim().isEmpty()) {
+            try {
+                LocalDate newDate = LocalDate.parse(newDateStr.trim(), YMD);
+                master.setSelectedDate(newDate);
+            } catch (Exception ex) {
+                JOptionPane.showMessageDialog(this, "Invalid date format. Please use yyyy-MM-dd.", "Input Error", JOptionPane.ERROR_MESSAGE);
+            }
+        }
+    }
+
+    /**
+     * Whenever the active date changes, update the displayed label.
+     */
+    @Override
+    public void update(Observable o, Object arg) {
+        // Update the displayed date when the model changes (or the date is explicitly set)
+        LocalDate date = master.getSelectedDate();
+        activeDateLabel.setText("Active Date: " + date.format(YMD));
     }
 }

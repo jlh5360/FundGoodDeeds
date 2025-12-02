@@ -149,6 +149,7 @@ public class NeedsRepository extends Observable {
 	{
 		this.needsCatalog.addAll(basicNeeds);
 		setChanged();
+		notifyObservers();
 	}
 
 	public NeedComponent getNeedByName(String name) 
@@ -171,6 +172,7 @@ public class NeedsRepository extends Observable {
 	{
 		this.needsCatalog.add(need);
 		setChanged();
+		notifyObservers();
 	}
 
 	public List<NeedComponent> getNeedsCatalog() 
@@ -191,7 +193,6 @@ public class NeedsRepository extends Observable {
 			if(component instanceof Need need)
 			{
 				// Format: n,name,total,fixed,variable,fees
-				Need need = (Need) component;
 				String line = String.format("n,%s,%.1f",
 					need.getName(),
 					need.getTotal()

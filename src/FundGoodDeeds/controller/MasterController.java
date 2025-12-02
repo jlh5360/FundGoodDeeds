@@ -1,6 +1,8 @@
 package FundGoodDeeds.controller;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Observer;
 
 import FundGoodDeeds.model.Day;
@@ -25,11 +27,19 @@ public class MasterController {
 
     private LocalDate selectedDate = LocalDate.now();
 
+    private final List<Observer> views = new ArrayList<>();
+
     //Dependency Injection via constructor
     public MasterController(NeedsController needsController, LedgerController ledgerController, FundingController fundingController) {
         this.needsController = needsController;
         this.ledgerController = ledgerController;
         this.fundingController = fundingController;
+    }
+
+    //Allow the views to be registered in the view list
+    public void registerViews(Observer o)
+    {
+        views.add(o);
     }
 
     //Allow the View/App to register as an Observer
@@ -79,8 +89,15 @@ public class MasterController {
 
     public void setSelectedDate(LocalDate date) {
         this.selectedDate = date;
+        notifyViews();
     }
 
+    public void resetSelectedDateToToday() {
+        LocalDate today = LocalDate.now();
+        setSelectedDate(today);
+        notifyViews();
+    }
+    
     public Day getDaySummary(LocalDate date) {
         //The buildDay() function should get all the information from the 
         //needs and funding and ledger repositories on a particular day
@@ -89,8 +106,10 @@ public class MasterController {
         return this.ledgerController.getLedgerRepository().buildDay(selectedDate);
     }
 
-    public double getTotalIncome() {
-        return this.fundingController.getFundingRepository().getTotalFunds();
+    public double getTotalIncome(LocalDate date) {
+        // return this.fundingController.getFundingRepository().getTotalFunds();
+        // changed to use ledgerController to calculate total income for specific date
+        return this.ledgerController.getLedgerRepository().findIncome(date);
     }
 
     public double getTotalNeedCost() {
@@ -98,11 +117,11 @@ public class MasterController {
     }
 
     //FOR FUTURE IMPLEMENTATION
-    public double getNetCost() 
+    public double getNetCost(LocalDate date) 
     {
         // Make sure it doesn't give negative values
 
-        return Math.max(0,getTotalNeedCost() - getTotalIncome());
+        return Math.max(0,getTotalNeedCost() - getTotalIncome(date));
     }
 
     /**
@@ -136,5 +155,12 @@ public class MasterController {
         double threshold = ledgerController.getThreshold(date); 
         
         return netCosts > threshold;
+    }
+
+    private void notifyViews() {
+        for (Observer view : views) {
+            // Note: The null arguments are standard for the java.util.Observer pattern
+            view.update(null, null); 
+        }
     }
 }

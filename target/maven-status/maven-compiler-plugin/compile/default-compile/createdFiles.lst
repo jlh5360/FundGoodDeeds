@@ -12,6 +12,9 @@ FundGoodDeeds\controller\NeedsController.class
 FundGoodDeeds\model\NeedsRepository.class
 FundGoodDeeds\controller\FundingController.class
 FundGoodDeeds\model\AbstractLedgerEntry$EntryType.class
+FundGoodDeeds\view\panels\LedgerPanel$1.class
+FundGoodDeeds\view\panels\FundingPanel$1.class
+FundGoodDeeds\view\panels\NeedsPanel$1.class
 FundGoodDeeds\view\ConsoleView.class
 FundGoodDeeds\model\Bundle.class
 FundGoodDeeds\view\panels\LedgerPanel.class

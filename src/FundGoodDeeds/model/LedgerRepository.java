@@ -95,9 +95,11 @@ public class LedgerRepository extends Observable {
 
 				case "i":
 					String fundingSourceName = raw[4];
-					System.out.println("fundingSourceName = raw[4] ---> " + fundingSourceName);
+					// //DEBUGGING
+					// System.out.println("fundingSourceName = raw[4] ---> " + fundingSourceName);
 					FundingSource source = fundingRepository.getFundingSourceByName(fundingSourceName);
-					System.out.println("source = fundingRepository.getFundingSourceByName(fundingSourceName) ---> " + source);
+					// //DEBUGGING
+					// System.out.println("source = fundingRepository.getFundingSourceByName(fundingSourceName) ---> " + source);
 					double unitAmount = 0.0;
 
 					if (source != null) {
@@ -136,6 +138,8 @@ public class LedgerRepository extends Observable {
 
 	public void save(LedgerEntity entry) {
 		logEntries.add(entry);
+		setChanged();
+		notifyObservers();
 	}
 
 	public List<String[]> getDataFromCSV()
@@ -467,5 +471,44 @@ public class LedgerRepository extends Observable {
 		double goal = getEntryForDate(LedgerEntity.EntryType.GOAL,date);
 		double funds = getEntryForDate(LedgerEntity.EntryType.FUND, date);
 		return new Day(date.getYear(), date.getMonthValue(), date.getDayOfMonth(), goal, funds);
+	}
+
+	public double findIncome(LocalDate date) {
+		LocalDate targetDate = (date == null) ? LocalDate.now() : date;
+
+		// Filter all INCOME entries for the given date
+		List<LedgerEntity> incomeEntries = logEntries.stream()
+				.filter(entry -> entry.getType() == LedgerEntity.EntryType.INCOME)
+				.filter(entry -> entry.getDate().equals(targetDate))
+				.toList(); // Collect to list for easier debug/logging
+
+		if (incomeEntries.isEmpty()) {
+			return 0.0; // No entries found
+		}
+
+		double totalIncome = 0.0;
+
+		for (LedgerEntity entry : incomeEntries) {
+			String sourceName = entry.getNeedName(); // Funding source name
+			FundingSource source = fundingRepository.getFundingSourceByName(sourceName);
+
+			if (source != null) {
+				double unitAmount = source.getAmount(); // Use helper in FundingSource
+				totalIncome += entry.getCount() * unitAmount;
+			} else {
+				System.err.println("[Warning] Funding source '" + sourceName + "' not found. Counting as $0.");
+			}
+		}
+
+		return totalIncome;
+	}
+
+	/** Prints all current log entries to the console. */
+	public void printLogEntries() {
+		System.out.println("=== Ledger Entries ===");
+		for (LedgerEntity entry : logEntries) {
+			System.out.println(entry);
+		}
+		System.out.println("=====================");
 	}
 }

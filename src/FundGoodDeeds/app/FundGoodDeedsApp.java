@@ -43,6 +43,7 @@ public class FundGoodDeedsApp {
 
             SwingUIView ui = new SwingUIView(master);
             master.registerObservers(ui);
+            master.registerViews(ui);
 
             master.loadAll();
             ui.start();
@@ -51,7 +52,8 @@ public class FundGoodDeedsApp {
 
             ConsoleView ui = new ConsoleView(master);
             master.registerObservers(ui);
-
+            master.registerViews(ui);
+            
             master.loadAll();
             ui.startup();
             master.saveAll();

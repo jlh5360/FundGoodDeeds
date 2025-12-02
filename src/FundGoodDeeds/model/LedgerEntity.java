@@ -88,4 +88,10 @@ public class LedgerEntity implements AbstractLedgerEntry {
                 return ""; 
         }
     }
+
+	@Override
+	public String toString() {
+		return String.format("[%s] Type: %s, Name: %s, Count: %.2f, Amount: %.2f",
+				date, type, needName, count, amount);
+	}
 }
