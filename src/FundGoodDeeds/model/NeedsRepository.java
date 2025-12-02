@@ -149,6 +149,7 @@ public class NeedsRepository extends Observable {
 	{
 		this.needsCatalog.addAll(basicNeeds);
 		setChanged();
+		notifyObservers();
 	}
 
 	public NeedComponent getNeedByName(String name) 
@@ -171,6 +172,7 @@ public class NeedsRepository extends Observable {
 	{
 		this.needsCatalog.add(need);
 		setChanged();
+		notifyObservers();
 	}
 
 	public List<NeedComponent> getNeedsCatalog() 

@@ -136,6 +136,8 @@ public class LedgerRepository extends Observable {
 
 	public void save(LedgerEntity entry) {
 		logEntries.add(entry);
+		setChanged();
+		notifyObservers();
 	}
 
 	public List<String[]> getDataFromCSV()

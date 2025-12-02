@@ -88,6 +88,7 @@ public class MasterController {
     public void resetSelectedDateToToday() {
         LocalDate today = LocalDate.now();
         setSelectedDate(today);
+        notifyViews();
     }
     
     public Day getDaySummary(LocalDate date) {

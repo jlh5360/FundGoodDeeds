@@ -103,7 +103,9 @@ public class SwingUIView extends JFrame implements Observer {
     // Observer pattern implementation
     @Override
     public void update(Observable o, Object arg) {
-        // The panels handle their own updates; this is just the JFrame's observer contract.
+
+        // Needed for functionality to make sure the datePanel is updated
+        datePanel.update(o, arg);
     }
     
     private void applyTheme(boolean isDark) {

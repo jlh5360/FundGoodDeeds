@@ -61,12 +61,14 @@ public class DatePanel extends JPanel implements Observer {
         add(themeToggleBtn);
     }
 
-    public JButton getResetDateButton() {
-        return resetDateButton;
-    }
+
     
     public JButton getThemeToggleBtn() {
         return this.themeToggleBtn;
+    }
+
+    public JButton getResetDateButton() {
+        return resetDateButton;
     }
 
     /**
@@ -78,7 +80,7 @@ public class DatePanel extends JPanel implements Observer {
         String current = master.getSelectedDate().format(YMD);
         String newDateStr = JOptionPane.showInputDialog(
             this, 
-            "Enter new active date (yyyy-MM-dd):", 
+            "Enter new active date (yyyy-MM-dd):",
             "Change Active Date", 
             JOptionPane.PLAIN_MESSAGE
         );
