@@ -51,6 +51,8 @@ public class SwingUIView extends JFrame implements Observer {
 
         // Create all the different panels up front.
         // This keeps the GUI modular — you can modify one panel without breaking the others.
+
+
         summaryPanel = new SummaryPanel(master);
         needsPanel = new NeedsPanel(master);
         fundingPanel = new FundingPanel(master);

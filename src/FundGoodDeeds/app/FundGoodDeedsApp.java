@@ -5,6 +5,7 @@ import java.io.FileNotFoundException;
 import FundGoodDeeds.controller.*;
 import FundGoodDeeds.model.*;
 import FundGoodDeeds.view.*;
+import FundGoodDeeds.view.panels.UserFrame;
 
 public class FundGoodDeedsApp {
 
@@ -41,6 +42,7 @@ public class FundGoodDeedsApp {
 
         if (useSwing) {
 
+            UserFrame loginUi = new UserFrame(master);
             SwingUIView ui = new SwingUIView(master);
             master.registerObservers(ui);
             master.registerViews(ui);
