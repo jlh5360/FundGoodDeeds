@@ -8,7 +8,7 @@ the respective classes with FundGoodDeedsApp holding our main class.
 
 To try it out (from the root directory)
 	mvn clean compile
-  exec:java -Dexec.args="swing"
+  	mvn exec:java -Dexec.args="swing"
 
 
 MORE DETAILS
@@ -19,5 +19,4 @@ Contains design documentation in Word and PDF formats.
 
 FUNCTIONS NOT COMPLETED
 
-	* Panel for user login and persistent storage for each of their respective data. 
 	* Pie/Bar Chart to visually represent user expense history over time. 

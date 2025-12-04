@@ -46,7 +46,7 @@ public class LedgerRepository extends Observable {
 			LedgerEntity entity; // Declare entity once
 
 			LocalDate entityDate = LocalDate.of(year,month,day);
-			double countOrUnits = Double.parseDouble(raw[5]);
+			double countOrUnits = Double.parseDouble(raw[raw.length > 5 ? 5 : 4]);
 			String type = raw[3];
 
 			switch(type)
@@ -510,5 +510,10 @@ public class LedgerRepository extends Observable {
 			System.out.println(entry);
 		}
 		System.out.println("=====================");
+	}
+
+	public void setUser(User user)
+	{
+		this.manager.setUserPath(user);
 	}
 }

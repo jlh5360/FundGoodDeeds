@@ -15,6 +15,7 @@ public class CSVManager
     // starting from "src/"
     private final String absoluteDataPath = "src/FundGoodDeeds/data/";
     public String ledgerCSV;
+    private Path userPath;
     
     public CSVManager(String ledgerCSVFile) throws FileNotFoundException
     {
@@ -37,9 +38,17 @@ public class CSVManager
 
         String header;
 
+        Path pathPrefix;
 
-
-        try(BufferedReader reader = Files.newBufferedReader(Path.of(this.absoluteDataPath + csvPath)))
+        if(userPath != null)
+        {
+            pathPrefix = this.userPath;
+        }
+        else
+        {
+            pathPrefix = Path.of(this.absoluteDataPath);
+        }
+        try(BufferedReader reader = Files.newBufferedReader(pathPrefix.resolve(csvPath)))
         {
 
             // Skips the header
@@ -79,8 +88,10 @@ public class CSVManager
     {
 
         // Appends to a file using a encapsulating class
+
+        String filePath = this.userPath != null ? this.userPath.resolve(csvPath).toString() : Path.of(this.absoluteDataPath).resolve(csvPath).toString();
         
-        FileWriter writer = new FileWriter(this.absoluteDataPath + csvPath,false);
+        FileWriter writer = new FileWriter(filePath,false);
 
         // Buffered writer for increased performance
 
@@ -100,5 +111,16 @@ public class CSVManager
             e.printStackTrace();
         }
     }
+
+    public void setUserPath(User user)
+    {
+        this.userPath = Path.of(absoluteDataPath).resolve(user.getUsername());
+    }
+    
+    public Path getDataPath()
+    {
+        return Path.of(this.absoluteDataPath);
+    }
 }
+
 

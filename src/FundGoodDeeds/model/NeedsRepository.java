@@ -237,7 +237,27 @@ public class NeedsRepository extends Observable {
 	/** Removes a NeedComponent (Need/Bundle) by name from the catalog. */
     public void removeNeedComponent(String name) {
         //Use removeIf to iterate and delete based on name comparison
+		NeedComponent retrievedNeed = null;
+		for(NeedComponent need : needsCatalog)
+		{
+			if(need.getName().equalsIgnoreCase(name))
+			{
+				retrievedNeed = need;
+			}
+		}
         needsCatalog.removeIf(nc -> nc.getName().equals(name));
+
+		// Edit bundles that have the need
+
+		List<Bundle> bundles = findBundlesContainingNeed(name);
+		if(!bundles.isEmpty() && (retrievedNeed != null))
+		{
+			for(Bundle bundle: bundles)
+			{
+				bundle.remove(retrievedNeed);
+			}
+		}
+
         setChanged();
         notifyObservers();
     }
@@ -263,14 +283,6 @@ public class NeedsRepository extends Observable {
         return bundles;
     }
 
-    /**
-     * Checks if a basic NeedComponent is a part of any existing Bundle.
-     * @param needName The name of the NeedComponent to check.
-     * @return true if the Need is a component in one or more Bundles, false otherwise.
-     */
-    public boolean isNeedComponentOfAnyBundle(String needName) {
-        return findBundlesContainingNeed(needName).size() > 0;
-    }
 
     /**
      * Gets the total count of a specific Need component across all Bundles.
@@ -456,4 +468,14 @@ public class NeedsRepository extends Observable {
     public void removeBundle(String name) {
         removeNeedComponent(name);
     }
+
+	public boolean isNeedComponentOfAnyBundle(String needName) {
+		// TODO Auto-generated method stub
+		throw new UnsupportedOperationException("Unimplemented method 'isNeedComponentOfAnyBundle'");
+	}
+
+	public void setUser(User user)
+	{
+		this.manager.setUserPath(user);
+	}
 }

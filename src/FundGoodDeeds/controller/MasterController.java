@@ -1,15 +1,23 @@
 package FundGoodDeeds.controller;
 
+import java.awt.desktop.UserSessionEvent;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Observer;
 
+import javax.swing.JFrame;
+import javax.swing.JPanel;
+
+import FundGoodDeeds.app.FundGoodDeedsApp;
+import FundGoodDeeds.model.CSVManager;
 import FundGoodDeeds.model.Day;
 import FundGoodDeeds.model.FundingRepository;
 import FundGoodDeeds.model.LedgerEntity;
 import FundGoodDeeds.model.LedgerRepository;
 import FundGoodDeeds.model.NeedsRepository;
+import FundGoodDeeds.model.User;
+import FundGoodDeeds.model.UserStore;
 
 /**
  * The MasterController orchestrates and delegates high-level operations 
@@ -24,22 +32,24 @@ public class MasterController {
     private final NeedsController needsController;
     private final LedgerController ledgerController;
     private final FundingController fundingController;
-
+    private final UserStore users;
     private LocalDate selectedDate = LocalDate.now();
 
+    private JFrame GUI;
     private final List<Observer> views = new ArrayList<>();
 
     //Dependency Injection via constructor
-    public MasterController(NeedsController needsController, LedgerController ledgerController, FundingController fundingController) {
+    public MasterController(NeedsController needsController, LedgerController ledgerController, FundingController fundingController,UserStore users) {
         this.needsController = needsController;
         this.ledgerController = ledgerController;
         this.fundingController = fundingController;
+        this.users = users;
     }
 
-    //Allow the views to be registered in the view list
-    public void registerViews(Observer o)
+    //Allow the GUI to be registered in the view list
+    public void registerGUI(JFrame gui)
     {
-        views.add(o);
+        GUI = gui;
     }
 
     //Allow the View/App to register as an Observer
@@ -47,6 +57,7 @@ public class MasterController {
         this.needsController.addObserver(o);
         this.ledgerController.addObserver(o);
         this.fundingController.addObserver(o);
+        this.views.add(o);
     }
 
     //Loading all data View's startup() function
@@ -123,6 +134,45 @@ public class MasterController {
 
         return Math.max(0,getTotalNeedCost() - getTotalIncome(date));
     }
+
+    public boolean userExists(String userName)
+    {
+        return users.getUser(userName) != null;
+    }
+
+    public void createUser(String userName,String password,String firstName, String lastName)
+    {
+        users.addUser(userName, password, firstName, lastName);
+
+    }
+
+    public boolean loginSuccessful(String userName, String password)
+    {
+        if(users.logIn(userName, password))
+        {
+            User currentUser = users.getUser(userName);
+            fundingController.setUser(currentUser);
+            needsController.setUser(currentUser);
+            ledgerController.setUser(currentUser);
+            return true;
+        }
+        return false;
+    }
+
+    public void restart(String choice)
+    {
+        this.saveAll();
+        try
+        {
+            GUI.dispose();
+            FundGoodDeedsApp.restartGUI();
+        }
+        catch(Exception e)
+        {
+            e.printStackTrace();
+        }
+    }
+    
 
     /**
      * Calculates the net cost (Costs Fulfilled - Funds Received) for the selected date.
