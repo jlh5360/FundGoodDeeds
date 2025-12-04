@@ -100,5 +100,11 @@ public class CSVManager
             e.printStackTrace();
         }
     }
+    
+    public Path getDataPath()
+    {
+        return Path.of(this.absoluteDataPath);
+    }
 }
+
 

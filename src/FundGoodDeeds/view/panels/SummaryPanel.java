@@ -9,7 +9,6 @@ import FundGoodDeeds.model.Day;
 import javax.swing.*;
 import java.awt.*;
 import java.text.NumberFormat;
-import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.Locale;
 import java.util.Observable;
@@ -133,13 +132,12 @@ public class SummaryPanel extends JPanel implements Observer {
     @Override
     public void update(Observable o, Object arg) {
         // Pull the "Day" snapshot for the currently selected date.
-        LocalDate date = master.getSelectedDate();
-        Day daySummary = master.getDaySummary(date);
-        
+        Day daySummary = master.getDaySummary(master.getSelectedDate());
+    
         // These totals are more "global" and come straight off MasterController.
         double totalNeeds = master.getTotalNeedCost();
-        double totalIncome = master.getTotalIncome(date);
-        double netCost = master.getNetCost(date);
+        double totalIncome = master.getTotalIncome();
+        double netCost = master.getNetCost();
         double dailyNetCost = master.getNetDayCost();
         double threshold = master.getLedgerController().getThreshold(master.getSelectedDate());
 

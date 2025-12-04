@@ -21,9 +21,9 @@ public class FundingRepository extends Observable {
      * splits each line into its components and creates FundingSource objects.
      * i,Student Loan,5000.0 > FundingSource("Student Loan", 5000.0)
      */
-    public void getSourcesFromCSV() {
+    public void getSourcesFromCSV(User user) {
 
-        List<String> rawSourcesList = csvManager.readData("funding.csv");
+        List<String> rawSourcesList = csvManager.readData(user.getUsername() + "/funding.csv");
         for (String rawSource : rawSourcesList) {
             String[] individualSource = rawSource.split(",");
             FundingSource source = new FundingSource(individualSource[1], Double.parseDouble(individualSource[2]));
@@ -34,18 +34,18 @@ public class FundingRepository extends Observable {
 
     // Delegates saving funding sources
 
-    public void saveFundsCatalog() throws IOException {
-        saveSourcesToCSV();
+    public void saveFundsCatalog(User user) throws IOException {
+        saveSourcesToCSV(user);
         setChanged();
         notifyObservers();
     }
 
     // Loads funds from CSV
 
-    public void loadFunds()
+    public void loadFunds(User user)
     {
         this.fundingSources.clear();
-        getSourcesFromCSV();
+        getSourcesFromCSV(user);
         setChanged();
         notifyObservers();
     }
@@ -57,7 +57,7 @@ public class FundingRepository extends Observable {
     }
 
     // save funding sources to CSV
-    public void saveSourcesToCSV() throws IOException {
+    public void saveSourcesToCSV(User user) throws IOException {
         List<String> rawSourcesList = new ArrayList<>();
 
         for (FundingSource source : this.fundingSources) {
@@ -72,7 +72,7 @@ public class FundingRepository extends Observable {
         }
 
         try {
-            csvManager.writeData("funding.csv", rawSourcesList);
+            csvManager.writeData("/" + user.getUsername() +"funding.csv", rawSourcesList);
         } catch (IOException e) {
             e.printStackTrace();
         }

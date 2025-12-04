@@ -38,20 +38,6 @@ public class UserFrame extends JFrame implements Observer{
         setLocationRelativeTo(null); // Center the window
     }
 
-    // Method to add an user to the system
-
-    private void addUser(String username, String password)
-    {
-        throw new UnsupportedOperationException("Not supported");
-    }
-
-    // Method to login and pass the user to the master controller
-
-    private void login(String userame, String password)
-    {
-        throw new UnsupportedOperationException("Not supported");
-    }
-
 
     @Override
     public void update(Observable o, Object arg) {

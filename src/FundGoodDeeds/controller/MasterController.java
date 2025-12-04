@@ -1,5 +1,6 @@
 package FundGoodDeeds.controller;
 
+import java.awt.desktop.UserSessionEvent;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
@@ -11,6 +12,8 @@ import FundGoodDeeds.model.FundingRepository;
 import FundGoodDeeds.model.LedgerEntity;
 import FundGoodDeeds.model.LedgerRepository;
 import FundGoodDeeds.model.NeedsRepository;
+import FundGoodDeeds.model.User;
+import FundGoodDeeds.model.UserStore;
 
 /**
  * The MasterController orchestrates and delegates high-level operations 
@@ -21,22 +24,23 @@ public class MasterController {
     // private final NeedsRepository needsRepository;
     // private final LedgerRepository ledgerRepository;
     // private final FundingRepository fundingRepository;
-    private CSVManager manager;
 
     private final NeedsController needsController;
     private final LedgerController ledgerController;
     private final FundingController fundingController;
+    private final UserStore users;
 
+    private User currentUser;
     private LocalDate selectedDate = LocalDate.now();
 
     private final List<Observer> views = new ArrayList<>();
 
     //Dependency Injection via constructor
-    public MasterController(CSVManager manager,NeedsController needsController, LedgerController ledgerController, FundingController fundingController) {
-        this.manager = manager;
+    public MasterController(NeedsController needsController, LedgerController ledgerController, FundingController fundingController,UserStore users) {
         this.needsController = needsController;
         this.ledgerController = ledgerController;
         this.fundingController = fundingController;
+        this.users = users;
     }
 
     //Allow the views to be registered in the view list
@@ -127,9 +131,14 @@ public class MasterController {
         return Math.max(0,getTotalNeedCost() - getTotalIncome(date));
     }
 
-    public boolean userExists(String username, String password)
+    public boolean userExists(String userName)
     {
-        List<String> users = manager.readData("users.csv");
+        return users.getUser(userName) != null;
+    }
+
+    public void createUser(String userName,String password,String firstName, String lastName)
+    {
+        this.currentUser = users.addUser(userName, password, firstName, lastName);
 
     }
 

@@ -22,14 +22,14 @@ public class FundingController {
     }
 
     //Triggers the model to load all funding source data
-    public void loadData() {
-        fundingRepository.loadFunds();
+    public void loadData(User user) {
+        fundingRepository.loadFunds(User user);
     }
     
     //Triggers the model to save all funding source data
-    public void saveData() {
+    public void saveData(User user) {
         try {
-            fundingRepository.saveFundsCatalog();
+            fundingRepository.saveFundsCatalog(User user);
         } catch (Exception e) {
             throw new RuntimeException("Save failed for funding sources: " + e.getMessage(), e);
         }

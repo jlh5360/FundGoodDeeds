@@ -27,11 +27,18 @@ public class FundGoodDeedsApp {
         NeedsController needsCtrl = new NeedsController(needsRepo);
         LedgerController ledgerCtrl = new LedgerController(ledgerRepo, needsRepo);
         FundingController fundingCtrl = new FundingController(fundingRepo);
+        
+        // -----------------------------
+        // 2) USER PERSISTENCE
+        // -----------------------------
+        
+        UserStore users = new UserStore(csvManager);
 
         MasterController master = new MasterController(
                 needsCtrl,
                 ledgerCtrl,
-                fundingCtrl
+                fundingCtrl,
+                users
         );
 
         // -----------------------------

@@ -22,6 +22,7 @@ public class LoginPanel extends JPanel{
     private JButton loginButton = new JButton("Login");
     private JButton signUpButton = new JButton("Sign Up");
 
+
     public LoginPanel(MasterController master)
     {
         this.master = master;
@@ -45,25 +46,42 @@ public class LoginPanel extends JPanel{
         parent.add(passwordPanel,BorderLayout.SOUTH);
 
         add(parent,BorderLayout.NORTH);
+
+        // Action listeners for the buttons
+
+        signUpButton.addActionListener(e -> createUser());
         
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
         buttonPanel.add(loginButton);
         buttonPanel.add(signUpButton);
         add(buttonPanel,BorderLayout.CENTER);
-    
-        public void createUser()
-        {
-            if(!(this.userNameTextField.getText().isBlank() && this.passwordTextField.getText().isBlank()))
-            {
 
+    }
+
+        
+    public void createUser()
+    {
+        if(!(this.userNameTextField.getText().isBlank() && this.passwordTextField.getText().isBlank()))
+        {
+            String userName = this.userNameTextField.getText();
+            String password = this.passwordTextField.getText();
+            if(!master.userExists(userName))
+            {
+                String firstName = JOptionPane.showInputDialog("Enter your first name");
+                String lastName = JOptionPane.showInputDialog("Enter your last name");
+                master.createUser(userName,password, firstName, lastName);
+                JOptionPane.showMessageDialog(this.getParent(), "User successfully created.");
             }
             else
             {
-                JOptionPane.showMessageDialog(parent, "You must enter a username and password!");
+                JOptionPane.showMessageDialog(this.getParent(), "A user with that username already exists!");
             }
-
         }
-    }
+        else
+        {
+            JOptionPane.showMessageDialog(this.getParent(),"You must enter a username and password!");
+        }
 
+    }
 
 }
