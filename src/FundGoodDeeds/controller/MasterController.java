@@ -6,6 +6,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Observer;
 
+import javax.swing.JFrame;
+import javax.swing.JPanel;
+
+import FundGoodDeeds.app.FundGoodDeedsApp;
 import FundGoodDeeds.model.CSVManager;
 import FundGoodDeeds.model.Day;
 import FundGoodDeeds.model.FundingRepository;
@@ -29,10 +33,9 @@ public class MasterController {
     private final LedgerController ledgerController;
     private final FundingController fundingController;
     private final UserStore users;
-
-    private User currentUser;
     private LocalDate selectedDate = LocalDate.now();
 
+    private JFrame GUI;
     private final List<Observer> views = new ArrayList<>();
 
     //Dependency Injection via constructor
@@ -44,9 +47,9 @@ public class MasterController {
     }
 
     //Allow the views to be registered in the view list
-    public void registerViews(Observer o)
+    public void registerGUI(JFrame gui)
     {
-        views.add(o);
+        GUI = gui;
     }
 
     //Allow the View/App to register as an Observer
@@ -54,6 +57,7 @@ public class MasterController {
         this.needsController.addObserver(o);
         this.ledgerController.addObserver(o);
         this.fundingController.addObserver(o);
+        this.views.add(o);
     }
 
     //Loading all data View's startup() function
@@ -138,7 +142,7 @@ public class MasterController {
 
     public void createUser(String userName,String password,String firstName, String lastName)
     {
-        this.currentUser = users.addUser(userName, password, firstName, lastName);
+        users.addUser(userName, password, firstName, lastName);
 
     }
 
@@ -146,7 +150,7 @@ public class MasterController {
     {
         if(users.logIn(userName, password))
         {
-            this.currentUser = users.getUser(userName);
+            User currentUser = users.getUser(userName);
             fundingController.setUser(currentUser);
             needsController.setUser(currentUser);
             ledgerController.setUser(currentUser);
@@ -155,6 +159,19 @@ public class MasterController {
         return false;
     }
 
+    public void restart(String choice)
+    {
+        this.saveAll();
+        try
+        {
+            GUI.dispose();
+            FundGoodDeedsApp.restartGUI();
+        }
+        catch(Exception e)
+        {
+            e.printStackTrace();
+        }
+    }
     
 
     /**

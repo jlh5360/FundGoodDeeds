@@ -66,7 +66,7 @@ public class UserStore {
      * @param lastName
      * @return String that describes what happened, if the user already exists, etc
      */
-    public User addUser(String userName, String password, String firstName, String lastName)
+    public void addUser(String userName, String password, String firstName, String lastName)
     {
 
         if(getUser(userName) == null)
@@ -77,15 +77,16 @@ public class UserStore {
 
             User newUser = new User(userName, hashedPassword, firstName, lastName);
             users.add(newUser);
+
+            List<String> usersStrings = new ArrayList<>(users.stream().map(user -> user.toCSVString()).toList());
             createUserDirectory(userName);
             try {
-                manager.writeData("users.csv",List.of(newUser.toCSVString()));
+                manager.writeData("users.csv",usersStrings);
             } catch (IOException e) {
                 // TODO Auto-generated catch block
                 e.printStackTrace();
             }
         }
-        return getUser(userName);
     }
 
     private void createUserDirectory(String userName) {

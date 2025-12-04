@@ -1,5 +1,7 @@
 package FundGoodDeeds.app;
 
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.io.FileNotFoundException;
 
 import FundGoodDeeds.controller.*;
@@ -8,10 +10,8 @@ import FundGoodDeeds.view.*;
 
 public class FundGoodDeedsApp {
 
-    public static void main(String[] args) throws FileNotFoundException {
-
-        System.out.println("Starting FundGoodDeeds...\n");
-
+    private static MasterController startup() throws FileNotFoundException
+    {
         // -----------------------------
         // 1) MODEL
         // -----------------------------
@@ -41,29 +41,51 @@ public class FundGoodDeedsApp {
                 users
         );
 
+        return master;
+    }
+
+    private static void showGUIApp(MasterController master)
+    {
+         SwingUIView ui = new SwingUIView(master);
+         master.registerObservers(ui);
+         master.registerGUI(ui);
+         master.loadAll();
+         ui.start();
+    }
+
+    public static void restartGUI() throws FileNotFoundException
+    {
+        MasterController master = startup();
+        UserFrame loginUi = new UserFrame(master,() -> {
+            showGUIApp(master);    
+        });
+        loginUi.start();
+        
+    }
+
+    public static void main(String[] args) throws FileNotFoundException {
+
+        System.out.println("Starting FundGoodDeeds...\n");
+
+        MasterController master = startup();
+
         // -----------------------------
         // 3) VIEW
         // -----------------------------
         boolean useSwing = args.length > 0 && args[0].equalsIgnoreCase("swing");
-        boolean loggedIn = false;
-
         if (useSwing) {
-        
-                UserFrame loginUi = new UserFrame(master,() -> {
-                        SwingUIView ui = new SwingUIView(master);
-                        master.registerObservers(ui);
-                        master.registerViews(ui);
 
-                        master.loadAll();
-                        ui.start();
+                UserFrame loginUi = new UserFrame(master,() -> {
+                   showGUIApp(master);    
                 });
                 loginUi.start();
+                
+                
 
         } else {
 
             ConsoleView ui = new ConsoleView(master);
             master.registerObservers(ui);
-            master.registerViews(ui);
             
             master.loadAll();
             ui.startup();

@@ -27,6 +27,7 @@ public class DatePanel extends JPanel implements Observer {
     private final JButton changeDateButton;
     private final JButton resetDateButton;
     private final JButton themeToggleBtn;
+    private final JButton signOutBtn;
     
     private final DateTimeFormatter YMD = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
@@ -56,11 +57,18 @@ public class DatePanel extends JPanel implements Observer {
         
         themeToggleBtn = new JButton("Toggle Light Mode"); // Set initial text
 
+        signOutBtn = new JButton("Sign Out");
+
+        signOutBtn.addActionListener(e -> {
+            signOut();
+        });
+
         add(activeDateLabel);
         add(changeDateButton);
         add(resetDateButton);
         add(new JSeparator(SwingConstants.VERTICAL)); // Separator
         add(themeToggleBtn);
+        add(signOutBtn);
     }
 
 
@@ -76,6 +84,21 @@ public class DatePanel extends JPanel implements Observer {
     private void resetDateAlert()
     {
         JOptionPane.showMessageDialog(this,"The date has been reset to today's date");
+    }
+
+    private void signOut()
+    {
+        int confirm = JOptionPane.showConfirmDialog(this, 
+        "Are you sure you want to sign out?", 
+        "Sign Out",JOptionPane.YES_NO_OPTION);
+        
+        if (confirm == JOptionPane.YES_OPTION)
+        {
+            // Dispose of the original app
+            master.restart("swing");
+            
+        }
+
     }
 
     /**
