@@ -19,5 +19,4 @@ Contains design documentation in Word and PDF formats.
 
 FUNCTIONS NOT COMPLETED
 
-	* Panel for user login and persistent storage for each of their respective data. 
 	* Pie/Bar Chart to visually represent user expense history over time. 
