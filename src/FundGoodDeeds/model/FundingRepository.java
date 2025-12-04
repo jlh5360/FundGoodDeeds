@@ -21,9 +21,9 @@ public class FundingRepository extends Observable {
      * splits each line into its components and creates FundingSource objects.
      * i,Student Loan,5000.0 > FundingSource("Student Loan", 5000.0)
      */
-    public void getSourcesFromCSV(User user) {
+    public void getSourcesFromCSV() {
 
-        List<String> rawSourcesList = csvManager.readData(user.getUsername() + "/funding.csv");
+        List<String> rawSourcesList = csvManager.readData("funding.csv");
         for (String rawSource : rawSourcesList) {
             String[] individualSource = rawSource.split(",");
             FundingSource source = new FundingSource(individualSource[1], Double.parseDouble(individualSource[2]));
@@ -34,18 +34,18 @@ public class FundingRepository extends Observable {
 
     // Delegates saving funding sources
 
-    public void saveFundsCatalog(User user) throws IOException {
-        saveSourcesToCSV(user);
+    public void saveFundsCatalog() throws IOException {
+        saveSourcesToCSV();
         setChanged();
         notifyObservers();
     }
 
     // Loads funds from CSV
 
-    public void loadFunds(User user)
+    public void loadFunds()
     {
         this.fundingSources.clear();
-        getSourcesFromCSV(user);
+        getSourcesFromCSV();
         setChanged();
         notifyObservers();
     }
@@ -57,7 +57,7 @@ public class FundingRepository extends Observable {
     }
 
     // save funding sources to CSV
-    public void saveSourcesToCSV(User user) throws IOException {
+    public void saveSourcesToCSV() throws IOException {
         List<String> rawSourcesList = new ArrayList<>();
 
         for (FundingSource source : this.fundingSources) {
@@ -72,7 +72,7 @@ public class FundingRepository extends Observable {
         }
 
         try {
-            csvManager.writeData("/" + user.getUsername() +"funding.csv", rawSourcesList);
+            csvManager.writeData("funding.csv", rawSourcesList);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -121,6 +121,11 @@ public class FundingRepository extends Observable {
             total += source.getAmount();
         }
         return total;
+    }
+
+    public void setUser(User user)
+    {
+        this.csvManager.setUserPath(user);
     }
 
 }

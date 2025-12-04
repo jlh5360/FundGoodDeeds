@@ -5,13 +5,18 @@ import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
+import javax.swing.SwingUtilities;
 
 import FundGoodDeeds.controller.MasterController;
+
 import java.awt.*;
+
+import javax.swing.SwingUtilities;
 
 public class LoginPanel extends JPanel{
 
     private MasterController master;
+    private final Runnable onLoginSuccess;
     
     private JLabel userNameJLabel = new JLabel("Username");
     private JLabel passwordJLabel = new JLabel("Password");
@@ -23,9 +28,10 @@ public class LoginPanel extends JPanel{
     private JButton signUpButton = new JButton("Sign Up");
 
 
-    public LoginPanel(MasterController master)
+    public LoginPanel(MasterController master,Runnable loginSuccess)
     {
         this.master = master;
+        this.onLoginSuccess = loginSuccess;
         setLayout(new BorderLayout());
 
         // For layout smoothness
@@ -50,6 +56,7 @@ public class LoginPanel extends JPanel{
         // Action listeners for the buttons
 
         signUpButton.addActionListener(e -> createUser());
+        loginButton.addActionListener(e -> login());
         
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
         buttonPanel.add(loginButton);
@@ -82,6 +89,29 @@ public class LoginPanel extends JPanel{
             JOptionPane.showMessageDialog(this.getParent(),"You must enter a username and password!");
         }
 
+    }
+
+    public void login()
+    {
+    if(!(this.userNameTextField.getText().isBlank() && this.passwordTextField.getText().isBlank()))
+        {
+            String userName = this.userNameTextField.getText();
+            String password = this.passwordTextField.getText();
+            if(master.loginSuccessful(userName,password))
+            {
+                JOptionPane.showMessageDialog(this.getParent(), "Successfully logged in!");
+                SwingUtilities.getWindowAncestor(this).dispose();
+                this.onLoginSuccess.run();
+            }
+            else
+            {
+                JOptionPane.showMessageDialog(this.getParent(), "Either this user does not exist or the password you entered is incorrect.");
+            }
+        }
+        else
+        {
+            JOptionPane.showMessageDialog(this.getParent(),"You must enter a username and password!");
+        }
     }
 
 }

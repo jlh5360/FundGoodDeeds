@@ -49,21 +49,15 @@ public class FundGoodDeedsApp {
 
         if (useSwing) {
         
-            if(!loggedIn)
-            {
-                UserFrame loginUi = new UserFrame(master);
+                UserFrame loginUi = new UserFrame(master,() -> {
+                        SwingUIView ui = new SwingUIView(master);
+                        master.registerObservers(ui);
+                        master.registerViews(ui);
+
+                        master.loadAll();
+                        ui.start();
+                });
                 loginUi.start();
-            }
-            else
-            {
-                SwingUIView ui = new SwingUIView(master);
-                master.registerObservers(ui);
-                master.registerViews(ui);
-
-                master.loadAll();
-                ui.start();
-            }
-
 
         } else {
 

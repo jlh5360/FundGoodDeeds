@@ -5,6 +5,7 @@ import java.util.Observer;
 
 import FundGoodDeeds.model.FundingRepository;
 import FundGoodDeeds.model.FundingSource;
+import FundGoodDeeds.model.User;
 
 public class FundingController {
     private final FundingRepository fundingRepository;
@@ -21,15 +22,20 @@ public class FundingController {
         }
     }
 
+    public void setUser(User user)
+    {
+        this.fundingRepository.setUser(user);
+    }
+
     //Triggers the model to load all funding source data
-    public void loadData(User user) {
-        fundingRepository.loadFunds(User user);
+    public void loadData() {
+        fundingRepository.loadFunds();
     }
     
     //Triggers the model to save all funding source data
-    public void saveData(User user) {
+    public void saveData() {
         try {
-            fundingRepository.saveFundsCatalog(User user);
+            fundingRepository.saveFundsCatalog();
         } catch (Exception e) {
             throw new RuntimeException("Save failed for funding sources: " + e.getMessage(), e);
         }

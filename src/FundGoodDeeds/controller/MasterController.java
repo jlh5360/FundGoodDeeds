@@ -142,6 +142,21 @@ public class MasterController {
 
     }
 
+    public boolean loginSuccessful(String userName, String password)
+    {
+        if(users.logIn(userName, password))
+        {
+            this.currentUser = users.getUser(userName);
+            fundingController.setUser(currentUser);
+            needsController.setUser(currentUser);
+            ledgerController.setUser(currentUser);
+            return true;
+        }
+        return false;
+    }
+
+    
+
     /**
      * Calculates the net cost (Costs Fulfilled - Funds Received) for the selected date.
      * Implements logic for Program Operation #8.

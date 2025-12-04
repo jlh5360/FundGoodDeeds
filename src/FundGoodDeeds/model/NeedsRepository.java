@@ -468,4 +468,14 @@ public class NeedsRepository extends Observable {
     public void removeBundle(String name) {
         removeNeedComponent(name);
     }
+
+	public boolean isNeedComponentOfAnyBundle(String needName) {
+		// TODO Auto-generated method stub
+		throw new UnsupportedOperationException("Unimplemented method 'isNeedComponentOfAnyBundle'");
+	}
+
+	public void setUser(User user)
+	{
+		this.manager.setUserPath(user);
+	}
 }

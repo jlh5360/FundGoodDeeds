@@ -9,6 +9,7 @@ import FundGoodDeeds.model.LedgerRepository;
 import FundGoodDeeds.model.Need;
 import FundGoodDeeds.model.NeedComponent;
 import FundGoodDeeds.model.NeedsRepository;
+import FundGoodDeeds.model.User;
 
 public class NeedsController {
 	private final NeedsRepository needsRepository;
@@ -32,6 +33,11 @@ public class NeedsController {
     public void loadData() {
         //Delegate data loading to the repository
         needsRepository.loadNeeds();
+    }
+
+    public void setUser(User user)
+    {
+        this.needsRepository.setUser(user);
     }
     // ***Future feature marked for refactoring***
     //Triggers the model to save all need and bundle data.

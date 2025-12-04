@@ -19,13 +19,11 @@ public class UserFrame extends JFrame implements Observer{
 
     private final MasterController master;
 
-
-
-    public UserFrame(MasterController master)
+    public UserFrame(MasterController master,Runnable loginSuccess)
     {
 
         this.master = master;   
-        LoginPanel loginPanel = new LoginPanel(master);
+        LoginPanel loginPanel = new LoginPanel(master,loginSuccess);
 
 
         Container contentPane = getContentPane();

@@ -81,6 +81,11 @@ public class LedgerController {
         return ledgerRepository.findFunds(date);
     }
 
+    public void setUser(User user)
+    {
+        this.ledgerRepository.setUser(user);
+    }
+
     // /**
     //  * Sets the initial/current funds amount.
     //  * @param amount The new funds total.

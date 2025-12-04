@@ -45,14 +45,16 @@ public class UserStore {
         return new User(columns[0],columns[1],columns[2],columns[3]);
     }
 
-    // public boolean logIn(String userName,String password)
-    // {
-    //     User user = getUser(userName);
-    //     if(user != null)
-    //     {
-            
-    //     }
-    // }
+    public boolean logIn(String userName,String password)
+    {
+        User user = getUser(userName);
+        if(user != null)
+        {
+            return Password.check(password, user.getPassword()).withBcrypt();
+        }
+
+        return false;
+    }
 
     /***
      * 

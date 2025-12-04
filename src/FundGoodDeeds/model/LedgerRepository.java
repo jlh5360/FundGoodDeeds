@@ -511,4 +511,9 @@ public class LedgerRepository extends Observable {
 		}
 		System.out.println("=====================");
 	}
+
+	public void setUser(User user)
+	{
+		this.manager.setUserPath(user);
+	}
 }
