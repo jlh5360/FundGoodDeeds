@@ -72,10 +72,29 @@ public class LoginPanel extends JPanel{
         {
             String userName = this.userNameTextField.getText();
             String password = this.passwordTextField.getText();
+
+            // This is to make sure I prompt again if the user enters a empty string
+
+            String firstName = "";
+            String lastName = "";
             if(!master.userExists(userName))
             {
-                String firstName = JOptionPane.showInputDialog("Enter your first name");
-                String lastName = JOptionPane.showInputDialog("Enter your last name");
+                while(firstName.isBlank())
+                {
+                    firstName = JOptionPane.showInputDialog("Enter your first name");
+                    if(firstName.isBlank())
+                    {
+                        JOptionPane.showMessageDialog(this, "You must enter a first name");
+                    }
+                }
+                while(lastName.isBlank())
+                {
+                    lastName = JOptionPane.showInputDialog("Enter your last name");
+                    if(lastName.isBlank())
+                    {
+                        JOptionPane.showMessageDialog(this, "You must enter a last name");
+                    }
+                }
                 master.createUser(userName,password, firstName, lastName);
                 JOptionPane.showMessageDialog(this.getParent(), "User successfully created.");
             }
