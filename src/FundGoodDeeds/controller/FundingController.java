@@ -41,6 +41,12 @@ public class FundingController {
         }
     }
 
+    public FundingSource findFundByName(String name)
+    {
+        FundingSource source = fundingRepository.getFundingSourceByName(name);
+        return source;
+    }
+
     //Creates and adds a new Funding Source to the catalog.
     //The recurrence field is removed per the new CSV requirement.
     public void addFundingSource(String name, double amount) {

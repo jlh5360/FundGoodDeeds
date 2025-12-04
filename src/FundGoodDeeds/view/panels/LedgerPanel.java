@@ -130,14 +130,11 @@ public class LedgerPanel extends JPanel implements Observer {
 
         String unitsStr = JOptionPane.showInputDialog(this, "Enter Units Received (e.g., 1.0):", "Add Funding Income", JOptionPane.PLAIN_MESSAGE);
         if (unitsStr == null || unitsStr.trim().isEmpty()) return;
-        
-        String amountStr = JOptionPane.showInputDialog(this, "Enter Unit Amount/Value ($):", "Add Funding Income", JOptionPane.PLAIN_MESSAGE);
-        if (amountStr == null || amountStr.trim().isEmpty()) return;
 
         try {
             double units = Double.parseDouble(unitsStr.trim());
-            double amount = Double.parseDouble(amountStr.trim());
-            master.getLedgerController().addIncomeEntry(date, sourceName.trim(), units, amount);
+            double amount = master.getFundingController().findFundByName(sourceName).getAmount();
+            master.getLedgerController().addIncomeEntry(date, sourceName.trim(), units,amount);
             JOptionPane.showMessageDialog(this, "Funding Income recorded successfully.", "Success", JOptionPane.INFORMATION_MESSAGE);
         } catch (NumberFormatException ex) {
             JOptionPane.showMessageDialog(this, "Invalid number entered for units or amount.", "Input Error", JOptionPane.ERROR_MESSAGE);

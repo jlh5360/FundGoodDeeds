@@ -46,7 +46,7 @@ public class MasterController {
         this.users = users;
     }
 
-    //Allow the views to be registered in the view list
+    //Allow the GUI to be registered in the view list
     public void registerGUI(JFrame gui)
     {
         GUI = gui;

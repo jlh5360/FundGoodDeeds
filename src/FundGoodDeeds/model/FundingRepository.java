@@ -88,7 +88,7 @@ public class FundingRepository extends Observable {
 
     public FundingSource getFundingSourceByName(String name) {
         for (FundingSource source : this.fundingSources) {
-            if (source.getName().equals(name)) {
+            if (source.getName().equalsIgnoreCase(name)) {
                 return source;
             }
         }

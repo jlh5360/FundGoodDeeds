@@ -12,7 +12,6 @@ public class UserStore {
     private CSVManager manager;
     private final String[] fileNames = {
         "funding.csv",
-        "ledger.csv",
         "log.csv",
         "needs.csv"
     };
