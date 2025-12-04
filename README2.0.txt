@@ -8,7 +8,7 @@ the respective classes with FundGoodDeedsApp holding our main class.
 
 To try it out (from the root directory)
 	mvn clean compile
-  exec:java -Dexec.args="swing"
+  	mvn exec:java -Dexec.args="swing"
 
 
 MORE DETAILS
