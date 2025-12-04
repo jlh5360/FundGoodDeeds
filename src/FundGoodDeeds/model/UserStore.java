@@ -28,7 +28,7 @@ public class UserStore {
     {
         List<String> rawUsers = manager.readData("users.csv");
         if(!rawUsers.isEmpty())
-            this.users = rawUsers.stream().map(user -> createUserObject(user)).toList();
+            this.users = new ArrayList<>(rawUsers.stream().map(user -> createUserObject(user)).toList());
     }
 
     /**
