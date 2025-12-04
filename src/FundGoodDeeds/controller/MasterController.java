@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Observer;
 
+import FundGoodDeeds.model.CSVManager;
 import FundGoodDeeds.model.Day;
 import FundGoodDeeds.model.FundingRepository;
 import FundGoodDeeds.model.LedgerEntity;
@@ -20,6 +21,7 @@ public class MasterController {
     // private final NeedsRepository needsRepository;
     // private final LedgerRepository ledgerRepository;
     // private final FundingRepository fundingRepository;
+    private CSVManager manager;
 
     private final NeedsController needsController;
     private final LedgerController ledgerController;
@@ -30,7 +32,8 @@ public class MasterController {
     private final List<Observer> views = new ArrayList<>();
 
     //Dependency Injection via constructor
-    public MasterController(NeedsController needsController, LedgerController ledgerController, FundingController fundingController) {
+    public MasterController(CSVManager manager,NeedsController needsController, LedgerController ledgerController, FundingController fundingController) {
+        this.manager = manager;
         this.needsController = needsController;
         this.ledgerController = ledgerController;
         this.fundingController = fundingController;
@@ -122,6 +125,12 @@ public class MasterController {
         // Make sure it doesn't give negative values
 
         return Math.max(0,getTotalNeedCost() - getTotalIncome(date));
+    }
+
+    public boolean userExists(String username, String password)
+    {
+        List<String> users = manager.readData("users.csv");
+
     }
 
     /**

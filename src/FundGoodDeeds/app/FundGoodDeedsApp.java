@@ -5,7 +5,6 @@ import java.io.FileNotFoundException;
 import FundGoodDeeds.controller.*;
 import FundGoodDeeds.model.*;
 import FundGoodDeeds.view.*;
-import FundGoodDeeds.view.panels.UserFrame;
 
 public class FundGoodDeedsApp {
 
@@ -39,16 +38,25 @@ public class FundGoodDeedsApp {
         // 3) VIEW
         // -----------------------------
         boolean useSwing = args.length > 0 && args[0].equalsIgnoreCase("swing");
+        boolean loggedIn = false;
 
         if (useSwing) {
+        
+            if(!loggedIn)
+            {
+                UserFrame loginUi = new UserFrame(master);
+                loginUi.start();
+            }
+            else
+            {
+                SwingUIView ui = new SwingUIView(master);
+                master.registerObservers(ui);
+                master.registerViews(ui);
 
-            UserFrame loginUi = new UserFrame(master);
-            SwingUIView ui = new SwingUIView(master);
-            master.registerObservers(ui);
-            master.registerViews(ui);
+                master.loadAll();
+                ui.start();
+            }
 
-            master.loadAll();
-            ui.start();
 
         } else {
 
