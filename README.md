@@ -1,15 +1,15 @@
-# TERM-PROJECT:  JSCOPE
+# JSCOPE: FundGoodDeeds
 
 We are **JSCOPE** "Creating **J**ava **S**olutions **C**oded and **O**ptimized for **P**rogress and **E**fficiency."
 
-An online application to be developed in Java 11=>**17** for the purpose of...  >**_replace-with-description_**<
+**FundGoodDeeds** is a Java-based financial tracking application designed to enhance user resilience by monitoring daily expenses, funding sources, and budget thresholds through an intuitive MVC-structured interface. The system features a secure multi-user authentication subsystem that ensures data privacy by isolating personal financial records into encrypted, user-specific CSV directories.
 
 ## JSCOPE Team & Roles
 
-- Connor Bashaw, Team Coordinator
-- Oliver Gomes Jr, Configuration Coordinator
-- Jonathan Ho, Requirements Coordinator
-- Patrick LaBeau,
+- Connor Bashaw (Team Coordinator)
+- Oliver Gomes Jr (Configuration Coordinator)
+- Jonathan Ho (Requirements Coordinator)
+- Patrick LaBeau (Quality Assurance Coordinator))
 
 ## Team Additional Information
 
